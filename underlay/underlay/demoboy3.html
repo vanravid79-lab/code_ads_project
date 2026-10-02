@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Khmer Daily News - Underlay Scroll Reveal</title>
+  <style>
+    body {
+      font-family: 'Kantumruy Pro', 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f2f5;
+    }
+
+    /* Outer Wrapper Container */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      /* padding: 20px; */
+      background-color: #ffffff;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 3px solid #0056b3;
+    }
+
+    header h1 {
+      margin: 0;
+      color: #0056b3;
+      font-size: 28px;
+    }
+
+    /* .post {
+      padding: 20px 0;
+    } */
+
+    .post h2 {
+      color: #1a1a1a;
+      line-height: 1.4;
+      font-size: 24px;
+    }
+
+    .post p {
+      line-height: 1.8;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .date-meta {
+      color: #888;
+      font-size: 0.9em;
+      margin-bottom: 15px;
+    }
+
+    .sknteam_image {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .sknteam_image img {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 4px;
+    }
+
+    /* --- SCROLL REVEAL UNDERLAY WINDOW --- */
+    .underlay-slot {
+      height: 1000px;
+      margin: 30px 0;
+      position: relative;
+      clip-path: inset(0 0 0 0);
+    }
+
+    .underlay-fixed-content {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* Base Layer (Right-side Image: photo_2026-09-01_14-12-16.jpg) */
+    /* Base Layer (Right-side Image: photo_2026-09-01_14-12-16.jpg) */
+    .underlay-banner {
+      width: 100%;
+      height: 100%;
+      background-image: url("./asset/boy2.jpg");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center top;
+      position: relative;
+      pointer-events: auto;
+      overflow: hidden;
+    }
+
+    /* Top Layer (Left-side Image: photo.jpg) */
+    .underlay-banner-reveal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background-image: url("./asset/boy1.jpg");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: top;
+      clip-path: inset(100% 0 0 0);
+      z-index: 1;
+      transition: clip-path 0.05s linear;
+    }
+
+    /* Horizontal Line (Top-Bottom Slider) */
+    .underlay-banner::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 0.2rem;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.5), inset 0 0 4px rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      transform: translateY(-50%);
+      z-index: 2;
+      transition: top 0.05s linear;
+    }
+
+    /* Circular Up/Down Arrow Handle */
+    .underlay-banner::after {
+      content: "▼";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 28px;
+      font-weight: bold;
+      line-height: 36px;
+      text-align: center;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+      z-index: 3;
+      transition: top 0.05s linear;
+      cursor: grab;
+    }
+
+    .underlay-banner::after:active {
+      cursor: grabbing;
+    }
+
+    .ad-label {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      z-index: 5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px 0;
+      border-top: 1px solid #ddd;
+      color: #777;
+      font-size: 14px;
+      background-color: #ffffff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <header>
+      <h1>សារព័ត៌មាន Khmer Daily</h1>
+    </header>
+
+    <div class="post">
+      <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+      <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+      <div class="sknteam_image">
+        <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+      </div>
+
+      <p>
+        <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+        "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+        ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+      </p>
+
+      <div class="underlay-slot">
+        <div class="underlay-fixed-content">
+          <div class="underlay-banner">
+            <div class="underlay-banner-reveal"></div>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+        និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+        និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+      </p>
+
+      <p>
+        ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+        និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+        កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+      </p>
+
+      <p>
+        គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+        ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+        និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+      </p>
+
+      <div class="sknteam_image">
+        <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+      </div>
+    </div>
+
+    <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+  </div>
+
+  <script>
+    // Manual drag/swipe control for underlay banner (VERTICAL)
+    const underlayBanner = document.querySelector('.underlay-banner');
+    const revealLayer = document.querySelector('.underlay-banner-reveal');
+    let isDragging = false;
+    let startY = 0;
+    let currentPosition = 50; // Start at middle
+
+    // Mouse events
+    underlayBanner.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startY = e.clientY;
+      // Remove transition while dragging for smooth response
+      underlayBanner.style.transition = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      
+      const rect = underlayBanner.getBoundingClientRect();
+      const deltaY = e.clientY - startY;
+      const bannerHeight = rect.height;
+      
+      // Calculate position: swipe up = line goes up, swipe down = line goes down
+      currentPosition = Math.max(0, Math.min(100, 50 + (deltaY / bannerHeight) * 100));
+      
+      // Update pseudo-elements position with CSS variable
+      underlayBanner.style.setProperty('--slider-position', currentPosition + '%');
+      
+      // Update reveal layer (inverted: swipe down shows first image, swipe up shows second image)
+      revealLayer.style.clipPath = `inset(${currentPosition}% 0 0 0)`;
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      // Restore transition after dragging
+      underlayBanner.style.transition = '';
+    });
+
+    // Touch events for mobile
+    underlayBanner.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      startY = e.touches[0].clientY;
+      // Remove transition while dragging for smooth response
+      underlayBanner.style.transition = 'none';
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      
+      const rect = underlayBanner.getBoundingClientRect();
+      const deltaY = e.touches[0].clientY - startY;
+      const bannerHeight = rect.height;
+      
+      // Calculate position: swipe up = line goes up, swipe down = line goes down
+      currentPosition = Math.max(0, Math.min(100, 50 + (deltaY / bannerHeight) * 100));
+      
+      // Update pseudo-elements position with CSS variable
+      underlayBanner.style.setProperty('--slider-position', currentPosition + '%');
+      
+      // Update reveal layer (inverted: swipe down shows first image, swipe up shows second image)
+      revealLayer.style.clipPath = `inset(${currentPosition}% 0 0 0)`;
+    });
+
+    document.addEventListener('touchend', () => {
+      isDragging = false;
+      // Restore transition after dragging
+      underlayBanner.style.transition = '';
+    });
+
+    // Update pseudo-element positions using CSS variables
+    underlayBanner.style.setProperty('--slider-position', '50%'); // Start in middle
+    revealLayer.style.clipPath = 'inset(50% 0 0 0)'; // Show 50% of reveal layer initially
+    
+    // Create a style rule for dynamic positioning of pseudo-elements
+    const style = document.createElement('style');
+    style.textContent = `
+      .underlay-banner::before,
+      .underlay-banner::after {
+        top: var(--slider-position, 50%) !important;
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+
+</body>
+
+</html>

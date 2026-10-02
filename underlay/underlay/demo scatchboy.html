@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Khmer Daily News - Fullscreen Scratch Reveal</title>
+  <style>
+    body {
+      font-family: 'Kantumruy Pro', 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f2f5;
+    }
+
+    /* Outer Wrapper Container */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+      z-index: 2;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 3px solid #0056b3;
+    }
+
+    header h1 {
+      margin: 0;
+      color: #0056b3;
+      font-size: 28px;
+    }
+
+    .post {
+      padding: 20px;
+    }
+
+    .post h2 {
+      color: #1a1a1a;
+      line-height: 1.4;
+      font-size: 24px;
+    }
+
+    .post p {
+      line-height: 1.8;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .date-meta {
+      color: #888;
+      font-size: 0.9em;
+      margin-bottom: 15px;
+    }
+
+    .sknteam_image {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .sknteam_image img {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 4px;
+    }
+
+    /* --- FULLSCREEN UNDERLAY WINDOW --- */
+    .underlay-slot {
+      height: 900px; /* Window height inside article flow */
+      margin: 30px -20px; /* Spans full width by negating .post padding */
+      position: relative;
+      clip-path: inset(0 0 0 0); /* Masks fixed layer inside slot bounds */
+    }
+
+    .underlay-fixed-content {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;  /* Full viewport width */
+      height: 100vh; /* Full viewport height */
+      z-index: 0;
+      pointer-events: auto;
+    }
+
+    /* Bottom Background Image (boy2.jpg) */
+    .underlay-banner {
+      width: 100%;
+      height: 100%;
+      background-image: url("./asset/boy2.jpg");
+      background-size: 100% 100%; /* Fills full viewport bounds with zero gaps */
+      background-repeat: no-repeat;
+      background-position: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top Scratch Canvas Layer (girl2.png) */
+    #scratchCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      cursor: pointer;
+      touch-action: none;
+      transition: opacity 0.6s ease;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px 0;
+      border-top: 1px solid #ddd;
+      color: #777;
+      font-size: 14px;
+      background-color: #ffffff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <header>
+      <h1>សារព័ត៌មាន Khmer Daily</h1>
+    </header>
+
+    <div class="post">
+      <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+      <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+      <div class="sknteam_image">
+        <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+      </div>
+
+      <p>
+        <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+        "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+        ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+      </p>
+
+      <!-- CUTOUT SLOT CONTAINER -->
+      <div class="underlay-slot">
+        <div class="underlay-fixed-content">
+          <div class="underlay-banner">
+            <canvas id="scratchCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+        និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+        និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+      </p>
+
+      <p>
+        ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+        និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+        កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+      </p>
+
+      <p>
+        គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+        ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+        និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+      </p>
+
+      <div class="sknteam_image">
+        <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+      </div>
+    </div>
+
+    <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('scratchCanvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    let isScratching = false;
+    let isRevealed = false;
+    let scratchCheckThrottle = 0;
+
+    const topImage = new Image();
+    topImage.src = './asset/boy1.jpg'; // Top image to be scratched off
+
+    function initCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      if (topImage.complete && !isRevealed) {
+        drawTopImage();
+      }
+    }
+
+    function drawTopImage() {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw top image mapped directly to full canvas viewport width/height
+      ctx.drawImage(topImage, 0, 0, canvas.width, canvas.height);
+    }
+
+    topImage.onload = drawTopImage;
+    window.addEventListener('resize', initCanvas);
+    initCanvas();
+
+    function getCoordinates(e) {
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX, y: clientY };
+    }
+
+    function scratch(e) {
+      if (!isScratching || isRevealed) return;
+      
+      const { x, y } = getCoordinates(e);
+
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 40, 0, Math.PI * 2, false); // 40px brush radius
+      ctx.fill();
+
+      scratchCheckThrottle++;
+      if (scratchCheckThrottle % 10 === 0) {
+        checkScratchPercentage();
+      }
+    }
+
+    function checkScratchPercentage() {
+      if (isRevealed) return;
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imageData.data;
+      const totalPixels = pixels.length / 4;
+      let clearedPixels = 0;
+
+      // Sample every 8th pixel (32 bytes) for ultra-fast performance
+      for (let i = 3; i < pixels.length; i += 32) {
+        if (pixels[i] === 0) {
+          clearedPixels++;
+        }
+      }
+
+      const sampledTotal = totalPixels / 8;
+      const percentageCleared = (clearedPixels / sampledTotal) * 100;
+
+      if (percentageCleared >= 50) {
+        revealAd();
+      }
+    }
+
+    function revealAd() {
+      isRevealed = true;
+      canvas.style.opacity = '0';
+
+      setTimeout(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.display = 'none';
+      }, 600);
+    }
+
+    // Mouse Events
+    canvas.addEventListener('mousedown', (e) => {
+      isScratching = true;
+      scratch(e);
+    });
+    window.addEventListener('mousemove', scratch);
+    window.addEventListener('mouseup', () => { 
+      if (isScratching) {
+        isScratching = false;
+        checkScratchPercentage();
+      }
+    });
+
+    // Touch Events for Mobile
+    canvas.addEventListener('touchstart', (e) => {
+      isScratching = true;
+      scratch(e);
+    });
+    window.addEventListener('touchmove', scratch, { passive: true });
+    window.addEventListener('touchend', () => { 
+      if (isScratching) {
+        isScratching = false;
+        checkScratchPercentage();
+      }
+    });
+  </script>
+
+</body>
+
+</html>

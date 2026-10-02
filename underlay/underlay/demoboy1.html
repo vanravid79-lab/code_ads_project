@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Khmer Daily News - Underlay Scroll Reveal</title>
+  <style>
+    body {
+      font-family: 'Kantumruy Pro', 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f2f5;
+    }
+
+    /* Outer Wrapper Container */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+      z-index: 2;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 3px solid #0056b3;
+    }
+
+    header h1 {
+      margin: 0;
+      color: #0056b3;
+      font-size: 28px;
+    }
+
+    .post {
+      padding: 20px 0;
+    }
+
+    .post h2 {
+      color: #1a1a1a;
+      line-height: 1.4;
+      font-size: 24px;
+    }
+
+    .post p {
+      line-height: 1.8;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .date-meta {
+      color: #888;
+      font-size: 0.9em;
+      margin-bottom: 15px;
+    }
+
+    .sknteam_image {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .sknteam_image img {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 4px;
+    }
+
+    /* --- SCROLL REVEAL UNDERLAY WINDOW --- */
+    .underlay-slot {
+      height: 600px;
+      margin: 30px 0;
+      position: relative;
+      clip-path: inset(0 0 0 0);
+    }
+
+    .underlay-fixed-content {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .underlay-banner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      pointer-events: auto;
+      overflow: hidden;
+      cursor: grab;
+    }
+
+    .underlay-banner:active {
+      cursor: grabbing;
+    }
+
+    /* New Image Container Styles */
+    .allCanImg {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .allCanImg div {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .allCanImg img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    /* Layer ordering and clip-path setup for reveal effect */
+    .allCanImg div:nth-child(1) {
+      z-index: 1;
+      /* bottom layer: img_3.png */
+    }
+
+    .allCanImg div:nth-child(2) {
+      z-index: 2;
+      /* middle layer: img_4.png */
+      clip-path: inset(0 50% 0 0);
+    }
+
+    .allCanImg div:nth-child(3) {
+      z-index: 3;
+      /* top layer: img_6.png */
+      clip-path: inset(0 100% 0 0);
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px 0;
+      border-top: 1px solid #ddd;
+      color: #777;
+      font-size: 14px;
+      background-color: #ffffff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <header>
+      <h1>សារព័ត៌មាន Khmer Daily</h1>
+    </header>
+
+    <div class="post">
+      <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+      <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+      <div class="sknteam_image">
+        <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+      </div>
+
+      <p>
+        <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+        "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+        ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+      </p>
+
+      <div class="underlay-slot">
+        <div class="underlay-fixed-content">
+          <div class="underlay-banner">
+            <div class="allCanImg">
+              <div>
+                <img src="./asset/img_3.png" alt="Image 3" />
+              </div>
+              <div>
+                <img src="./asset/img_4.png" alt="Image 4" />
+              </div>
+              <div>
+                <img src="./asset/img_6.png" alt="Image 6" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+        និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+        និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+      </p>
+
+      <p>
+        ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+        និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+        កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+      </p>
+
+      <p>
+        គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+        ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+        និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+      </p>
+
+      <div class="sknteam_image">
+        <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+      </div>
+    </div>
+
+    <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+  </div>
+
+  <script>
+    const underlayBanner = document.querySelector('.underlay-banner');
+    const layer2 = document.querySelector('.allCanImg div:nth-child(2)');
+    const layer3 = document.querySelector('.allCanImg div:nth-child(3)');
+    let isDragging = false;
+    let startX = 0;
+    let currentPosition = 50; // Start at center (50%)
+
+    // Helper function to update clip-paths based on position percentage
+    function updateReveal(percent) {
+      const p = Math.max(0, Math.min(100, percent));
+
+      // Multi-layer split calculation:
+      // When p goes from 50 to 100, layer 3 reveals. When p goes from 50 to 0, layer 2/3 hides.
+      // Adjusting clip-paths dynamically:
+      layer3.style.clipPath = `inset(0 ${100 - p}% 0 0)`;
+    }
+
+    // Mouse events
+    underlayBanner.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+
+      const rect = underlayBanner.getBoundingClientRect();
+      const deltaX = e.clientX - startX;
+      const bannerWidth = rect.width;
+
+      currentPosition = Math.max(0, Math.min(100, 50 + (deltaX / bannerWidth) * 100));
+      updateReveal(currentPosition);
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // Touch events for mobile
+    underlayBanner.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      startX = e.touches[0].clientX;
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+
+      const rect = underlayBanner.getBoundingClientRect();
+      const deltaX = e.touches[0].clientX - startX;
+      const bannerWidth = rect.width;
+
+      currentPosition = Math.max(0, Math.min(100, 50 + (deltaX / bannerWidth) * 100));
+      updateReveal(currentPosition);
+    });
+
+    document.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+
+    // Initial setup
+    updateReveal(50);
+  </script>
+
+</body>
+
+</html>

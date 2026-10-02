@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Khmer Daily News - Demo</title>
+
+    <style>
+        /* =========================================
+           GLOBAL
+        ========================================= */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Kantumruy Pro', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+
+        /* =========================================
+           MAIN CONTAINER
+        ========================================= */
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+
+            background-color: #fff;
+
+            box-shadow:
+                0 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        /* =========================================
+           HEADER
+        ========================================= */
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+
+            border-bottom: 3px solid #0056b3;
+        }
+
+        header h1 {
+            margin: 0;
+
+            color: #0056b3;
+
+            font-size: 28px;
+        }
+
+        /* =========================================
+           POST
+        ========================================= */
+
+        .post {
+            padding: 20px 0;
+        }
+
+        .post h2 {
+            color: #1a1a1a;
+
+            line-height: 1.4;
+
+            font-size: 24px;
+        }
+
+        .post p {
+            line-height: 1.8;
+
+            color: #333;
+
+            margin-bottom: 15px;
+        }
+
+        /* =========================================
+           DATE
+        ========================================= */
+
+        .date-meta {
+            color: #888;
+
+            font-size: 0.9em;
+
+            margin-bottom: 15px;
+        }
+
+        /* =========================================
+           ARTICLE IMAGE
+        ========================================= */
+
+        .sknteam_image {
+            text-align: center;
+
+            margin: 20px 0;
+        }
+
+        .sknteam_image img {
+            width: 100%;
+
+            max-width: 500px;
+
+            border-radius: 4px;
+
+            display: block;
+
+            margin: 0 auto;
+        }
+
+        /* =========================================
+           3D CUBE CONTAINER
+        ========================================= */
+
+        #allImg {
+            width: 100%;
+
+            height: 380px;
+
+            margin: 40px 0;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            /*
+             * Perspective controls how strong
+             * the 3D effect looks.
+             */
+            perspective: 900px;
+
+            /*
+             * Prevents the cube from creating
+             * horizontal scrolling.
+             */
+            overflow: hidden;
+        }
+
+        /* =========================================
+           CUBE
+        ========================================= */
+
+        .cube {
+            /*
+             * Change this number if you want
+             * a bigger/smaller cube.
+             */
+            --cube-size: 300px;
+
+            /*
+             * Half of cube size.
+             *
+             * 300 / 2 = 150
+             */
+            --cube-depth: 150px;
+
+            width: var(--cube-size);
+
+            height: var(--cube-size);
+
+            position: relative;
+
+            /*
+             * IMPORTANT:
+             * Allows child elements to exist
+             * in 3D space.
+             */
+            transform-style: preserve-3d;
+
+            /*
+             * Smooth cube animation.
+             */
+            animation:
+                cubeRotate 12s infinite ease-in-out;
+        }
+
+        /* =========================================
+           CUBE FACE
+        ========================================= */
+
+        .cube-face {
+            position: absolute;
+
+            top: 0;
+            left: 0;
+
+            width: var(--cube-size);
+
+            height: var(--cube-size);
+
+            overflow: hidden;
+
+            border-radius: 10px;
+
+            /*
+             * Hide the back side of each image.
+             */
+            backface-visibility: hidden;
+
+            /*
+             * Small shadow around each side.
+             */
+            box-shadow:
+                0 15px 35px rgba(0, 0, 0, 0.30);
+        }
+
+        /* =========================================
+           CUBE IMAGES
+        ========================================= */
+
+        .cube-face img {
+            width: 100%;
+
+            height: 100%;
+
+            display: block;
+
+            /*
+             * Makes every image fill
+             * the cube side.
+             */
+            object-fit: cover;
+        }
+
+        /* =========================================
+           FRONT
+        ========================================= */
+
+        .cube-front {
+            transform:
+                translateZ(var(--cube-depth));
+        }
+
+        /* =========================================
+           RIGHT
+        ========================================= */
+
+        .cube-right {
+            transform:
+                rotateY(90deg) translateZ(var(--cube-depth));
+        }
+
+        /* =========================================
+           BACK
+        ========================================= */
+
+        .cube-back {
+            transform:
+                rotateY(180deg) translateZ(var(--cube-depth));
+        }
+
+        /* =========================================
+           LEFT
+        ========================================= */
+
+        .cube-left {
+            transform:
+                rotateY(-90deg) translateZ(var(--cube-depth));
+        }
+
+        /* =========================================
+           CUBE ROTATION
+        ========================================= */
+
+        @keyframes cubeRotate {
+
+            /* Front */
+            0% {
+                transform: rotateY(0deg);
+            }
+
+            /* Rotate to right */
+            20% {
+                transform: rotateY(90deg);
+            }
+
+            /* Pause */
+            25% {
+                transform: rotateY(90deg);
+            }
+
+            /* Rotate to back */
+            45% {
+                transform: rotateY(180deg);
+            }
+
+            /* Pause */
+            50% {
+                transform: rotateY(180deg);
+            }
+
+            /* Rotate to left */
+            70% {
+                transform: rotateY(270deg);
+            }
+
+            /* Pause */
+            75% {
+                transform: rotateY(270deg);
+            }
+
+            /* Return to front */
+            100% {
+                transform: rotateY(360deg);
+            }
+        }
+
+        /* =========================================
+           FOOTER
+        ========================================= */
+
+        footer {
+            text-align: center;
+
+            padding: 20px 0;
+
+            border-top: 1px solid #ddd;
+
+            color: #777;
+
+            font-size: 14px;
+        }
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 600px) {
+
+            .container {
+                width: 100%;
+
+                margin: 0;
+
+                padding: 15px;
+            }
+
+            header h1 {
+                font-size: 23px;
+            }
+
+            .post h2 {
+                font-size: 20px;
+            }
+
+            #allImg {
+                height: 300px;
+
+                margin: 30px 0;
+            }
+
+            .cube {
+                --cube-size: 230px;
+
+                --cube-depth: 115px;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <!-- =========================================
+         MAIN CONTAINER
+    ========================================== -->
+
+    <div class="container">
+
+        <!-- =====================================
+             HEADER
+        ====================================== -->
+
+        <header>
+
+            <h1>
+                សារព័ត៌មាន Khmer Daily
+            </h1>
+
+        </header>
+
+
+        <!-- =====================================
+             ARTICLE
+        ====================================== -->
+
+        <div class="post">
+
+            <!-- DATE -->
+
+            <div class="date-meta">
+                ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦
+            </div>
+
+
+            <!-- TITLE -->
+
+            <h2>
+                ត្រៀមរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប
+                ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី
+            </h2>
+
+
+            <!-- =================================
+                 MAIN IMAGE
+            ================================== -->
+
+            <div class="sknteam_image">
+
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+
+            </div>
+
+
+            <!-- =================================
+                 PARAGRAPH
+            ================================== -->
+
+            <p>
+
+                <strong>ខេត្តសៀមរាប៖</strong>
+
+                អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។
+
+                ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំ
+                ដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+
+            </p>
+
+
+            <!-- =================================
+                 PARAGRAPH
+            ================================== -->
+
+            <p>
+
+                លោកអភិបាលខេត្តបានបញ្ជាក់ថា
+                ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុក
+                មកពីគ្រប់ខេត្តក្រុង។
+
+                នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                និងការរីកចម្រើននៃវិស័យទេសចរណ៍
+                នៅក្នុងតំបន់សៀមរាបអង្គរ។
+
+            </p>
+
+
+            <!-- =================================
+                 3D CUBE
+            ================================== -->
+
+            <section id="allImg">
+
+                <div class="cube">
+
+                    <!-- FRONT -->
+                    <div class="cube-face cube-front">
+
+                        <img src="./images/pic1.jpg" alt="Cube Image 1" />
+
+                    </div>
+
+
+                    <!-- RIGHT -->
+                    <div class="cube-face cube-right">
+
+                        <img src="./images/pic2.jpg" alt="Cube Image 2" />
+
+                    </div>
+
+
+                    <!-- BACK -->
+                    <div class="cube-face cube-back">
+
+                        <img src="./images/pic3.jpg" alt="Cube Image 3" />
+
+                    </div>
+
+
+                    <!-- LEFT -->
+                    <div class="cube-face cube-left">
+
+                        <img src="./images/pic4.jpg" alt="Cube Image 4" />
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================
+                 PARAGRAPH
+            ================================== -->
+
+            <p>
+
+                ទន្ទឹមនឹងនេះដែរ
+                កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច
+                ដើម្បីការពារសន្តិសុខ
+                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។
+
+                អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្ម
+                សេវាកម្មទេសចរណ៍ទាំងអស់
+                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុ
+                ក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+
+            </p>
+
+
+            <!-- =================================
+                 PARAGRAPH
+            ================================== -->
+
+            <p>
+
+                គួរបញ្ជាក់ផងដែរថា
+                ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្ត
+                មិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់
+                ក្នុងការថែរក្សា
+                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរ
+                ឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+
+            </p>
+
+
+            <!-- =================================
+                 FOOTER IMAGE
+            ================================== -->
+
+            <div class="sknteam_image">
+
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================
+             FOOTER
+        ====================================== -->
+
+        <footer>
+
+            រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News
+
+        </footer>
+
+    </div>
+
+</body>
+
+</html>

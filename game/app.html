@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0e13">
+    <title>Stadium Goal</title>
+
+    <style>
+        /* ==========================================================================
+   Tokens
+   ========================================================================== */
+        :root {
+            --accent: #ffcc00;
+            --accent-hover: #ffdd33;
+            --success: #1fbf6b;
+            --danger: #e5484d;
+            --surface: rgba(10, 14, 20, 0.72);
+            --border: rgba(255, 255, 255, 0.12);
+            --text: #fff;
+            --text-muted: rgba(255, 255, 255, 0.7);
+            --radius: 10px;
+            --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+            --z-ball: 10;
+            --z-aim: 11;
+            --z-coach: 12;
+            --z-hud: 15;
+            --z-result: 20;
+        }
+
+        /* ==========================================================================
+   Base
+   ========================================================================== */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #0b0e13;
+            color: var(--text);
+            font-family: var(--font);
+            overscroll-behavior: none;
+        }
+
+        /* ==========================================================================
+   Stage: fills the whole screen (mobile, tablet, desktop)
+   ========================================================================== */
+        .stage {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            /* accounts for mobile browser address bar */
+            margin: 0;
+            overflow: hidden;
+            background: #111;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .stage__bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center bottom;
+            /* tweak: center top / center 70% */
+            pointer-events: none;
+        }
+
+        .goal {
+            position: absolute;
+            top: 40%;
+            left: 40%;
+            width: 45%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .goal img {
+            display: block;
+            width: 220px;
+            height: auto;
+            pointer-events: none;
+            -webkit-user-drag: none;
+        }
+
+        /* ==========================================================================
+           Goalkeeper: positioned in front of the goal, but behind the ball
+           ========================================================================== */
+        .goalKeeper {
+            position: absolute;
+            top: 43%;
+            left: 50%;
+            width: 120px;
+            transform: translate(-50%, -50%);
+            z-index: 6;
+            pointer-events: none;
+
+            /* Smooth goalkeeper movement */
+            animation: goalkeeperMove 2.8s ease-in-out infinite alternate;
+            will-change: transform;
+        }
+
+        .goalKeeper img {
+            display: block;
+            width: 100%;
+            height: auto;
+            pointer-events: none;
+            -webkit-user-drag: none;
+            filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.35));
+        }
+
+        /* Move the goalkeeper smoothly from left to right */
+        @keyframes goalkeeperMove {
+            0% {
+                transform: translate(-120px, -50%);
+            }
+
+            50% {
+                transform: translate(-50%, -50%);
+            }
+
+            100% {
+                transform: translate(20px, -50%);
+            }
+        }
+
+        /* Respect users who prefer reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .goalKeeper {
+                animation: none;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        /* ==========================================================================
+   Ball
+   ========================================================================== */
+        .ball {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            transform: translate(-50%, -50%);
+            z-index: var(--z-ball);
+            touch-action: none;
+            filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.45));
+        }
+
+        .ball img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            -webkit-user-drag: none;
+        }
+
+        /* ==========================================================================
+   Aim: yellow string, finger dot and dotted path
+   ========================================================================== */
+        .aim {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            display: none;
+            z-index: var(--z-aim);
+            pointer-events: none;
+        }
+
+        .aim.is-active {
+            display: block;
+        }
+
+        .aim__path {
+            position: absolute;
+            width: 12px;
+            margin-left: -6px;
+            transform-origin: top center;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 2.5px, transparent 3px) center top / 12px 12px repeat-y;
+        }
+
+        .aim__string {
+            position: absolute;
+            width: 5px;
+            margin-left: -2.5px;
+            border-radius: 3px;
+            background: var(--accent);
+            transform-origin: top center;
+        }
+
+        .aim__dot {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            margin: -9px 0 0 -9px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        /* ==========================================================================
+   Coach: animated "how to play" hand
+   ========================================================================== */
+        .coach {
+            position: absolute;
+            width: 0;
+            height: 0;
+            z-index: var(--z-coach);
+            pointer-events: none;
+        }
+
+        .coach__string {
+            position: absolute;
+            left: -2px;
+            top: -110px;
+            width: 4px;
+            height: 110px;
+            border-radius: 2px;
+            background: var(--accent);
+            transform: scaleY(0);
+            transform-origin: bottom;
+            animation: coach-string 2.6s ease-in-out infinite;
+        }
+
+        .coach__arrow {
+            position: absolute;
+            left: -14px;
+            top: -160px;
+            width: 28px;
+            opacity: 0;
+            animation: coach-arrow 2.6s ease-in-out infinite;
+        }
+
+        .coach__hand {
+            position: absolute;
+            left: -28px;
+            top: -2px;
+            width: 56px;
+            opacity: 0;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.65));
+            animation: coach-hand 2.6s ease-in-out infinite;
+        }
+
+        @keyframes coach-hand {
+            0% {
+                opacity: 0;
+                transform: translateY(16px) scale(1);
+            }
+
+            12%,
+            25% {
+                opacity: 1;
+                transform: translateY(0) scale(0.92);
+            }
+
+            65% {
+                opacity: 1;
+                transform: translateY(-110px) scale(0.92);
+            }
+
+            78% {
+                opacity: 1;
+                transform: translateY(-110px) scale(1);
+            }
+
+            90%,
+            100% {
+                opacity: 0;
+                transform: translateY(-110px) scale(1);
+            }
+        }
+
+        @keyframes coach-string {
+
+            0%,
+            25% {
+                transform: scaleY(0);
+                opacity: 1;
+            }
+
+            65%,
+            76% {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+
+            90%,
+            100% {
+                transform: scaleY(1);
+                opacity: 0;
+            }
+        }
+
+        @keyframes coach-arrow {
+
+            0%,
+            64% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            78% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            92%,
+            100% {
+                opacity: 0;
+                transform: translateY(-16px);
+            }
+        }
+
+        /* ==========================================================================
+   HUD
+   ========================================================================== */
+        .hud {
+            position: absolute;
+            top: max(12px, env(safe-area-inset-top, 0px));
+            left: max(12px, env(safe-area-inset-left, 0px));
+            right: max(12px, env(safe-area-inset-right, 0px));
+            display: flex;
+            gap: 8px;
+            z-index: var(--z-hud);
+            pointer-events: none;
+        }
+
+        .hud__item,
+        .hud__help {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+        }
+
+        .hud__item {
+            flex: 1;
+            padding: 8px 12px;
+            text-align: center;
+        }
+
+        .hud__label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .hud__value {
+            font-size: 22px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .hud__help {
+            flex: 0 0 44px;
+            padding: 0;
+            color: var(--text);
+            font: 700 20px var(--font);
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .hud__help:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* ==========================================================================
+   Power meter
+   ========================================================================== */
+        .power {
+            position: absolute;
+            left: 50%;
+            bottom: max(20px, env(safe-area-inset-bottom, 0px));
+            width: min(70%, 320px);
+            transform: translateX(-50%);
+            z-index: var(--z-hud);
+            pointer-events: none;
+        }
+
+        .power__track {
+            height: 8px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .power__fill {
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--success), var(--accent), var(--danger));
+            background-size: 320px 100%;
+        }
+
+        .power__hint {
+            margin-top: 8px;
+            font-size: 13px;
+            text-align: center;
+            color: var(--text-muted);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+        }
+
+        /* ==========================================================================
+   Result panel
+   ========================================================================== */
+        .result {
+            position: absolute;
+            top: 48%;
+            left: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            padding: 20px 28px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            visibility: hidden;
+            transform: translate(-50%, -50%) scale(0.9);
+            transition: transform 0.25s ease, opacity 0.25s ease, visibility 0.25s;
+            z-index: var(--z-result);
+        }
+
+        .result.is-visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .result__title {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .result[data-outcome="goal"] .result__title {
+            color: var(--success);
+        }
+
+        .result[data-outcome="miss"] .result__title {
+            color: var(--danger);
+        }
+
+        .btn {
+            padding: 10px 22px;
+            border: 0;
+            border-radius: var(--radius);
+            background: var(--accent);
+            color: #111;
+            font: 700 16px var(--font);
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: 2px;
+        }
+
+        /* ==========================================================================
+   Accessibility
+   ========================================================================== */
+        @media (prefers-reduced-motion: reduce) {
+            .result {
+                transition: none;
+            }
+
+            .coach__string,
+            .coach__arrow {
+                animation: none;
+            }
+
+            .coach__hand {
+                animation: none;
+                opacity: 1;
+                transform: translateY(-40px);
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <main class="stage" id="stage">
+        <img class="stage__bg" src="./images/stadium2.png" alt="">
+
+        <div class="goal" id="goal">
+            <img src="./images/Gemini_Generated_Image_3qdwxa3qdwxa3qdw-removebg-preview.png" alt="Goal">
+        </div>
+
+        <!-- Goalkeeper is in front of the goal and behind the football -->
+        <div class="goalKeeper" aria-hidden="true">
+            <img src="./images/download-removebg-preview.png" alt="Goalkeeper" draggable="false">
+        </div>
+
+        <header class="hud" aria-label="Scoreboard">
+            <div class="hud__item">
+                <div class="hud__label">Goals</div>
+                <div class="hud__value" id="goalsValue">0</div>
+            </div>
+            <div class="hud__item">
+                <div class="hud__label">Shots</div>
+                <div class="hud__value" id="shotsValue">0</div>
+            </div>
+            <button class="hud__help" id="helpBtn" type="button" aria-label="How to play">?</button>
+        </header>
+
+        <div class="ball" id="ball" role="img"
+            aria-label="Football. Swipe anywhere toward the goal and release to shoot.">
+            <img src="./images/img_2.png" alt="" draggable="false">
+        </div>
+
+        <div class="aim" id="aim" aria-hidden="true">
+            <div class="aim__path" id="aimPath"></div>
+            <div class="aim__string" id="aimString"></div>
+            <div class="aim__dot" id="aimDot"></div>
+        </div>
+
+        <div class="coach" id="coach" aria-hidden="true">
+            <div class="coach__string"></div>
+            <svg class="coach__arrow" viewBox="0 0 28 36">
+                <path d="M14 3 L25 18 H17.5 V33 H10.5 V18 H3 Z" fill="#ffcc00" stroke="#0a0e14" stroke-width="1.5"
+                    stroke-linejoin="round" />
+            </svg>
+            <svg class="coach__hand" viewBox="0 0 48 48" fill="#fff">
+                <rect x="19" y="2" width="10" height="30" rx="5" />
+                <rect x="28" y="16" width="9" height="22" rx="4.5" />
+                <rect x="36" y="20" width="8" height="20" rx="4" />
+                <rect x="8" y="26" width="10" height="16" rx="5" />
+                <rect x="11" y="26" width="33" height="20" rx="10" />
+            </svg>
+        </div>
+
+        <footer class="power" aria-hidden="true">
+            <div class="power__track">
+                <div class="power__fill" id="powerFill"></div>
+            </div>
+            <div class="power__hint" id="hint"></div>
+        </footer>
+
+        <div class="result" id="result" data-outcome="" role="status" aria-live="polite">
+            <h2 class="result__title" id="resultTitle"></h2>
+            <button class="btn" id="resetBtn" type="button">Next shot</button>
+        </div>
+    </main>
+
+    <script>
+        (() => {
+            'use strict';
+
+            /* ------------------------------------------------------------------------
+               Config: tweak the feel of the game here
+               ---------------------------------------------------------------------- */
+            const CONFIG = {
+                startX: 0.5,        // ball start, fraction of stage width
+                startY: 0.69,       // ball start, fraction of stage height
+                power: 0.12,        // swipe length -> launch speed
+                maxPull: 150,       // longest swipe, px
+                minPull: 10,        // shorter swipes are ignored, px
+                friction: 0.97,     // speed kept per 60fps frame
+                bounce: 0.7,        // speed kept after hitting a wall
+                stopSpeed: 0.1,     // below this the ball counts as stopped
+                goalInsetX: 0.22,   // bigger = ball must go deeper into the goal (left/right)
+                goalInsetY: 0.30,   // bigger = ball must go deeper into the goal (top/bottom)
+                hint: 'Swipe toward the goal, then release',
+            };
+
+            const FRAME_MS = 1000 / 60;
+
+            const PHASE = { READY: 'ready', AIMING: 'aiming', FLYING: 'flying', DONE: 'done' };
+
+            /* ------------------------------------------------------------------------
+               DOM
+               ---------------------------------------------------------------------- */
+            const $ = (id) => document.getElementById(id);
+
+            const el = {
+                stage: $('stage'),
+                ball: $('ball'),
+                goalImg: $('goal').querySelector('img'),
+                aim: $('aim'),
+                aimPath: $('aimPath'),
+                aimString: $('aimString'),
+                aimDot: $('aimDot'),
+                coach: $('coach'),
+                helpBtn: $('helpBtn'),
+                powerFill: $('powerFill'),
+                hint: $('hint'),
+                result: $('result'),
+                resultTitle: $('resultTitle'),
+                resetBtn: $('resetBtn'),
+                goalsValue: $('goalsValue'),
+                shotsValue: $('shotsValue'),
+            };
+
+            /* ------------------------------------------------------------------------
+               State (all positions in px, relative to the stage)
+               ---------------------------------------------------------------------- */
+            const state = {
+                phase: PHASE.READY,
+                x: 0, y: 0,               // ball position
+                vx: 0, vy: 0,             // ball velocity
+                originX: 0, originY: 0,   // where the finger first touched
+                pullX: 0, pullY: 0,       // finger movement since then (clamped)
+                goals: 0,
+                shots: 0,
+                lastTime: 0,
+            };
+
+            /* ------------------------------------------------------------------------
+               View: everything that touches the DOM
+               ---------------------------------------------------------------------- */
+            const view = {
+                stageSize: () => ({ w: el.stage.clientWidth, h: el.stage.clientHeight }),
+
+                toLocal(e) {
+                    const rect = el.stage.getBoundingClientRect();
+                    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                },
+
+                renderBall() {
+                    el.ball.style.left = state.x + 'px';
+                    el.ball.style.top = state.y + 'px';
+                },
+
+                placeCoach() {
+                    el.coach.style.left = state.x + 'px';
+                    el.coach.style.top = state.y + 'px';
+                },
+
+                // Draw a bar from the ball, `len` px long, pointing along `rot`
+                drawBar(bar, len, rot) {
+                    bar.style.left = state.x + 'px';
+                    bar.style.top = state.y + 'px';
+                    bar.style.height = len + 'px';
+                    bar.style.transform = rot;
+                },
+
+                // dx, dy = finger offset from the ball. No arguments hides the aim.
+                setAim(dx = 0, dy = 0) {
+                    const active = dx !== 0 || dy !== 0;
+                    el.aim.classList.toggle('is-active', active);
+                    if (!active) return;
+
+                    const len = Math.hypot(dx, dy);
+                    const rot = `rotate(${Math.atan2(-dx, dy) * 180 / Math.PI}deg)`;
+
+                    this.drawBar(el.aimPath, len * 2, rot);    // dotted path, twice as long
+                    this.drawBar(el.aimString, len, rot);      // yellow string to the finger
+                    el.aimDot.style.left = state.x + dx + 'px';
+                    el.aimDot.style.top = state.y + dy + 'px';
+                },
+
+                setPower(ratio) {
+                    el.powerFill.style.width = Math.round(ratio * 100) + '%';
+                },
+
+                setHint(text) { el.hint.textContent = text; },
+                showCoach() { el.coach.hidden = false; },
+                hideCoach() { el.coach.hidden = true; },
+
+                showResult(outcome) {
+                    el.goalsValue.textContent = state.goals;
+                    el.shotsValue.textContent = state.shots;
+                    el.result.dataset.outcome = outcome;
+                    el.resultTitle.textContent = outcome === 'goal' ? 'GOAL!' : 'Missed';
+                    el.result.classList.add('is-visible');
+                    el.resetBtn.focus({ preventScroll: true });
+                },
+
+                hideResult() { el.result.classList.remove('is-visible'); },
+            };
+
+            /* ------------------------------------------------------------------------
+               Game logic
+               ---------------------------------------------------------------------- */
+            function placeAtStart() {
+                const { w, h } = view.stageSize();
+                state.x = w * CONFIG.startX;
+                state.y = h * CONFIG.startY;
+                view.renderBall();
+                view.placeCoach();
+            }
+
+            // A goal counts when the CENTRE of the ball is inside the inner area of the goal image
+            function ballIsInGoal() {
+                const b = el.ball.getBoundingClientRect();
+                const g = el.goalImg.getBoundingClientRect();
+
+                const cx = b.left + b.width / 2;
+                const cy = b.top + b.height / 2;
+
+                return (
+                    cx > g.left + g.width * CONFIG.goalInsetX &&
+                    cx < g.right - g.width * CONFIG.goalInsetX &&
+                    cy > g.top + g.height * CONFIG.goalInsetY &&
+                    cy < g.bottom - g.height * CONFIG.goalInsetY
+                );
+            }
+
+            function finishShot(outcome) {
+                state.phase = PHASE.DONE;
+                state.shots += 1;
+                if (outcome === 'goal') state.goals += 1;
+                view.showResult(outcome);
+            }
+
+            function resetShot() {
+                state.phase = PHASE.READY;
+                state.vx = state.vy = 0;
+                placeAtStart();
+                view.setAim();
+                view.setPower(0);
+                view.hideResult();
+                view.setHint(CONFIG.hint);
+            }
+
+            /* ------------------------------------------------------------------------
+               Input: swipe anywhere on the stage
+               ---------------------------------------------------------------------- */
+            function onPointerDown(e) {
+                if (state.phase !== PHASE.READY) return;
+                if (e.target.closest('button')) return;      // let the ? button work
+
+                const p = view.toLocal(e);
+                state.originX = p.x;
+                state.originY = p.y;
+                state.pullX = 0;
+                state.pullY = 0;
+                state.phase = PHASE.AIMING;
+
+                try { el.stage.setPointerCapture(e.pointerId); } catch (_) { /* not critical */ }
+                view.hideCoach();
+                e.preventDefault();
+            }
+
+            function onPointerMove(e) {
+                if (state.phase !== PHASE.AIMING) return;
+
+                const p = view.toLocal(e);
+                let dx = p.x - state.originX;
+                let dy = p.y - state.originY;
+
+                const len = Math.hypot(dx, dy);
+                if (len > CONFIG.maxPull) {
+                    dx = (dx / len) * CONFIG.maxPull;
+                    dy = (dy / len) * CONFIG.maxPull;
+                }
+
+                state.pullX = dx;
+                state.pullY = dy;
+
+                view.setAim(dx, dy);                         // string and dot follow the finger
+                view.setPower(Math.min(len, CONFIG.maxPull) / CONFIG.maxPull);
+            }
+
+            function onPointerUp() {
+                if (state.phase !== PHASE.AIMING) return;
+
+                view.setAim();
+                view.setPower(0);
+
+                if (Math.hypot(state.pullX, state.pullY) < CONFIG.minPull) {
+                    state.phase = PHASE.READY;
+                    return;
+                }
+
+                // The ball flies the way the hand moved
+                state.vx = state.pullX * CONFIG.power;
+                state.vy = state.pullY * CONFIG.power;
+                state.phase = PHASE.FLYING;
+                state.lastTime = performance.now();
+                view.setHint('');
+                requestAnimationFrame(tick);
+            }
+
+            /* ------------------------------------------------------------------------
+               Game loop
+               ---------------------------------------------------------------------- */
+            function tick(now) {
+                if (state.phase !== PHASE.FLYING) return;
+
+                // Scale by elapsed time so speed is the same on 60/120/144Hz screens
+                const step = Math.min((now - state.lastTime) / FRAME_MS, 3);
+                state.lastTime = now;
+
+                const { w, h } = view.stageSize();
+                const r = el.ball.offsetWidth / 2;
+
+                state.x += state.vx * step;
+                state.y += state.vy * step;
+
+                const damping = Math.pow(CONFIG.friction, step);
+                state.vx *= damping;
+                state.vy *= damping;
+
+                // Bounce off the side and top walls
+                if (state.x < r || state.x > w - r) {
+                    state.vx *= -CONFIG.bounce;
+                    state.x = Math.max(r, Math.min(w - r, state.x));
+                }
+                if (state.y < r) {
+                    state.vy *= -CONFIG.bounce;
+                    state.y = r;
+                }
+
+                view.renderBall();
+
+                if (ballIsInGoal()) return finishShot('goal');
+
+                const stopped = Math.abs(state.vx) < CONFIG.stopSpeed && Math.abs(state.vy) < CONFIG.stopSpeed;
+                if (stopped || state.y > h + r) return finishShot('miss');
+
+                requestAnimationFrame(tick);
+            }
+
+            /* ------------------------------------------------------------------------
+               Init
+               ---------------------------------------------------------------------- */
+            el.stage.addEventListener('pointerdown', onPointerDown);
+            el.stage.addEventListener('pointermove', onPointerMove);
+            el.stage.addEventListener('pointerup', onPointerUp);
+            el.stage.addEventListener('pointercancel', onPointerUp);
+
+            el.resetBtn.addEventListener('click', resetShot);
+            el.helpBtn.addEventListener('click', () => {
+                if (state.phase === PHASE.READY) view.showCoach();
+            });
+
+            // Keep the ball in place when the phone rotates or the address bar shows/hides
+            window.addEventListener('resize', () => {
+                if (state.phase === PHASE.READY) placeAtStart();
+            });
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => { if (state.phase === PHASE.READY) placeAtStart(); }, 200);
+            });
+
+            view.setHint(CONFIG.hint);
+            placeAtStart();
+        })();
+    </script>
+</body>
+
+</html>
