@@ -1,30 +1,53 @@
 <!doctype html>
-
 <html lang="km">
 
 <head>
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Khmer Daily News - Demo</title>
+    <title>Khmer Daily News</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&display=swap"
+        rel="stylesheet" />
 
     <style>
-        /* ========== VARIABLES ========== */
+        /* ========== TOKENS ========== */
         :root {
-            --blue: #0056b3;
-            --red: #d90000;
-            --red-dark: #a80000;
+            --color-primary: #0056b3;
+            --color-text: #1a1a1a;
+            --color-text-body: #333;
+            --color-muted: #777;
+            --color-border: #ddd;
+            --color-bg: #f0f2f5;
+            --color-surface: #fff;
+            --color-carousel: #d90000;
+
+            --font-base: "Kantumruy Pro", "Noto Sans Khmer", Arial, sans-serif;
+            --radius: 8px;
+            --carousel-width: 360px;
+            --carousel-ratio: 360 / 200;
         }
 
-        /* ========== GLOBAL ========== */
-        * {
+        /* ========== BASE ========== */
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
         }
 
         body {
             margin: 0;
-            font-family: 'Kantumruy Pro', 'Arial', sans-serif;
-            background-color: #f0f2f5;
+            font-family: var(--font-base);
+            color: var(--color-text-body);
+            background: var(--color-bg);
+            -webkit-text-size-adjust: 100%;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
         }
 
         /* ========== LAYOUT ========== */
@@ -32,592 +55,415 @@
             max-width: 650px;
             margin: 10px auto;
             padding: 12px;
-            background-color: #fff;
+            background: var(--color-surface);
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
         }
 
-        header {
+        .site-header {
             padding: 10px 0;
             text-align: center;
-            border-bottom: 2px solid var(--blue);
+            border-bottom: 2px solid var(--color-primary);
         }
 
-        header h1 {
+        .site-header h1 {
             margin: 0;
             font-size: 22px;
-            color: var(--blue);
+            color: var(--color-primary);
         }
 
-        footer {
+        .site-footer {
             padding: 15px 0;
             text-align: center;
             font-size: 12px;
-            color: #777;
-            border-top: 1px solid #ddd;
+            color: var(--color-muted);
+            border-top: 1px solid var(--color-border);
         }
 
-        /* ========== POST ========== */
+        /* ========== ARTICLE ========== */
         .post {
             padding: 10px 0;
         }
 
-        .post h2 {
-            font-size: 19px;
-            line-height: 1.3;
-            color: #1a1a1a;
-        }
-
-        .post p {
-            margin-bottom: 10px;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #333;
-        }
-
-        .date-meta {
-            margin-bottom: 10px;
+        .post-date {
+            margin: 0 0 10px;
             font-size: 0.85em;
             color: #888;
         }
 
-        .sknteam_image {
-            margin: 15px 0;
-            text-align: center;
+        .post-title {
+            margin: 0 0 12px;
+            font-size: 19px;
+            line-height: 1.4;
+            color: var(--color-text);
         }
 
-        .sknteam_image img {
-            display: block;
+        .post p {
+            margin: 0 0 10px;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .post-figure {
+            margin: 15px 0;
+        }
+
+        .post-figure img {
             width: 100%;
             max-width: 380px;
             margin: 0 auto;
             border-radius: 4px;
         }
 
-        /* ========== CAROUSEL WRAPPER ========== */
-        #allImg {
+        /* ========== CAROUSEL (360 x 200) ========== */
+        .carousel {
             position: relative;
-            width: 360px;
-            height: 200px;
+            width: 100%;
+            max-width: var(--carousel-width);
+            aspect-ratio: var(--carousel-ratio);
             margin: 30px auto;
             overflow: hidden;
-            border-radius: 8px;
-            background: red;
+            border-radius: var(--radius);
+            background: var(--color-carousel);
         }
 
-        .carousel {
+        .carousel-track {
             position: absolute;
             inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
         }
 
-        /* Logo overlay */
-        .textBeer {
+        .carousel-logo {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 5%;
+            left: 3%;
             z-index: 50;
+            width: 28%;
             pointer-events: none;
         }
 
-        .textBeer img {
-            display: block;
-            max-width: 100px;
-            height: auto;
-        }
-
-        /* ========== CAROUSEL ITEMS ========== */
         .carousel-item {
-            /* position variables (changed per state below) */
             --x: 0%;
             --scale: 1;
 
             position: absolute;
             width: 31%;
-            height: 175px;
-            padding: 4px;
+            height: 87.5%;
+            padding: 1.1%;
             overflow: hidden;
-            border-radius: 8px;
-            background: red;
             border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow:
-                0 6px 14px rgba(0, 0, 0, 0.35),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            transform: translateX(var(--x)) scale(var(--scale));
-            transition:
-                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 0.8s ease,
-                filter 0.8s ease;
-            will-change: transform;
+            border-radius: var(--radius);
+            background: var(--color-carousel);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            /* static: never animated */
+
+            /* Only transform + opacity are animated (GPU-friendly, no repaint) */
+            transform: translate3d(var(--x), 0, 0) scale(var(--scale));
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.6s ease;
+            will-change: transform, opacity;
         }
 
         .carousel-item img {
-            display: block;
             width: 100%;
             height: 100%;
             object-fit: contain;
-            object-position: center;
             border-radius: 5px;
-            background-color: transparent;
         }
 
-        /* States */
-        .carousel-item.left,
-        .carousel-item.right {
+        .carousel-item.is-left,
+        .carousel-item.is-right {
             --scale: 0.82;
-            opacity: 0.8;
             z-index: 1;
-            filter: brightness(0.88);
+            opacity: 0.8;
         }
 
-        .carousel-item.left {
+        .carousel-item.is-left {
             --x: -108%;
         }
 
-        .carousel-item.right {
+        .carousel-item.is-right {
             --x: 108%;
         }
 
-        .carousel-item.center {
+        .carousel-item.is-center {
             --scale: 1.12;
-            opacity: 1;
             z-index: 10;
-            filter: brightness(1);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+            opacity: 1;
         }
 
-        .carousel-item.hidden {
+        .carousel-item.is-hidden {
             --x: 220%;
             --scale: 0.6;
-            opacity: 0;
             z-index: 0;
+            opacity: 0;
+            pointer-events: none;
         }
 
-        .carousel-item:hover {
-            filter: brightness(1.08);
+        /* ========== LIGHT SWEEP ========== */
+        .carousel-item::after {
+            content: "";
+            position: absolute;
+            top: -10%;
+            bottom: -10%;
+            left: 0;
+            z-index: 2;
+            width: 50%;
+            pointer-events: none;
+            opacity: 0;
+            /* invisible at rest */
+
+            /* soft, multi-stop falloff instead of a sharp triangle */
+            background: linear-gradient(100deg,
+                    rgba(227, 222, 222, 0) 0%,
+                    rgba(255, 255, 255, 0.08) 25%,
+                    rgba(255, 255, 255, 0.35) 50%,
+                    rgba(255, 255, 255, 0.08) 75%,
+                    rgba(255, 255, 255, 0) 100%);
+            filter: blur(6px);
+            /* softens the edges */
+            mix-blend-mode: soft-light;
+            /* optional: looks like real light, not a white band */
+
+            transform: translate3d(-300%, 0, 0) skewX(-20deg);
+            /* fully off the card */
+        }
+
+        .carousel-item.is-center::after {
+            animation: light-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both;
+        }
+
+        @keyframes light-sweep {
+            0% {
+                transform: translate3d(-350%, 0, 0) skewX(-30deg);
+                opacity: 0;
+            }
+
+            15% {
+                opacity: 1;
+            }
+
+            85% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate3d(350%, 0, 0) skewX(-30deg);
+                opacity: 0;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .carousel-item {
+                transition: none;
+            }
+
+            .carousel-item.is-center::after {
+                animation: none;
+            }
         }
 
         /* ========== MOBILE ========== */
         @media (max-width: 600px) {
             .container {
-                width: 100%;
                 margin: 0;
                 padding: 10px;
             }
 
-            header h1 {
+            .site-header h1 {
                 font-size: 20px;
             }
 
-            .post h2 {
+            .post-title {
                 font-size: 17px;
-            }
-
-            #allImg {
-                margin: 25px auto;
-            }
-
-            .carousel-item {
-                height: 130px;
-                padding: 3px;
-            }
-
-            .carousel-item.left,
-            .carousel-item.right {
-                --scale: 0.78;
-            }
-
-            .carousel-item.left {
-                --x: -105%;
-            }
-
-            .carousel-item.right {
-                --x: 105%;
-            }
-
-            .carousel-item.center {
-                --scale: 1.1;
-            }
-
-            .textBeer {
-                top: 6px;
-                left: 6px;
-            }
-
-            .textBeer img {
-                max-width: 70px;
-            }
-        }
-
-        /* ========== VERY SMALL MOBILE ========== */
-        @media (max-width: 380px) {
-            .carousel-item {
-                width: 30%;
-                height: 110px;
-                padding: 2px;
-            }
-
-            .carousel-item.left,
-            .carousel-item.right {
-                --scale: 0.72;
-            }
-
-            .carousel-item.left {
-                --x: -108%;
-            }
-
-            .carousel-item.right {
-                --x: 108%;
-            }
-
-            .carousel-item.center {
-                --scale: 1.08;
-            }
-
-            .textBeer img {
-                max-width: 55px;
             }
         }
     </style>
-
 </head>
 
-
 <body>
-
     <div class="container">
 
-
-        <!-- =========================================
-             HEADER
-        ========================================== -->
-
-        <header>
-
-            <h1>
-                សារព័ត៌មាន Khmer Daily
-            </h1>
-
+        <header class="site-header">
+            <h1>សារព័ត៌មាន Khmer Daily</h1>
         </header>
 
+        <main>
+            <article class="post">
 
-        <!-- =========================================
-             POST
-        ========================================== -->
+                <p class="post-date">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</p>
 
-        <div class="post">
+                <h2 class="post-title">
+                    ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប
+                    ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី
+                </h2>
 
+                <figure class="post-figure">
+                    <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Angkor Sangkran" width="380" height="228"
+                        data-fallback="https://placehold.co/500x300/0056b3/ffffff?text=Khmer+News" />
+                </figure>
 
-            <!-- DATE -->
+                <p>
+                    <strong>ខេត្តសៀមរាប៖</strong>
+                    អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                    ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                    "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។
+                    ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                    ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំ
+                    ស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+                </p>
 
-            <div class="date-meta">
-                ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦
-            </div>
+                <p>
+                    លោកអភិបាលខេត្តបានបញ្ជាក់ថា
+                    ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                    ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                    ការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុក
+                    មកពីគ្រប់ខេត្តក្រុង។
+                    នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                    និងការរីកចម្រើននៃវិស័យទេសចរណ៍
+                    នៅក្នុងតំបន់សៀមរាបអង្គរ។
+                </p>
 
+                <!-- CAROUSEL (360 x 200) -->
+                <section class="carousel" id="carousel" role="region" aria-roledescription="carousel"
+                    aria-label="Angkor photo gallery">
 
-            <!-- TITLE -->
+                    <img class="carousel-logo" src="./images/img_1.png" alt=""
+                        data-fallback="https://placehold.co/100x40/000000/ffffff?text=Logo" />
 
-            <h2>
-                ត្រៀមរៀបចំព្រឹត្តិការណ៍
-                "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប
-                ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី
-            </h2>
-
-
-            <!-- =========================================
-                 ARTICLE IMAGE
-            ========================================== -->
-
-            <div class="sknteam_image">
-
-                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image"
-                    onerror="this.src='https://placehold.co/500x300/0056b3/ffffff?text=Khmer+News';" />
-
-            </div>
-
-
-            <!-- =========================================
-                 ARTICLE TEXT
-            ========================================== -->
-
-            <p>
-
-                <strong>ខេត្តសៀមរាប៖</strong>
-
-                អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
-                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
-                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។
-                ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
-                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំ
-                ស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
-
-            </p>
-
-
-            <p>
-
-                លោកអភិបាលខេត្តបានបញ្ជាក់ថា
-                ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
-                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
-                ការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុក
-                មកពីគ្រប់ខេត្តក្រុង។
-                នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
-                និងការរីកចម្រើននៃវិស័យទេសចរណ៍
-                នៅក្នុងតំបន់សៀមរាបអង្គរ។
-
-            </p>
-
-
-            <!-- =========================================
-                 AUTO CIRCULAR CAROUSEL
-            ========================================== -->
-
-            <section id="allImg">
-
-
-                <!-- LOGO -->
-
-                <section class="textBeer">
-
-                    <img src="./images/img_1.png" alt="Overlay Image"
-                        onerror="this.src='https://placehold.co/100x40/000000/ffffff?text=Logo';" />
-
+                    <div class="carousel-track">
+                        <div class="carousel-item">
+                            <img src="./images/img_4.png" alt="Angkor image 1"
+                                data-fallback="https://placehold.co/360x200/333333/ffffff?text=Angkor+Image+1" />
+                        </div>
+                        <div class="carousel-item">
+                            <img src="./images/img_5.png" alt="Angkor image 2"
+                                data-fallback="https://placehold.co/360x200/444444/ffffff?text=Angkor+Image+2" />
+                        </div>
+                        <div class="carousel-item">
+                            <img src="./images/img_6.png" alt="Angkor image 3"
+                                data-fallback="https://placehold.co/360x200/555555/ffffff?text=Angkor+Image+3" />
+                        </div>
+                        <div class="carousel-item">
+                            <img src="./images/img_7.png" alt="Angkor image 4"
+                                data-fallback="https://placehold.co/360x200/666666/ffffff?text=Angkor+Image+4" />
+                        </div>
+                    </div>
                 </section>
 
+                <p>
+                    ទន្ទឹមនឹងនេះដែរ
+                    កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច
+                    ដើម្បីការពារសន្តិសុខ
+                    និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។
+                    អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្ម
+                    សេវាកម្មទេសចរណ៍ទាំងអស់
+                    កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុ
+                    ក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+                </p>
 
-                <!-- CAROUSEL -->
+                <p>
+                    គួរបញ្ជាក់ផងដែរថា
+                    ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្ត
+                    មិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                    ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់
+                    ក្នុងការថែរក្សា
+                    និងការលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរ
+                    ឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+                </p>
 
-                <div class="carousel" id="carousel">
+                <figure class="post-figure">
+                    <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Angkor Sangkran" width="380" height="228"
+                        loading="lazy" data-fallback="https://placehold.co/500x300/0056b3/ffffff?text=Khmer+News" />
+                </figure>
 
+            </article>
+        </main>
 
-                    <!-- IMAGE 1 -->
-
-                    <div class="carousel-item">
-
-                        <img src="./images/img_4.png" alt="Angkor Image 1"
-                            onerror="this.src='https://placehold.co/360x200/333333/ffffff?text=Angkor+Image+1';" />
-
-                    </div>
-
-
-                    <!-- IMAGE 2 -->
-
-                    <div class="carousel-item">
-
-                        <img src="./images/img_5.png" alt="Angkor Image 2"
-                            onerror="this.src='https://placehold.co/360x200/444444/ffffff?text=Angkor+Image+2';" />
-
-                    </div>
-
-
-                    <!-- IMAGE 3 -->
-
-                    <div class="carousel-item">
-
-                        <img src="./images/img_6.png" alt="Angkor Image 3"
-                            onerror="this.src='https://placehold.co/360x200/555555/ffffff?text=Angkor+Image+3';" />
-
-                    </div>
-
-
-                    <!-- IMAGE 4 -->
-
-                    <div class="carousel-item">
-
-                        <img src="./images/img_7.png" alt="Angkor Image 4"
-                            onerror="this.src='https://placehold.co/360x200/666666/ffffff?text=Angkor+Image+4';" />
-
-                    </div>
-
-
-                </div>
-
-            </section>
-
-
-            <!-- =========================================
-                 MORE ARTICLE TEXT
-            ========================================== -->
-
-            <p>
-
-                ទន្ទឹមនឹងនេះដែរ
-                កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច
-                ដើម្បីការពារសន្តិសុខ
-                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។
-                អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្ម
-                សេវាកម្មទេសចរណ៍ទាំងអស់
-                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុ
-                ក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
-
-            </p>
-
-
-            <p>
-
-                គួរបញ្ជាក់ផងដែរថា
-                ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្ត
-                មិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
-                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់
-                ក្នុងការថែរក្សា
-                និងការលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរ
-                ឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
-
-            </p>
-
-
-            <!-- =========================================
-                 FOOTER ARTICLE IMAGE
-            ========================================== -->
-
-            <div class="sknteam_image">
-
-                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo"
-                    onerror="this.src='https://placehold.co/500x300/0056b3/ffffff?text=Khmer+News';" />
-
-            </div>
-
-
-        </div>
-
-
-        <!-- =========================================
-             FOOTER
-        ========================================== -->
-
-        <footer>
-
+        <footer class="site-footer">
             រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News
-
         </footer>
-
 
     </div>
 
-
-    <!-- =========================================
-         CIRCULAR CAROUSEL JAVASCRIPT
-    ========================================== -->
-
     <script>
+        (function () {
+            "use strict";
 
-        document.addEventListener("DOMContentLoaded", function () {
-
-            const items =
-                document.querySelectorAll(".carousel-item");
-
-            let currentIndex = 0;
-
-            const totalItems = items.length;
-
-
-            /*
-                1800 = 1.8 seconds
-            */
-
-            const intervalTime = 1800;
-
-
-            /* =========================================
-               GET POSITION
-            ========================================== */
-
-            function getPosition(index) {
-
-                let position =
-                    (index - currentIndex + totalItems)
-                    % totalItems;
-
-
-                /*
-                    0 = CENTER
-                    1 = RIGHT
-                    LAST = LEFT
-                    OTHER = HIDDEN
-                */
-
-                if (position === 0) {
-                    return "center";
-                }
-
-
-                if (position === 1) {
-                    return "right";
-                }
-
-
-                if (position === totalItems - 1) {
-                    return "left";
-                }
-
-
-                return "hidden";
-
-            }
-
-
-            /* =========================================
-               UPDATE CAROUSEL
-            ========================================== */
-
-            function updateCarousel() {
-
-                items.forEach(function (item, index) {
-
-                    item.classList.remove(
-                        "left",
-                        "center",
-                        "right",
-                        "hidden"
-                    );
-
-
-                    const position =
-                        getPosition(index);
-
-
-                    item.classList.add(position);
-
+            /* ---------- Image fallback (runs once per image) ---------- */
+            document.querySelectorAll("img[data-fallback]").forEach(function (img) {
+                img.addEventListener("error", function () {
+                    if (img.dataset.failed) return;
+                    img.dataset.failed = "true";
+                    img.src = img.dataset.fallback;
                 });
+            });
 
-            }
-
-
-            /* =========================================
-               NEXT IMAGE
-            ========================================== */
-
-            function nextSlide() {
-
-                currentIndex =
-                    (currentIndex + 1)
-                    % totalItems;
-
-
-                updateCarousel();
-
-            }
-
-
-            /* =========================================
-               START
-            ========================================== */
-
-            updateCarousel();
-
-
-            setInterval(
-                nextSlide,
-                intervalTime
+            /* ---------- Carousel ---------- */
+            var INTERVAL_MS = 1800;
+            var items = Array.prototype.slice.call(
+                document.querySelectorAll("#carousel .carousel-item")
             );
+            var total = items.length;
+            if (!total) return;
 
-        });
+            var current = 0;
+            var timer = null;
 
+            function positionOf(index) {
+                var offset = (index - current + total) % total;
+                if (offset === 0) return "is-center";
+                if (offset === 1) return "is-right";
+                if (offset === total - 1) return "is-left";
+                return "is-hidden";
+            }
+
+            function render() {
+                items.forEach(function (item, index) {
+                    var state = positionOf(index);
+                    item.classList.remove("is-left", "is-center", "is-right", "is-hidden");
+                    item.classList.add(state);
+                    item.setAttribute("aria-hidden", state === "is-center" ? "false" : "true");
+                });
+            }
+
+            function next() {
+                current = (current + 1) % total;
+                render();
+            }
+
+            function start() {
+                if (!timer) timer = setInterval(next, INTERVAL_MS);
+            }
+
+            function stop() {
+                clearInterval(timer);
+                timer = null;
+            }
+
+            render();
+
+            var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (reduceMotion) return;
+
+            var carousel = document.getElementById("carousel");
+            start();
+
+            carousel.addEventListener("mouseenter", stop);
+            carousel.addEventListener("mouseleave", start);
+            document.addEventListener("visibilitychange", function () {
+                document.hidden ? stop() : start();
+            });
+
+            // Pause when the carousel is scrolled out of view (saves CPU/battery)
+            if ("IntersectionObserver" in window) {
+                new IntersectionObserver(function (entries) {
+                    entries[0].isIntersecting ? start() : stop();
+                }, { threshold: 0.1 }).observe(carousel);
+            }
+        })();
     </script>
-
-
 </body>
 
 </html>
