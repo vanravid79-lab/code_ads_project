@@ -152,7 +152,7 @@
             --sweep-skew: -25deg;
             /* slant */
             --sweep-time: 1s;
-            --sweep-delay: 0.35s;
+            --sweep-delay: 0.1s;
 
             position: absolute;
             width: 112px;
@@ -221,7 +221,6 @@
             pointer-events: none;
             will-change: transform;
 
-            /* smooth bell-curve falloff, symmetric, 90deg (the slant comes from --sweep-skew) */
             background: linear-gradient(90deg,
                     rgba(255, 255, 255, 0) calc(50% - var(--sweep-size) * 0.5),
                     rgba(255, 255, 255, calc(var(--sweep-peak) * 0.03)) calc(50% - var(--sweep-size) * 0.42),
@@ -237,13 +236,12 @@
                     rgba(255, 255, 255, calc(var(--sweep-peak) * 0.03)) calc(50% + var(--sweep-size) * 0.42),
                     rgba(255, 255, 255, 0) calc(50% + var(--sweep-size) * 0.5));
             mix-blend-mode: screen;
-            /* adds light to the image instead of laying a white band on top */
 
             /* resting position: fully off the card, nothing shows when idle */
             transform: translate3d(-160%, 0, 0) skewX(var(--sweep-skew));
         }
 
-        .carousel-item.is-center::after {
+        .carousel.is-playing .carousel-item.is-center::after {
             animation: light-sweep var(--sweep-time) cubic-bezier(0.45, 0, 0.25, 1) var(--sweep-delay) both;
         }
 
@@ -458,7 +456,16 @@
             if (reduceMotion) return;
 
             var carousel = document.getElementById("carousel");
-            start();
+            var played = false;
+
+            // First time the carousel is on screen: switch the sweep on and start the loop
+            function begin() {
+                if (!played) {
+                    played = true;
+                    carousel.classList.add("is-playing");
+                }
+                start();
+            }
 
             carousel.addEventListener("mouseenter", stop);
             carousel.addEventListener("mouseleave", start);
@@ -466,17 +473,14 @@
                 document.hidden ? stop() : start();
             });
 
-            // Pause when the carousel is scrolled out of view (saves CPU/battery)
             if ("IntersectionObserver" in window) {
                 new IntersectionObserver(function (entries) {
-                    entries[0].isIntersecting ? start() : stop();
-                }, { threshold: 0.1 }).observe(carousel);
+                    entries[0].isIntersecting ? begin() : stop();
+                }, { threshold: 0.3 }).observe(carousel);
+            } else {
+                begin();
             }
         })();
-
-
-
-
     </script>
 </body>
 
