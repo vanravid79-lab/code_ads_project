@@ -213,6 +213,55 @@
             text-shadow: 0 3px 14px rgba(0, 0, 0, 0.7);
         }
 
+        .learn-more-button {
+            position: absolute;
+            bottom: clamp(2rem, 10vh, 5rem);
+            left: 50%;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            min-height: 3rem;
+            padding: 0.8rem 1.6rem;
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            border-radius: 999px;
+            background: #ffdd00;
+            color: #171717;
+            font: 700 1rem/1 "Barlow Condensed", sans-serif;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            transform: translateX(-50%);
+            transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+            cursor: pointer;
+        }
+
+        .learn-more-button::after {
+            content: "\2192";
+            font-size: 1.2em;
+            transition: transform 180ms ease;
+        }
+
+        .learn-more-button:hover {
+            background: #ffe84d;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+            transform: translate(-50%, -2px);
+        }
+
+        .learn-more-button:hover::after {
+            transform: translateX(3px);
+        }
+
+        .learn-more-button:focus-visible {
+            outline: 3px solid #fff;
+            outline-offset: 4px;
+        }
+
+        .learn-more-button:active {
+            transform: translate(-50%, 0);
+        }
+
         .underlay-swipe-cue {
             position: absolute;
             top: 60%;
@@ -520,7 +569,11 @@
                                     <span class="swipe-line-1">Your</span>
                                     <span class="swipe-line-2">Energy</span>
                                 </div>
+                                <!-- learn more btn -->
+                                <button id="btnLearnMore" class="learn-more-button" type="button">Learn more</button>
+
                             </section>
+
 
                         </div>
                         <canvas id="scratchCanvas"></canvas>
