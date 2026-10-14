@@ -309,6 +309,21 @@
             left: 1.8rem;
         }
 
+        .underlay-swipe-cue .swipe-hand {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            left: auto;
+            width: auto;
+            height: auto;
+            border: 0;
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            line-height: 1;
+            transform: translateY(-50%);
+            filter: drop-shadow(0 0 8px #ffdd00);
+            animation: swipe-hand 1.4s ease-in-out infinite;
+        }
+
         @keyframes swipe-cue {
 
             0%,
@@ -335,6 +350,18 @@
             }
         }
 
+        @keyframes swipe-hand {
+
+            0%,
+            100% {
+                transform: translate(-0.25rem, -50%);
+            }
+
+            50% {
+                transform: translate(-1.75rem, -50%);
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
 
             .underlay-track,
@@ -347,6 +374,10 @@
             }
 
             .underlay-swipe-cue::before {
+                animation: none;
+            }
+
+            .underlay-swipe-cue .swipe-hand {
                 animation: none;
             }
         }
@@ -499,7 +530,7 @@
                                 </div>
 
                                 <span class="underlay-swipe-cue" aria-hidden="true">
-                                    <span></span><span></span><span></span>
+                                    <span></span><span></span><span></span><span class="swipe-hand">👈</span>
                                 </span>
                             </section>
 
@@ -510,7 +541,7 @@
                                     <span class="swipe-line-2">Charge</span>
                                 </div>
                                 <span class="underlay-swipe-cue" aria-hidden="true">
-                                    <span></span><span></span><span></span>
+                                    <span></span><span></span><span></span><span class="swipe-hand">👈</span>
                                 </span>
                             </section>
 
