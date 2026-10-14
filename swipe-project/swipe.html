@@ -1,0 +1,918 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khmer Daily News - Fullscreen Scratch Reveal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800&display=swap');
+
+        body {
+            font-family: 'Kantumruy Pro', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+
+        /* Outer Wrapper Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 2;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #0056b3;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #0056b3;
+            font-size: 28px;
+        }
+
+        .post {
+            padding: 20px;
+        }
+
+        .post h2 {
+            color: #1a1a1a;
+            line-height: 1.4;
+            font-size: 24px;
+        }
+
+        .post p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .date-meta {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .sknteam_image {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sknteam_image img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 4px;
+        }
+
+        /* --- FULLSCREEN UNDERLAY WINDOW --- */
+        .underlay-slot {
+            height: 900px;
+            margin: 30px -20px;
+            position: relative;
+            clip-path: inset(0 0 0 0);
+        }
+
+        .underlay-fixed-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: auto;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* On the charging slides there is no scratch layer, so let the page scroll vertically
+           while we still detect horizontal swipes on the stage. */
+        .underlay-fixed-content.is-last {
+            touch-action: pan-y;
+        }
+
+        .underlay-banner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .underlay-track {
+            --slides: 5;
+            /* number of panels (slides) */
+            position: absolute;
+            inset: 0;
+            display: flex;
+            width: calc(var(--slides) * 100%);
+            /* each panel = one screen wide */
+            height: 100%;
+            transform: translate3d(0, 0, 0);
+            transition: transform 850ms cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+        }
+
+        /* Slides 1 and 2 */
+        .underlay-panel {
+            position: relative;
+            flex: 0 0 calc(100% / var(--slides));
+            height: 100%;
+            background: url("./images/string_image1.png") center / 100% 100% no-repeat;
+        }
+
+        /* Slide 3: charging */
+        .underlay-panel2 {
+            position: relative;
+            flex: 0 0 calc(100% / var(--slides));
+            height: 100%;
+            background: url("./images/string_ads_charge.png") center / 100% 100% no-repeat;
+        }
+
+        /* Slide 4: charged (100%)
+           "(" ")" and "%" in a file name must be URL-encoded: ( = %28, ) = %29, % = %25.
+           Tip: renaming the file to string_ads_charge_100.png avoids this completely. */
+        .underlay-panel3 {
+            position: relative;
+            flex: 0 0 calc(100% / var(--slides));
+            height: 100%;
+            background: url("./images/string_ads_charge_100.png") center / 100% 100% no-repeat;
+        }
+
+        /* Slide 5: final screen */
+        .underlay-panel4 {
+            position: relative;
+            flex: 0 0 calc(100% / var(--slides));
+            height: 100%;
+            background: url("./images/string_ads_charge2.png") center / 100% 100% no-repeat;
+        }
+
+        /* Top Scratch Canvas Layer */
+        #scratchCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            cursor: pointer;
+            touch-action: none;
+            transition: opacity 500ms ease;
+        }
+
+        .underlay-copy {
+            position: absolute;
+            top: calc(50% - 0.55em);
+            left: 50%;
+            z-index: 2;
+            transform: translate(-50%, -50%);
+            margin: 0;
+            color: white;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .underlay-copy-energy {
+            top: calc(50% + 0.55em);
+        }
+
+        .swipe-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.09em;
+            width: calc(100% - 2rem);
+            transform: translate(-50%, -50%);
+            font-family: "Barlow Condensed", sans-serif;
+            font-size: clamp(3.5rem, 12vw, 8rem);
+            font-weight: 800;
+            line-height: 0.82;
+            text-align: center;
+            text-transform: uppercase;
+            pointer-events: none;
+            margin-top: -12rem;
+        }
+
+        .swipe-line-1 {
+            color: #fff;
+            -webkit-text-stroke: 1px #111;
+            text-shadow: 0 3px 14px rgba(0, 0, 0, 0.7);
+        }
+
+        .swipe-line-2 {
+            color: #ffdd00;
+            -webkit-text-stroke: 1px #111;
+            text-shadow: 0 3px 14px rgba(0, 0, 0, 0.7);
+        }
+
+        .underlay-swipe-cue {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            z-index: 2;
+            width: clamp(9rem, 32vw, 19rem);
+            height: clamp(2.5rem, 8vw, 5rem);
+            pointer-events: none;
+            transform: translateX(-50%);
+            animation: swipe-cue 1.8s ease-in-out infinite;
+        }
+
+        .underlay-swipe-cue::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 1.5rem;
+            height: 70%;
+            transform: translateY(-50%);
+            background:
+                linear-gradient(90deg, transparent, rgba(255, 221, 0, 0.9) 55%, #ffdd00) 0 50% / 100% 3px no-repeat,
+                repeating-linear-gradient(180deg, transparent 0 5px, rgba(255, 221, 0, 0.8) 6px 8px, transparent 9px 13px);
+            filter: drop-shadow(0 0 8px #ffdd00);
+            animation: swipe-trail 1.4s ease-in-out infinite;
+        }
+
+        .underlay-swipe-cue span {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-top: 0.45rem solid #ffdd00;
+            border-right: 0.45rem solid #ffdd00;
+            transform: translateY(-50%) rotate(45deg);
+            filter: drop-shadow(0 0 5px #ffdd00);
+        }
+
+        .underlay-swipe-cue span:nth-child(2) {
+            right: 0.9rem;
+        }
+
+        .underlay-swipe-cue span:nth-child(3) {
+            right: 1.8rem;
+        }
+
+        @keyframes swipe-cue {
+
+            0%,
+            100% {
+                opacity: 0.55;
+                transform: translateX(calc(-50% - 3px));
+            }
+
+            50% {
+                opacity: 1;
+                transform: translateX(calc(-50% + 3px));
+            }
+        }
+
+        @keyframes swipe-trail {
+            from {
+                background-position: 0 50%, 0 0;
+            }
+
+            to {
+                background-position: 2rem 50%, 1rem 0;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .underlay-track,
+            #scratchCanvas {
+                transition-duration: 0.01ms;
+            }
+
+            .underlay-swipe-cue {
+                animation: none;
+            }
+
+            .underlay-swipe-cue::before {
+                animation: none;
+            }
+        }
+
+        /* ---------- Charging gauge (slides 3 and 4) ---------- */
+        .charge-ui {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(1rem, 4vw, 2rem);
+            pointer-events: none;
+        }
+
+        /* Higher specificity than ".post h2" */
+        .post .charge-ui .charge-title {
+            margin: 0;
+            line-height: 1;
+            font-family: "Barlow Condensed", sans-serif;
+            font-weight: 800;
+            font-size: clamp(1.4rem, 5vw, 2.4rem);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+        }
+
+        .charge-gauge {
+            position: relative;
+            width: clamp(10rem, 36vw, 18rem);
+            aspect-ratio: 1;
+        }
+
+        .charge-ring {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .charge-ring circle {
+            fill: none;
+            stroke-width: 14;
+            stroke-linecap: round;
+            /* r = 80 -> circumference ~ 502.65; the visible arc is 270deg ~ 377 */
+            transform: rotate(135deg);
+            transform-origin: 50% 50%;
+        }
+
+        .ring-track {
+            stroke: rgba(255, 255, 255, 0.22);
+            stroke-dasharray: 377 503;
+        }
+
+        .ring-progress {
+            stroke: url(#chargeGrad);
+            stroke-dasharray: 0 503;
+            /* the script sets this from 0 to 377 (= 0% to 100%) */
+            filter: drop-shadow(0 0 8px rgba(255, 221, 0, 0.85));
+        }
+
+        .charge-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding-top: 6%;
+        }
+
+        .charge-percent {
+            font-family: "Barlow Condensed", sans-serif;
+            font-weight: 800;
+            font-style: italic;
+            font-size: clamp(2.5rem, 9vw, 4.5rem);
+            line-height: 1;
+            color: #fff;
+            text-shadow: 0 0 14px rgba(255, 221, 0, 0.6);
+        }
+
+        .charge-bolt {
+            width: clamp(1.5rem, 5vw, 2.5rem);
+            fill: #ffdd00;
+            filter: drop-shadow(0 0 8px rgba(255, 221, 0, 0.9));
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-size: 14px;
+            background-color: #ffffff;
+        }
+
+        .energy-display {
+            font-family: "Barlow Condensed", sans-serif;
+            font-size: clamp(5rem, 17vw, 15rem);
+            font-weight: 800;
+            font-style: normal;
+            line-height: 0.85;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            -webkit-text-stroke: 2px #111;
+            paint-order: stroke fill;
+            text-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+            margin-top: -12rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>សារព័ត៌មាន Khmer Daily</h1>
+        </header>
+
+        <div class="post">
+            <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+            <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+            </div>
+
+            <p>
+                <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+            </p>
+
+            <!-- CUTOUT SLOT CONTAINER -->
+            <div class="underlay-slot">
+                <div class="underlay-fixed-content" id="underlayStage">
+                    <div class="underlay-banner">
+                        <div class="underlay-track" id="underlayTrack">
+
+                            <!-- Slide 1 -->
+                            <section class="underlay-panel">
+                                <div class="swipe-title">
+                                    <span class="swipe-line-1">Low</span>
+                                    <span class="swipe-line-2">Energy?</span>
+                                </div>
+                                <span class="underlay-swipe-cue" aria-hidden="true">
+                                    <span></span><span></span><span></span>
+                                </span>
+                            </section>
+
+                            <!-- Slide 2 -->
+                            <section class="underlay-panel">
+                                <div class="swipe-title">
+                                    <span class="swipe-line-1">Swipe to</span>
+                                    <span class="swipe-line-2">Charge</span>
+                                </div>
+                                <span class="underlay-swipe-cue" aria-hidden="true">
+                                    <span></span><span></span><span></span>
+                                </span>
+                            </section>
+
+                            <!-- Slide 3: charging (underlay-panel2 => string_ads_charge.png) -->
+                            <section class="underlay-panel2">
+                                <div class="charge-ui" style="margin-top: -11rem;">
+                                    <h2 style="color: #fff;" class="charge-title">Charging...</h2>
+
+                                    <div class="charge-gauge">
+                                        <svg class="charge-ring" viewBox="0 0 200 200" aria-hidden="true">
+                                            <defs>
+                                                <linearGradient id="chargeGrad" x1="0" y1="1" x2="1" y2="0">
+                                                    <stop offset="0" stop-color="#ffdd00" />
+                                                    <stop offset="1" stop-color="#ffb800" />
+                                                </linearGradient>
+                                            </defs>
+                                            <!-- grey track (270deg) -->
+                                            <circle class="ring-track" cx="100" cy="100" r="80" />
+                                            <!-- yellow progress (0% -> 25% -> 50% of 270deg, driven by the script) -->
+                                            <circle class="ring-progress" id="ringProgress" cx="100" cy="100" r="80" />
+                                        </svg>
+
+                                        <div class="charge-center">
+                                            <div class="charge-percent" id="chargePercent">0%</div>
+                                            <svg class="charge-bolt" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="M13 1 L4 14 H10.5 L8.5 23 L20 9.5 H13.5 Z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Slide 4: continues 50% -> 100% (underlay-panel3 => string_ads_charge(100%).png) -->
+                            <section class="underlay-panel3" id="img4">
+                                <div class="charge-ui" style="margin-top: -11rem;">
+                                    <h2 style="color: #fff;" class="charge-title" id="chargeTitle4">Charging...</h2>
+
+                                    <div class="charge-gauge">
+                                        <svg class="charge-ring" viewBox="0 0 200 200" aria-hidden="true">
+                                            <!-- the yellow gradient #chargeGrad is defined once, in slide 3 -->
+                                            <circle class="ring-track" cx="100" cy="100" r="80" />
+                                            <circle class="ring-progress" id="ringProgress4" cx="100" cy="100" r="80" />
+                                        </svg>
+
+                                        <div class="charge-center">
+                                            <div class="charge-percent" id="chargePercent4">50%</div>
+                                            <svg class="charge-bolt" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="M13 1 L4 14 H10.5 L8.5 23 L20 9.5 H13.5 Z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Slide 5 (underlay-panel4 => string_ads_charge2.png) -->
+                            <section class="underlay-panel4" id="slideImg5">
+                                <div class="swipe-title">
+                                    <span class="swipe-line-1">Unleash</span>
+                                    <span class="swipe-line-1">Your</span>
+                                    <span class="swipe-line-2">Energy</span>
+                                </div>
+                            </section>
+
+                        </div>
+                        <canvas id="scratchCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <p>
+                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+            </p>
+
+            <p>
+                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+            </p>
+
+            <p>
+                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+            </p>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+            </div>
+        </div>
+
+        <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+    </div>
+
+    <script>
+        const stage = document.getElementById('underlayStage');
+        const canvas = document.getElementById('scratchCanvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const underlayTrack = document.getElementById('underlayTrack');
+        const slideCount = underlayTrack.children.length;   // 4
+        const CHARGE_SLIDE = 2;                              // index of the charging slide (slide 3)
+        // Slides before CHARGE_SLIDE have the scratch layer; CHARGE_SLIDE and after do not.
+        const SWIPE_DISTANCE = 60;
+        // false = no scratch cover: your slide images show straight away, only swipe works.
+        // true  = scratch layer on slides 1 and 2 (needs a cover image, see topImage below).
+        const SCRATCH_ENABLED = false;
+
+        underlayTrack.style.setProperty('--slides', slideCount);
+
+        let isScratching = false;
+        let isRevealed = false;
+        let scratchCheckThrottle = 0;
+        let activeSlide = 0;
+
+        // gesture tracking (shared by mouse + touch)
+        let startX = 0;
+        let startY = 0;
+        let gestureType = null;   // 'swipe' | 'scratch' | null
+        let gestureActive = false;
+        let didSwipe = false;
+
+        /* ---------- Charge gauges ----------
+           Slide 3: 0% -> 25% -> 50%  (then auto-go to slide 4)
+           Slide 4: 50% -> 100%       (title changes to "Charged", then auto-go to slide 5) */
+        const RING_LENGTH = 377;       // visible arc length (270deg) = 100%
+        const CHARGE_DELAY = 850;      // wait for the slide transition before charging starts
+        const AUTO_NEXT_DELAY = 500;   // pause on 50% before moving to slide 4
+
+        const gauge3 = {
+            ring: document.getElementById('ringProgress'),
+            text: document.getElementById('chargePercent')
+        };
+        const gauge4 = {
+            ring: document.getElementById('ringProgress4'),
+            text: document.getElementById('chargePercent4'),
+            title: document.getElementById('chargeTitle4')
+        };
+
+        // Each step: charge up to `to` over `ms`, then hold for `hold` ms
+        const CHARGE_STEPS = [
+            { to: 25, ms: 1000, hold: 300 },
+            { to: 50, ms: 1000, hold: 0 }
+        ];
+        const CHARGE_END = CHARGE_STEPS[CHARGE_STEPS.length - 1].to;   // 50
+        const FINAL_STEPS = [
+            { to: 100, ms: 1800, hold: 0 }
+        ];
+        const FINAL_SLIDE = CHARGE_SLIDE + 1;   // slide 4: 50% -> 100%
+        const END_SLIDE = CHARGE_SLIDE + 2;     // slide 5: shown when slide 4 reaches 100%
+
+        let chargeTimer = null;
+        let chargeRaf = null;
+
+        function setGauge(gauge, percent) {
+            gauge.ring.style.strokeDasharray = `${(RING_LENGTH * percent) / 100} 503`;
+            gauge.text.textContent = Math.round(percent) + '%';
+        }
+
+        function cancelCharge() {
+            clearTimeout(chargeTimer);
+            cancelAnimationFrame(chargeRaf);
+        }
+
+        function resetFinal() {
+            setGauge(gauge4, CHARGE_END);
+            gauge4.title.textContent = 'Charging...';
+        }
+
+        // Both gauges finished (used on slide 5 and when coming back to slide 4 from it)
+        function showFinished() {
+            cancelCharge();
+            setGauge(gauge3, CHARGE_END);
+            setGauge(gauge4, 100);
+            gauge4.title.textContent = 'Charged';
+        }
+
+        function resetGauges() {
+            cancelCharge();
+            setGauge(gauge3, 0);
+            resetFinal();
+        }
+
+        function runSteps(gauge, steps, from, onDone) {
+            let step = 0;
+
+            const runStep = () => {
+                const { to, ms, hold } = steps[step];
+                const t0 = performance.now();
+
+                const tick = (now) => {
+                    const p = Math.min((now - t0) / ms, 1);
+                    const eased = p * p * (3 - 2 * p);
+                    setGauge(gauge, from + (to - from) * eased);
+
+                    if (p < 1) {
+                        chargeRaf = requestAnimationFrame(tick);
+                        return;
+                    }
+
+                    from = to;
+                    step++;
+
+                    if (step < steps.length) {
+                        chargeTimer = setTimeout(runStep, hold);
+                    } else {
+                        onDone();
+                    }
+                };
+
+                chargeRaf = requestAnimationFrame(tick);
+            };
+
+            runStep();
+        }
+
+        // Slide 3: 0 -> 25 -> 50, then go to slide 4
+        function startCharge() {
+            resetGauges();
+            chargeTimer = setTimeout(() => {
+                runSteps(gauge3, CHARGE_STEPS, 0, () => {
+                    chargeTimer = setTimeout(() => {
+                        if (activeSlide === CHARGE_SLIDE) changeSlide(CHARGE_SLIDE + 1);
+                    }, AUTO_NEXT_DELAY);
+                });
+            }, CHARGE_DELAY);
+        }
+
+        // Slide 4: continue 50 -> 100
+        function startFinalCharge() {
+            cancelCharge();
+            setGauge(gauge3, CHARGE_END);   // slide 3 stays at its final value
+            resetFinal();
+            chargeTimer = setTimeout(() => {
+                runSteps(gauge4, FINAL_STEPS, CHARGE_END, () => {
+                    gauge4.title.textContent = 'Charged';
+                    // 100% reached -> go to slide 5 automatically
+                    chargeTimer = setTimeout(() => {
+                        if (activeSlide === FINAL_SLIDE) changeSlide(END_SLIDE);
+                    }, AUTO_NEXT_DELAY);
+                });
+            }, CHARGE_DELAY);
+        }
+
+        /* ---------- Slide handling ---------- */
+        function changeSlide(index) {
+            const nextSlide = Math.max(0, Math.min(index, slideCount - 1));
+            if (nextSlide === activeSlide) return;
+
+            const prevSlide = activeSlide;
+            activeSlide = nextSlide;
+            underlayTrack.style.transform = `translateX(-${activeSlide * (100 / slideCount)}%)`;
+            scratchCheckThrottle = 0;
+
+            if (activeSlide >= CHARGE_SLIDE) {
+                // Charging slide (3) and slide 4: no scratch layer
+                isRevealed = true;
+                isScratching = false;
+                canvas.style.opacity = '0';
+                canvas.style.pointerEvents = 'none';
+                stage.classList.add('is-last');
+
+                if (activeSlide === FINAL_SLIDE) {
+                    // Slide 4: continue 50% -> 100% when coming forward from slide 3,
+                    // or just show the finished state when coming back from slide 5
+                    if (prevSlide < FINAL_SLIDE) startFinalCharge();
+                    else showFinished();
+                } else if (activeSlide >= END_SLIDE) {
+                    // Slide 5: everything is charged, nothing to run
+                    showFinished();
+                } else if (prevSlide < CHARGE_SLIDE) {
+                    // Arriving from the scratch slides: run 0% -> 25% -> 50%, then auto-go to slide 4
+                    startCharge();
+                } else {
+                    // Coming back from slide 4: keep slide 3 at its final value, no auto-advance
+                    cancelCharge();
+                    setGauge(gauge3, CHARGE_END);
+                    resetFinal();
+                }
+            } else {
+                resetGauges();
+                // Slides 1 and 2
+                stage.classList.toggle('is-last', !SCRATCH_ENABLED);
+                if (SCRATCH_ENABLED) {
+                    // scratch layer covers again
+                    isRevealed = false;
+                    canvas.style.display = 'block';
+                    canvas.style.pointerEvents = 'auto';
+                    canvas.style.opacity = '1';
+                    drawTopImage();
+                }
+            }
+        }
+
+        /* ---------- Canvas ---------- */
+        const topImage = new Image();
+        if (SCRATCH_ENABLED) topImage.src = './underlay/asset/girl2.png'; // Top image to be scratched off
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            if (!isRevealed) drawTopImage();
+        }
+
+        function drawTopImage() {
+            if (!SCRATCH_ENABLED) return;
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (topImage.complete && topImage.naturalWidth) {
+                ctx.drawImage(topImage, 0, 0, canvas.width, canvas.height);
+                return;
+            }
+
+            // Fallback if the image is missing / not loaded: plain dark cover
+            // (otherwise the canvas stays transparent and counts as "fully scratched")
+            const g = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            g.addColorStop(0, '#2b2b2b');
+            g.addColorStop(1, '#0d0d0d');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        topImage.onload = () => { if (!isRevealed) drawTopImage(); };
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+
+        if (!SCRATCH_ENABLED) {
+            // No cover: hide the canvas so the slide images are visible and nothing blocks them
+            isRevealed = true;
+            canvas.style.display = 'none';
+            stage.classList.add('is-last');   // keeps vertical page scroll working while swiping sideways
+        }
+
+        function scratchAt(x, y) {
+            if (isRevealed || activeSlide >= CHARGE_SLIDE) return;
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 40, 0, Math.PI * 2, false); // 40px brush radius
+            ctx.fill();
+
+            scratchCheckThrottle++;
+            if (scratchCheckThrottle % 10 === 0) {
+                checkScratchPercentage();
+            }
+        }
+
+        function checkScratchPercentage() {
+            if (isRevealed) return;
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+            const totalPixels = pixels.length / 4;
+            let clearedPixels = 0;
+
+            // Sample every 8th pixel for performance
+            for (let i = 3; i < pixels.length; i += 32) {
+                if (pixels[i] === 0) clearedPixels++;
+            }
+
+            const sampledTotal = totalPixels / 8;
+            const percentageCleared = (clearedPixels / sampledTotal) * 100;
+
+            if (percentageCleared >= 50) {
+                revealAd();
+            }
+        }
+
+        function revealAd() {
+            isRevealed = true;
+            canvas.style.opacity = '0';
+
+            setTimeout(() => {
+                // Only hide if we are still revealed (user did not swipe to another slide meanwhile)
+                if (isRevealed) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    canvas.style.display = 'none';
+                }
+            }, 600);
+        }
+
+        /* ---------- Unified gesture handling (on the stage, so swipe works on every slide) ---------- */
+        function gestureStart(x, y) {
+            startX = x;
+            startY = y;
+            gestureType = null;
+            gestureActive = true;
+            didSwipe = false;
+            isScratching = SCRATCH_ENABLED && activeSlide < CHARGE_SLIDE && !isRevealed;
+        }
+
+        function gestureMove(x, y) {
+            if (!gestureActive || didSwipe) return;
+
+            const dx = x - startX;
+            const dy = y - startY;
+
+            if (!gestureType && Math.max(Math.abs(dx), Math.abs(dy)) >= 10) {
+                gestureType = Math.abs(dx) > Math.abs(dy) ? 'swipe' : 'scratch';
+                if (gestureType === 'scratch' && isScratching) scratchAt(startX, startY);
+            }
+
+            if (gestureType === 'swipe') {
+                if (Math.abs(dx) >= SWIPE_DISTANCE) {
+                    didSwipe = true;
+                    isScratching = false;
+                    changeSlide(activeSlide + (dx < 0 ? 1 : -1));
+                }
+                return;
+            }
+
+            if (gestureType === 'scratch' && isScratching) scratchAt(x, y);
+        }
+
+        function gestureEnd() {
+            if (!gestureActive) return;
+            if (isScratching && gestureType !== 'swipe') checkScratchPercentage();
+            gestureActive = false;
+            isScratching = false;
+            gestureType = null;
+            didSwipe = false;
+        }
+
+        // Mouse
+        stage.addEventListener('mousedown', (e) => gestureStart(e.clientX, e.clientY));
+        window.addEventListener('mousemove', (e) => gestureMove(e.clientX, e.clientY));
+        window.addEventListener('mouseup', gestureEnd);
+
+        // Touch
+        stage.addEventListener('touchstart', (e) => {
+            gestureStart(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+        window.addEventListener('touchmove', (e) => {
+            if (!gestureActive) return;
+            gestureMove(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+        window.addEventListener('touchend', gestureEnd);
+        window.addEventListener('touchcancel', gestureEnd);
+
+        // Horizontal trackpad / mouse-wheel swipe
+        let wheelLocked = false;
+        stage.addEventListener('wheel', (e) => {
+            if (wheelLocked) return;
+            if (Math.abs(e.deltaX) > 30 && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+                wheelLocked = true;
+                changeSlide(activeSlide + (e.deltaX > 0 ? 1 : -1));
+                setTimeout(() => { wheelLocked = false; }, 700); // wait for the 0.6s transition
+            }
+        }, { passive: true });
+    </script>
+
+</body>
+
+</html>

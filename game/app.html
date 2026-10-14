@@ -84,8 +84,8 @@
         .goal {
             position: absolute;
             top: 40%;
-            left: 40%;
-            width: 45%;
+            left: 50%;
+            width: min(220px, 70vw);
             transform: translateX(-50%);
             pointer-events: none;
             z-index: 5;
@@ -93,7 +93,7 @@
 
         .goal img {
             display: block;
-            width: 220px;
+            width: 100%;
             height: auto;
             pointer-events: none;
             -webkit-user-drag: none;
@@ -153,12 +153,20 @@
    ========================================================================== */
         .ball {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 50px;
             height: 50px;
             transform: translate(-50%, -50%);
             z-index: var(--z-ball);
             touch-action: none;
             filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.45));
+            cursor: grab;
+            will-change: transform;
+        }
+
+        .ball:active {
+            cursor: grabbing;
         }
 
         .ball img {
@@ -536,7 +544,7 @@
         </header>
 
         <div class="ball" id="ball" role="img"
-            aria-label="Football. Swipe anywhere toward the goal and release to shoot.">
+            aria-label="Football. Drag the ball back from your target and release to shoot.">
             <img src="./images/img_2.png" alt="" draggable="false">
         </div>
 
@@ -585,17 +593,18 @@
                 startX: 0.5,        // ball start, fraction of stage width
                 startY: 0.69,       // ball start, fraction of stage height
                 power: 0.12,        // swipe length -> launch speed
-                maxPull: 150,       // longest swipe, px
+                maxPull: 180,       // longest drag, px
                 minPull: 10,        // shorter swipes are ignored, px
                 friction: 0.97,     // speed kept per 60fps frame
+                gravity: 648,       // downward acceleration, px/s^2
                 bounce: 0.7,        // speed kept after hitting a wall
                 stopSpeed: 0.1,     // below this the ball counts as stopped
-                goalInsetX: 0.22,   // bigger = ball must go deeper into the goal (left/right)
-                goalInsetY: 0.30,   // bigger = ball must go deeper into the goal (top/bottom)
-                hint: 'Swipe toward the goal, then release',
+                goalInsetX: 0.08,   // leave room for shots around the goalkeeper
+                goalInsetY: 0.18,   // ignore the frame and score within the goal opening
+                hint: 'Drag the ball back from your target, then release',
             };
 
-            const FRAME_MS = 1000 / 60;
+            const MAX_FRAME_SECONDS = 1 / 30;
 
             const PHASE = { READY: 'ready', AIMING: 'aiming', FLYING: 'flying', DONE: 'done' };
 
@@ -605,9 +614,11 @@
             const $ = (id) => document.getElementById(id);
 
             const el = {
+
                 stage: $('stage'),
                 ball: $('ball'),
                 goalImg: $('goal').querySelector('img'),
+                goalKeeper: document.querySelector('.goalKeeper'),
                 aim: $('aim'),
                 aimPath: $('aimPath'),
                 aimString: $('aimString'),
@@ -623,6 +634,8 @@
                 shotsValue: $('shotsValue'),
             };
 
+            const BALL_RADIUS = el.ball.offsetWidth / 2;
+
             /* ------------------------------------------------------------------------
                State (all positions in px, relative to the stage)
                ---------------------------------------------------------------------- */
@@ -632,6 +645,7 @@
                 vx: 0, vy: 0,             // ball velocity
                 originX: 0, originY: 0,   // where the finger first touched
                 pullX: 0, pullY: 0,       // finger movement since then (clamped)
+                dragStartX: 0, dragStartY: 0,
                 goals: 0,
                 shots: 0,
                 lastTime: 0,
@@ -649,8 +663,8 @@
                 },
 
                 renderBall() {
-                    el.ball.style.left = state.x + 'px';
-                    el.ball.style.top = state.y + 'px';
+                    el.ball.style.transform =
+                        `translate3d(${state.x}px, ${state.y}px, 0) translate(-50%, -50%)`;
                 },
 
                 placeCoach() {
@@ -714,17 +728,36 @@
 
             // A goal counts when the CENTRE of the ball is inside the inner area of the goal image
             function ballIsInGoal() {
-                const b = el.ball.getBoundingClientRect();
+                const stage = el.stage.getBoundingClientRect();
                 const g = el.goalImg.getBoundingClientRect();
-
-                const cx = b.left + b.width / 2;
-                const cy = b.top + b.height / 2;
+                const left = g.left - stage.left;
+                const top = g.top - stage.top;
 
                 return (
-                    cx > g.left + g.width * CONFIG.goalInsetX &&
-                    cx < g.right - g.width * CONFIG.goalInsetX &&
-                    cy > g.top + g.height * CONFIG.goalInsetY &&
-                    cy < g.bottom - g.height * CONFIG.goalInsetY
+                    state.x > left + g.width * CONFIG.goalInsetX &&
+                    state.x < left + g.width * (1 - CONFIG.goalInsetX) &&
+                    state.y > top + g.height * CONFIG.goalInsetY &&
+                    state.y < top + g.height * (1 - CONFIG.goalInsetY)
+                );
+            }
+
+            function ballTouchesGoalkeeper() {
+                const stage = el.stage.getBoundingClientRect();
+                const keeper = el.goalKeeper.getBoundingClientRect();
+                const left = keeper.left - stage.left;
+                const top = keeper.top - stage.top;
+                const keeperHitbox = {
+                    left: left + keeper.width * 0.2,
+                    right: left + keeper.width * 0.8,
+                    top: top + keeper.height * 0.12,
+                    bottom: top + keeper.height * 0.88,
+                };
+
+                return (
+                    state.x - BALL_RADIUS < keeperHitbox.right &&
+                    state.x + BALL_RADIUS > keeperHitbox.left &&
+                    state.y - BALL_RADIUS < keeperHitbox.bottom &&
+                    state.y + BALL_RADIUS > keeperHitbox.top
                 );
             }
 
@@ -746,15 +779,17 @@
             }
 
             /* ------------------------------------------------------------------------
-               Input: swipe anywhere on the stage
+               Input: grab the ball, pull back, and release to shoot
                ---------------------------------------------------------------------- */
             function onPointerDown(e) {
                 if (state.phase !== PHASE.READY) return;
-                if (e.target.closest('button')) return;      // let the ? button work
+                if (!el.ball.contains(e.target)) return;
 
                 const p = view.toLocal(e);
                 state.originX = p.x;
                 state.originY = p.y;
+                state.dragStartX = state.x;
+                state.dragStartY = state.y;
                 state.pullX = 0;
                 state.pullY = 0;
                 state.phase = PHASE.AIMING;
@@ -779,25 +814,32 @@
 
                 state.pullX = dx;
                 state.pullY = dy;
+                state.x = state.dragStartX + dx;
+                state.y = state.dragStartY + dy;
+                view.renderBall();
 
-                view.setAim(dx, dy);                         // string and dot follow the finger
+                view.setAim(-dx, -dy);                       // show the direction the ball will launch
                 view.setPower(Math.min(len, CONFIG.maxPull) / CONFIG.maxPull);
             }
 
-            function onPointerUp() {
+            function onPointerUp(e) {
                 if (state.phase !== PHASE.AIMING) return;
 
                 view.setAim();
                 view.setPower(0);
 
-                if (Math.hypot(state.pullX, state.pullY) < CONFIG.minPull) {
+                if (e.type === 'pointercancel' ||
+                    Math.hypot(state.pullX, state.pullY) < CONFIG.minPull) {
                     state.phase = PHASE.READY;
+                    state.x = state.dragStartX;
+                    state.y = state.dragStartY;
+                    view.renderBall();
                     return;
                 }
 
-                // The ball flies the way the hand moved
-                state.vx = state.pullX * CONFIG.power;
-                state.vy = state.pullY * CONFIG.power;
+                // Releasing sends the ball in the opposite direction to the pull.
+                state.vx = -state.pullX * CONFIG.power * 60;
+                state.vy = -state.pullY * CONFIG.power * 60;
                 state.phase = PHASE.FLYING;
                 state.lastTime = performance.now();
                 view.setHint('');
@@ -810,36 +852,37 @@
             function tick(now) {
                 if (state.phase !== PHASE.FLYING) return;
 
-                // Scale by elapsed time so speed is the same on 60/120/144Hz screens
-                const step = Math.min((now - state.lastTime) / FRAME_MS, 3);
+                const delta = Math.min((now - state.lastTime) / 1000, MAX_FRAME_SECONDS);
                 state.lastTime = now;
 
                 const { w, h } = view.stageSize();
-                const r = el.ball.offsetWidth / 2;
 
-                state.x += state.vx * step;
-                state.y += state.vy * step;
+                state.vy += CONFIG.gravity * delta;
+                state.x += state.vx * delta;
+                state.y += state.vy * delta;
 
-                const damping = Math.pow(CONFIG.friction, step);
+                const damping = Math.pow(CONFIG.friction, delta * 60);
                 state.vx *= damping;
                 state.vy *= damping;
 
                 // Bounce off the side and top walls
-                if (state.x < r || state.x > w - r) {
+                if (state.x < BALL_RADIUS || state.x > w - BALL_RADIUS) {
                     state.vx *= -CONFIG.bounce;
-                    state.x = Math.max(r, Math.min(w - r, state.x));
+                    state.x = Math.max(BALL_RADIUS, Math.min(w - BALL_RADIUS, state.x));
                 }
-                if (state.y < r) {
+                if (state.y < BALL_RADIUS) {
                     state.vy *= -CONFIG.bounce;
-                    state.y = r;
+                    state.y = BALL_RADIUS;
                 }
 
                 view.renderBall();
 
+                if (ballTouchesGoalkeeper()) return finishShot('miss');
                 if (ballIsInGoal()) return finishShot('goal');
 
-                const stopped = Math.abs(state.vx) < CONFIG.stopSpeed && Math.abs(state.vy) < CONFIG.stopSpeed;
-                if (stopped || state.y > h + r) return finishShot('miss');
+                const stopped = Math.abs(state.vx) < CONFIG.stopSpeed * 60 &&
+                    Math.abs(state.vy) < CONFIG.stopSpeed * 60;
+                if (stopped || state.y > h + BALL_RADIUS) return finishShot('miss');
 
                 requestAnimationFrame(tick);
             }
