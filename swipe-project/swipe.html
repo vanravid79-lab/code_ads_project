@@ -113,7 +113,7 @@
             /* each panel = one screen wide */
             height: 100%;
             transform: translate3d(0, 0, 0);
-            transition: transform 850ms cubic-bezier(0.22, 1, 0.36, 1);
+            transition: transform 1200ms cubic-bezier(0.22, 1, 0.36, 1);
             will-change: transform;
         }
 
@@ -514,6 +514,7 @@
                 ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
                 "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
                 ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+
             </p>
 
             <!-- CUTOUT SLOT CONTAINER -->
@@ -529,9 +530,7 @@
                                     <span class="swipe-line-2">Energy?</span>
                                 </div>
 
-                                <span class="underlay-swipe-cue" aria-hidden="true">
-                                    <span></span><span></span><span></span><span class="swipe-hand">👈</span>
-                                </span>
+
                             </section>
 
                             <!-- Slide 2 -->
@@ -655,6 +654,7 @@
         // false = no scratch cover: your slide images show straight away, only swipe works.
         // true  = scratch layer on slides 1 and 2 (needs a cover image, see topImage below).
         const SCRATCH_ENABLED = false;
+        const INTRO_AUTO_NEXT_DELAY = 3000;
 
         underlayTrack.style.setProperty('--slides', slideCount);
 
@@ -799,7 +799,7 @@
 
             const prevSlide = activeSlide;
             activeSlide = nextSlide;
-            underlayTrack.style.transform = `translateX(-${activeSlide * (100 / slideCount)}%)`;
+            underlayTrack.style.transform = `translate3d(-${activeSlide * (100 / slideCount)}%, 0, 0)`;
             scratchCheckThrottle = 0;
 
             if (activeSlide >= CHARGE_SLIDE) {
@@ -1003,6 +1003,14 @@
         // Learn more button click
         btnLearnMore.addEventListener('click', () => {
             window.location.href = 'https://www.facebook.com/StingCambodia/';
+        });
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    if (activeSlide === 0) changeSlide(1);
+                }, INTRO_AUTO_NEXT_DELAY);
+            });
         });
     </script>
 
