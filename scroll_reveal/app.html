@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khmer Daily News - Underlay Scroll Reveal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <link rel="stylesheet" href="./style.css" />
+</head>
+<style>
+    body {
+        font-family: "Kantumruy Pro", "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f2f5;
+    }
+
+    /* Outer Wrapper Container */
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        /* padding: 20px; */
+        background-color: #ffffff;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        position: relative;
+        z-index: 1;
+    }
+
+    header {
+        text-align: center;
+        padding: 20px 0;
+        border-bottom: 3px solid #0056b3;
+    }
+
+    header h1 {
+        margin: 0;
+        color: #0056b3;
+        font-size: 28px;
+    }
+
+    /* .post {
+      padding: 20px 0;
+    } */
+
+    .post h2 {
+        color: #1a1a1a;
+        line-height: 1.4;
+        font-size: 24px;
+    }
+
+    .post p {
+        line-height: 1.8;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .date-meta {
+        color: #888;
+        font-size: 0.9em;
+        margin-bottom: 15px;
+    }
+
+    .sknteam_image {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .sknteam_image img {
+        width: 100%;
+        max-width: 500px;
+        border-radius: 4px;
+    }
+
+    /* --- SCROLL REVEAL UNDERLAY WINDOW --- */
+    .underlay-slot {
+        height: 1000px;
+        margin: 30px 0;
+        position: relative;
+        z-index: 4;
+        clip-path: inset(0 0 0 0);
+    }
+
+    .underlay-fixed-content {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none;
+        z-index: 3;
+    }
+
+    /* Base Layer (Right-side Image: photo_2026-09-01_14-12-16.jpg) */
+    /* Base Layer (Right-side Image: photo_2026-09-01_14-12-16.jpg) */
+    .underlay-banner {
+        width: 100%;
+        height: 100%;
+        background-image: url("./assets/string_ads_charge_update.png");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center top;
+        position: relative;
+        pointer-events: auto;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+    }
+
+    .banner-scroll-prompt {
+        position: absolute;
+        z-index: 2;
+        bottom: max(20px, env(safe-area-inset-bottom));
+        left: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 8px 12px;
+        border: 0;
+        background: transparent;
+        color: #ddec0b;
+        font: inherit;
+        filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.75));
+        transform: translateX(-50%);
+        cursor: pointer;
+    }
+
+    .banner-scroll-prompt:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 4px;
+    }
+
+    .banner-scroll-indicator {
+        font-size: 30px;
+        animation: scroll-indicator-bounce 1.2s ease-in-out infinite;
+    }
+
+    .banner-scroll-prompt span {
+        color: inherit;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+
+    .sting-story[hidden] {
+        display: none;
+    }
+
+    .sting-story {
+        position: absolute;
+        z-index: 3;
+        inset: 0;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        box-sizing: border-box;
+        padding: 32px 24px;
+        overflow: hidden;
+        color: #fff;
+        background: rgba(4, 14, 25, 0.64);
+        animation: sting-story-appear 0.35s ease-out both;
+    }
+
+    .sting-story-content {
+        display: flex;
+        flex-direction: column;
+        width: min(100%, 520px);
+        min-height: 0;
+        flex: 1 1 auto;
+        margin: 0 0 0 24px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scroll-snap-type: y mandatory;
+        scroll-padding-block: 0;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(229, 237, 24, 0.75) rgba(255, 255, 255, 0.12);
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
+    }
+
+    .sting-story-page {
+        position: relative;
+        box-sizing: border-box;
+        display: flex;
+        min-height: 100%;
+        flex: 0 0 auto;
+        flex-direction: column;
+        justify-content: center;
+        padding: 48px 12px 48px 34px;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+    }
+
+    .sting-story-page::before,
+    .sting-story-page::after {
+        position: absolute;
+        left: 13px;
+        content: "";
+    }
+
+    .sting-story-page::before {
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg,
+                rgba(229, 237, 24, 0.28),
+                rgba(229, 237, 24, 0.9) 50%,
+                rgba(229, 237, 24, 0.28));
+        box-shadow: 0 0 12px rgba(229, 237, 24, 0.24);
+    }
+
+    .sting-story-page::after {
+        top: 50%;
+        width: 12px;
+        height: 12px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        background: #ddec0b;
+        box-shadow: 0 0 0 5px rgba(221, 236, 11, 0.16), 0 0 18px rgba(221, 236, 11, 0.72);
+        transform: translate(-5px, -50%);
+    }
+
+    .sting-story-content::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .sting-story-content::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: rgba(229, 237, 24, 0.75);
+    }
+
+    .sting-story-content::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .sting-story-page p:not(.sting-story-eyebrow, .sting-story-page-hint) {
+        max-width: 42ch;
+        margin: 0 0 16px;
+        color: #fff;
+        font-size: clamp(15px, 2.2vh, 18px);
+        line-height: 1.7;
+    }
+
+    .sting-story-page h2 {
+        margin: 0 0 14px;
+        color: #fff;
+        font-size: clamp(26px, 6vw, 42px);
+        letter-spacing: 0.06em;
+        line-height: 1.15;
+    }
+
+    .sting-story-page .sting-story-intro {
+        max-width: 38ch;
+        margin: 0;
+        color: #fff;
+        font-size: clamp(16px, 2.5vw, 20px);
+        line-height: 1.5;
+    }
+
+    .sting-story-page-hint {
+        margin: 32px 0 0;
+        color: #e5ed18;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+
+    .sting-story-page-hint .fa-angles-down {
+        display: block;
+        margin-top: 10px;
+        font-size: 20px;
+        text-align: center;
+    }
+
+    body.sting-story-open {
+        overflow: hidden;
+    }
+
+    .sting-story-page .sting-story-eyebrow {
+        margin: 0 0 8px;
+        color: #e5ed18;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+    }
+
+    .sting-story-close {
+        position: absolute;
+        top: max(16px, env(safe-area-inset-top));
+        right: max(16px, env(safe-area-inset-right));
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.72);
+        border-radius: 50%;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.32);
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .sting-story-close:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 3px;
+    }
+
+    @keyframes sting-story-appear {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes scroll-indicator-bounce {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(6px);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .banner-scroll-indicator,
+        .sting-story {
+            animation: none;
+        }
+    }
+
+    @media (max-width: 767px) {
+
+        .underlay-fixed-content,
+        .underlay-banner {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+        }
+
+        .underlay-banner {
+            flex: 0 0 100vw;
+            background-size: cover;
+            background-position: center;
+        }
+    }
+
+    .ad-label {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        z-index: 5;
+    }
+
+    footer {
+        text-align: center;
+        padding: 20px 0;
+        border-top: 1px solid #ddd;
+        color: #777;
+        font-size: 14px;
+        background-color: #ffffff;
+    }
+</style>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>សារព័ត៌មាន Khmer Daily</h1>
+        </header>
+
+        <div class="post">
+            <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+            <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+            </div>
+
+            <p>
+                <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+            </p>
+
+            <div class="underlay-slot" id="sting-interscroller">
+                <div class="underlay-fixed-content">
+                    <div class="underlay-banner">
+
+                        <button class="banner-scroll-prompt" type="button" aria-label="Read the Sting Cambodia story"
+                            aria-controls="sting-story" aria-expanded="false">
+                            <i class="fa-solid fa-angles-down banner-scroll-indicator" aria-hidden="true"></i>
+                            <span>Scroll</span>
+                        </button>
+
+
+                        <section class="sting-story" id="sting-story" aria-labelledby="sting-story-title" hidden>
+                            <button class="sting-story-close" type="button" aria-label="Close Sting Cambodia story">
+                                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                            </button>
+                            <div class="sting-story-content">
+                                <article class="sting-story-page">
+                                    <p class="sting-story-eyebrow">A FICTIONAL STORY SET IN CAMBODIA</p>
+                                    <h2 id="sting-story-title">STING CAMBODIA</h2>
+                                    <p class="sting-story-intro">Follow Dara through one busy day in Cambodia, from the
+                                        first light of morning to the last lights of the city, with an ice-cold Sting
+                                        along the way.</p>
+                                    <p class="sting-story-page-hint">Tap More to keep reading <i
+                                            class="fa-solid fa-angles-down" aria-hidden="true"></i></p>
+                                </article>
+                                <article class="sting-story-page">
+                                    <p class="sting-story-eyebrow">PHNOM PENH, EARLY MORNING</p>
+                                    <h2>A LONG DAY AHEAD</h2>
+                                    <p>Dara wakes before sunrise in Phnom Penh. Today is packed: deliveries across the
+                                        city, an evening class, and a family dinner to reach on time.</p>
+                                    <p>At the corner shop, the owner is already stacking the cooler. Rows of red Sting
+                                        bottles glow behind the glass, cold and ready for the day.</p>
+                                    <p>Dara grabs one for the road, waves goodbye, and starts the scooter. The city is
+                                        just waking up.</p>
+                                </article>
+                                <article class="sting-story-page">
+                                    <p class="sting-story-eyebrow">MIDDAY ON THE ROAD</p>
+                                    <h2>THE CITY NEVER SLOWS DOWN</h2>
+                                    <p>By noon the streets are loud and bright. Tuk-tuks, scooters, and fruit sellers
+                                        all share the road, and the Cambodian sun is at its hottest.</p>
+                                    <p>Dara has three more deliveries and no time to stop. Every red light feels like a
+                                        chance to catch a breath.</p>
+                                    <p>Then a message arrives from Dara's friend Sokha: "Meet me at the riverside. Bring
+                                        your energy."</p>
+                                </article>
+                                <article class="sting-story-page">
+                                    <p class="sting-story-eyebrow">RIVERSIDE BREAK</p>
+                                    <h2>A COLD STING, A SHORT PAUSE</h2>
+                                    <p>Sokha is waiting by the river with two ice-cold bottles of Sting. Dara laughs,
+                                        and for ten minutes the day finally slows down.</p>
+                                    <p>They talk about plans: Sokha wants to open a small coffee cart, and Dara dreams
+                                        of finishing night school and starting a delivery team.</p>
+                                    <p>The cold bottle, the breeze from the river, and a good friend make the break feel
+                                        like a fresh start.</p>
+                                </article>
+                                <article class="sting-story-page">
+                                    <p class="sting-story-eyebrow">LOCAL MARKET</p>
+                                    <h2>SMALL SHOP, BIG SMILE</h2>
+                                    <p>On the way back, Dara stops at a busy market shop. The owner, Auntie Sreymom, is
+                                        busy serving customers, and the Sting cooler is always the first to empty.</p>
+                                    <p>She tells Dara that young riders, students, and workers all stop by for a cold
+                                        drink before heading back out.</p>
+                                    <p>Dara listens and smiles. Behind every red bottle is a shop, a family, and a
+                                        neighborhood keeping each other going.</p>
+                                </article>
+                                <article class="sting-story-page">
+                                    <p class="sting-story-eyebrow">AFTERNOON RUSH</p>
+                                    <h2>KEEP GOING</h2>
+                                    <p>The afternoon is the hardest part. Traffic is thick, a delivery is late, and
+                                        Dara's phone will not stop ringing.</p>
+                                    <p>Dara pulls over, takes a breath, and opens another cold Sting. A few quiet
+                                        minutes are enough to reset.</p>
+                                    <p>Back on the road, the last deliveries go smoothly, one street after another,
+                                        until the final stop is done.</p>
+                                </article>
+                                <article class="sting-story-page">
+                                    <p class="sting-story-eyebrow">EVENING, PHNOM PENH</p>
+                                    <h2>THE CITY LIGHTS UP</h2>
+                                    <p>Evening settles over the city. Street lights flicker on, food stalls fill with
+                                        smoke and laughter, and the riverside comes alive.</p>
+                                    <p>Dara parks the scooter and meets Sokha and other friends at a roadside stall.
+                                        Everyone shares stories from their day and a round of cold Sting.</p>
+                                    <p>Different jobs, different dreams, but the same busy city and the same good
+                                        company.</p>
+                                </article>
+                                <article class="sting-story-page">
+                                    <p class="sting-story-eyebrow">THE STORY CONTINUES</p>
+                                    <h2>MAKE THE NEXT MOMENT YOURS</h2>
+                                    <p>Under the evening sky, Dara raises a bottle with the friends. The day was long,
+                                        but it was full of people who kept each other moving.</p>
+                                    <p>Tomorrow will bring another early morning, another busy road, and another chance
+                                        to chase a big idea.</p>
+                                    <p>Grab a cold Sting, find your people, and bring your energy to whatever comes
+                                        next. The next moment is yours to make.</p>
+                                    <p class="sting-story-page-hint">TAP READ AGAIN TO START OVER</p>
+                                </article>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+
+            <p>
+                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+            </p>
+
+            <p>
+                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+            </p>
+
+            <p>
+                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+            </p>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+            </div>
+        </div>
+
+        <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+    </div>
+
+    <script>
+        const stingInterscroller = document.querySelector('#sting-interscroller');
+        const scrollPrompt = document.querySelector('.banner-scroll-prompt');
+        const stingStory = document.querySelector('#sting-story');
+        const stingStoryContent = document.querySelector('.sting-story-content');
+        const closeStoryButton = document.querySelector('.sting-story-close');
+
+        scrollPrompt.addEventListener('click', () => {
+            stingStory.hidden = false;
+            stingStoryContent.scrollTop = 0;
+            scrollPrompt.setAttribute('aria-expanded', 'true');
+            stingInterscroller.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.body.classList.add('sting-story-open');
+            closeStoryButton.focus({ preventScroll: true });
+        });
+
+        function closeStory() {
+            stingStory.hidden = true;
+            document.body.classList.remove('sting-story-open');
+            scrollPrompt.setAttribute('aria-expanded', 'false');
+            scrollPrompt.focus({ preventScroll: true });
+        }
+
+        closeStoryButton.addEventListener('click', closeStory);
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !stingStory.hidden) closeStory();
+        });
+    </script>
+
+    <!-- ===== ADD-ON: 3 stories shown automatically, button-only navigation (existing code above is untouched) ===== -->
+    <style>
+        /* button stays above the story overlay so it can be clicked again */
+        .banner-scroll-prompt {
+            z-index: 10;
+            bottom: max(24px, env(safe-area-inset-bottom));
+            padding: 8px 20px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.55);
+            border: 1px solid rgba(221, 236, 11, 0.75);
+        }
+
+        /* leave room for the close button (top) and the main button (bottom) */
+        .sting-story {
+            padding: 52px 12px 84px;
+        }
+
+        /* no manual scrolling: only the button changes the stories */
+        .sting-story-content {
+            overflow: hidden;
+            touch-action: pan-y;
+            scroll-snap-type: none;
+            margin-left: 0;
+            width: min(100%, 340px);
+            justify-content: space-evenly;
+        }
+
+        /* compact layout: 3 stories share one screen */
+        .sting-story-page {
+            min-height: 0;
+            flex: 1 1 0;
+            overflow: hidden;
+            padding: 4px 6px 4px 26px;
+            scroll-snap-align: none;
+            scroll-snap-stop: normal;
+        }
+
+        .sting-story-page h2 {
+            margin: 0 0 3px;
+            font-size: clamp(13px, 3.6vw, 18px);
+            letter-spacing: 0.04em;
+        }
+
+        .sting-story-page .sting-story-eyebrow {
+            margin: 0 0 2px;
+            font-size: 8px;
+        }
+
+        .sting-story-page p:not(.sting-story-eyebrow, .sting-story-page-hint) {
+            margin: 0;
+            font-size: clamp(10px, 1.5vh, 12px);
+            line-height: 1.4;
+        }
+
+        /* show only the first paragraph of each story in the compact view */
+        .sting-story-page p:nth-of-type(n+3) {
+            display: none;
+        }
+
+        /* hide the old "scroll" hints inside the story */
+        .sting-story-page-hint {
+            display: none;
+        }
+
+        /* so hidden pages really disappear */
+        .sting-story-page[hidden] {
+            display: none;
+        }
+
+        /* smaller timeline dot and line */
+        .sting-story-page::before {
+            left: 9px;
+        }
+
+        .sting-story-page::after {
+            left: 9px;
+            width: 8px;
+            height: 8px;
+        }
+
+        /* smaller close button and main button */
+        .sting-story-close {
+            width: 32px;
+            height: 32px;
+            font-size: 15px;
+        }
+
+        .banner-scroll-indicator {
+            font-size: 26px;
+        }
+
+        .banner-scroll-prompt span {
+            font-size: 11px;
+        }
+
+        /* arrow flips on the last group */
+        .banner-scroll-indicator.is-restart {
+            transform: rotate(180deg);
+            animation: none;
+        }
+    </style>
+
+    <script>
+        (function () {
+            const PER_VIEW = 3; // stories shown together on one screen
+
+            const prompt = document.querySelector('.banner-scroll-prompt');
+            const label = prompt.querySelector('span');
+            const icon = prompt.querySelector('.banner-scroll-indicator');
+            const story = document.querySelector('#sting-story');
+            const content = document.querySelector('.sting-story-content');
+            const closeBtn = document.querySelector('.sting-story-close');
+            const pages = Array.from(content.querySelectorAll('.sting-story-page'));
+            const groups = Math.ceil(pages.length / PER_VIEW);
+
+            let group = 0;
+            const isOpen = () => !story.hidden;
+
+            function showGroup(g) {
+                group = g;
+                pages.forEach((p, i) => {
+                    p.hidden = Math.floor(i / PER_VIEW) !== g;
+                });
+                content.scrollTop = 0;
+
+                const last = g === groups - 1;
+                label.textContent = last ? 'Read again' : 'Scroll';
+                icon.classList.toggle('is-restart', last);
+            }
+
+            function reset() {
+                group = 0;
+                label.textContent = 'Scroll';
+                icon.classList.remove('is-restart');
+            }
+
+            // Open automatically: stories 1-3 are visible without any click.
+            // (The page is not scroll-locked, so readers can still scroll the article.)
+            story.hidden = false;
+            prompt.setAttribute('aria-expanded', 'true');
+            showGroup(0);
+
+            // Capture phase, so it runs before your original click handler.
+            prompt.addEventListener('click', (e) => {
+                if (!isOpen()) {
+                    showGroup(0);   // story was closed: your original handler reopens it
+                    return;
+                }
+                e.stopImmediatePropagation(); // story already open: just change group
+                showGroup(group < groups - 1 ? group + 1 : 0);
+            }, true);
+
+            closeBtn.addEventListener('click', reset);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') reset();
+            });
+        })();
+    </script>
+    <!-- ===== END ADD-ON ===== -->
+
+</body>
+
+</html>

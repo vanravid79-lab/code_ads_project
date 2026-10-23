@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khmer Daily News - Underlay Scroll Reveal</title>
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+
+        /* Outer Wrapper Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #0056b3;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #0056b3;
+            font-size: 28px;
+        }
+
+        .post h2 {
+            color: #1a1a1a;
+            line-height: 1.4;
+            font-size: 24px;
+        }
+
+        .post p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .date-meta {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .sknteam_image {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sknteam_image img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 4px;
+        }
+
+        /* --- SCROLL REVEAL UNDERLAY WINDOW --- */
+        .underlay-slot {
+            height: 1000px;
+            margin: 30px 0;
+            position: relative;
+            clip-path: inset(0 0 0 0);
+        }
+
+        .underlay-fixed-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .underlay-banner {
+            width: 100%;
+            height: 100%;
+            background-image: url("./assets/string-reveal2.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center top;
+            position: relative;
+            pointer-events: auto;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 22px;
+        }
+
+        /* ---------- Heading above card ---------- */
+        .scratch-title {
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+            pointer-events: none;
+            font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .scratch-title small {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.32em;
+            margin-bottom: 10px;
+        }
+
+        .scratch-title h3 {
+            margin: 0;
+            font-size: clamp(28px, 8vw, 38px);
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: 0.06em;
+        }
+
+        /* ---------- Card ---------- */
+        .scratch-card {
+            position: relative;
+            width: min(300px, calc(100% - 36px));
+            aspect-ratio: 8 / 9;
+            overflow: hidden;
+            border-radius: 12px;
+            background: #8f101c;
+            box-shadow:
+                0 0 0 2px #ffffff,
+                0 0 0 5px rgba(255, 255, 255, 0.55),
+                0 18px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Prize layer (revealed under the grey coating) */
+        .scratch-prize {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff7e8;
+            text-align: center;
+            font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+            background:
+                radial-gradient(ellipse at center, #d12c34 0, #a81724 48%, #690b16 100%);
+        }
+
+        /* gold flecks over prize layer */
+        .scratch-prize::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle, #f5d27a 0 1.5px, transparent 2px),
+                radial-gradient(circle, #ffedba 0 1px, transparent 1.5px),
+                radial-gradient(circle, #c99a36 0 1px, transparent 1.5px);
+            background-size: 23px 29px, 17px 19px, 31px 27px;
+            background-position: 0 0, 7px 11px, 13px 5px;
+            opacity: 0.55;
+            -webkit-mask-image: radial-gradient(ellipse at center, transparent 30%, #000 85%);
+            mask-image: radial-gradient(ellipse at center, transparent 30%, #000 85%);
+        }
+
+        .scratch-prize>* {
+            position: relative;
+        }
+
+        .scratch-prize svg {
+            width: 46px;
+            height: 46px;
+            margin-bottom: 18px;
+        }
+
+        .scratch-prize span {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.3em;
+            margin-bottom: 6px;
+        }
+
+        .scratch-prize strong {
+            font-size: clamp(30px, 10vw, 40px);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            line-height: 1.2;
+        }
+
+        .scratch-cover {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            touch-action: none;
+            user-select: none;
+            cursor: grab;
+            transition: opacity 0.35s ease;
+            will-change: opacity;
+        }
+
+        .scratch-cover:active {
+            cursor: grabbing;
+        }
+
+        .scratch-cover.is-done {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .scratch-hint {
+            position: absolute;
+            z-index: 2;
+            top: 50%;
+            left: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: max-content;
+            max-width: calc(100% - 24px);
+            box-sizing: border-box;
+            padding: 9px 14px 9px 9px;
+            border: 1px solid rgba(255, 255, 255, 0.82);
+            border-radius: 14px;
+            color: #65101a;
+            background: rgba(255, 250, 247, 0.96);
+            box-shadow: 0 8px 24px rgba(31, 9, 12, 0.28);
+            backdrop-filter: blur(8px);
+            font-size: clamp(13px, 3.8vw, 15px);
+            font-weight: 650;
+            line-height: 1.3;
+            text-align: center;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .scratch-hint-finger {
+            display: grid;
+            width: 34px;
+            height: 34px;
+            flex: 0 0 34px;
+            place-items: center;
+            border-radius: 50%;
+            color: #fff;
+            background: linear-gradient(145deg, #c72c3a, #82121f);
+            box-shadow: 0 3px 8px rgba(101, 16, 26, 0.25);
+            font-size: 18px;
+            animation: scratch-point 1s ease-in-out infinite alternate;
+        }
+
+        .scratch-hint-text {
+            max-width: 210px;
+            text-align: left;
+        }
+
+        @keyframes scratch-point {
+            from {
+                transform: translateY(2px);
+            }
+
+            to {
+                transform: translateY(-2px);
+            }
+        }
+
+        .scratch-hint.is-hidden {
+            opacity: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .scratch-cover,
+            .scratch-hint {
+                transition: none;
+            }
+
+            .scratch-hint-finger {
+                animation: none;
+            }
+        }
+
+        @media (max-width: 767px) {
+
+            .underlay-fixed-content,
+            .underlay-banner {
+                width: 100vw;
+                height: 100vh;
+                height: 100dvh;
+            }
+
+            .underlay-banner {
+                flex: 0 0 100vw;
+                background-size: cover;
+                background-position: center;
+            }
+        }
+
+        .ad-label {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            z-index: 5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-size: 14px;
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>សារព័ត៌មាន Khmer Daily</h1>
+        </header>
+
+        <div class="post">
+            <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+            <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+            </div>
+
+            <p>
+                <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+            </p>
+
+            <div class="underlay-slot">
+                <div class="underlay-fixed-content">
+                    <div class="underlay-banner">
+                        <!-- <div class="scratch-title">
+                            <small>SCRATCH &amp; WIN</small>
+                            <h3>A SPECIAL<br>REWARD</h3>
+                        </div> -->
+
+                        <div class="scratch-card">
+                            <div class="scratch-prize" aria-live="polite">
+                                <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+                                    <path
+                                        d="M8 21h32v22H8zM5 15h38v8H5zM24 15v28M24 15c-8 0-13-2-13-6 0-3 3-5 6-4 4 1 7 10 7 10Zm0 0c8 0 13-2 13-6 0-3-3-5-6-4-4 1-7 10-7 10Z"
+                                        stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2.5" />
+                                </svg>
+                                <span>YOU WIN</span>
+                                <strong class="scratch-discount"></strong>
+                            </div>
+                            <canvas class="scratch-cover" role="button" tabindex="0"
+                                aria-label="Scratch the card to reveal your reward"></canvas>
+                            <div class="scratch-hint">
+                                <span class="scratch-hint-finger" aria-hidden="true">👆</span>
+                                <span class="scratch-hint-text">Scratch the card to reveal your reward</span>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <p>
+                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+            </p>
+
+            <p>
+                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+            </p>
+
+            <p>
+                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+            </p>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+            </div>
+        </div>
+
+        <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+    </div>
+
+    <script>
+        const scratchCard = document.querySelector('.scratch-card');
+        const scratchCanvas = document.querySelector('.scratch-cover');
+        const scratchHint = document.querySelector('.scratch-hint');
+        const scratchDiscount = document.querySelector('.scratch-discount');
+        const scratchContext = scratchCanvas.getContext('2d');
+        const pendingPoints = [];
+
+        const discountOptions = [10, 15, 20, 25, 30, 50];
+        const discountPercentage = discountOptions[Math.floor(Math.random() * discountOptions.length)];
+
+        let isScratching = false;
+        let hasRevealed = false;
+        let lastScratchPoint = null;
+        let scratchFrame = 0;
+
+        const rand = (min, max) => min + Math.random() * (max - min);
+
+        scratchDiscount.textContent = `${discountPercentage}% OFF`;
+
+        function paintScratchCover(preserveScratch = false) {
+            const bounds = scratchCard.getBoundingClientRect();
+            const w = bounds.width;
+            const h = bounds.height;
+            if (!w || !h) return;
+
+            const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+            const canvasWidth = Math.round(w * pixelRatio);
+            const canvasHeight = Math.round(h * pixelRatio);
+            if (scratchCanvas.width === canvasWidth && scratchCanvas.height === canvasHeight) return;
+
+            let previousCanvas;
+            if (preserveScratch && scratchCanvas.width && scratchCanvas.height) {
+                previousCanvas = document.createElement('canvas');
+                previousCanvas.width = scratchCanvas.width;
+                previousCanvas.height = scratchCanvas.height;
+                previousCanvas.getContext('2d').drawImage(scratchCanvas, 0, 0);
+            }
+
+            scratchCanvas.width = canvasWidth;
+            scratchCanvas.height = canvasHeight;
+            scratchContext.setTransform(1, 0, 0, 1, 0, 0);
+            scratchContext.globalCompositeOperation = 'source-over';
+
+            if (previousCanvas) {
+                scratchContext.drawImage(previousCanvas, 0, 0, canvasWidth, canvasHeight);
+            } else {
+                drawScratchTexture(w, h, pixelRatio);
+            }
+
+            scratchContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+            scratchContext.globalCompositeOperation = 'destination-out';
+        }
+
+        function drawScratchTexture(w, h, pixelRatio) {
+            const ctx = scratchContext;
+            ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+            const base = ctx.createLinearGradient(0, 0, w, h);
+            base.addColorStop(0, '#bd2730');
+            base.addColorStop(0.5, '#86101d');
+            base.addColorStop(1, '#a51c27');
+            ctx.fillStyle = base;
+            ctx.fillRect(0, 0, w, h);
+
+            for (let i = 0; i < 36; i++) {
+                const x = rand(-20, w);
+                const y = rand(-20, h);
+                const len = rand(30, 100);
+                ctx.strokeStyle = Math.random() > 0.5
+                    ? `rgba(255,220,190,${rand(0.06, 0.18)})`
+                    : `rgba(50,0,8,${rand(0.08, 0.2)})`;
+                ctx.lineWidth = rand(0.6, 3);
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + len * 0.6, y + len);
+                ctx.stroke();
+            }
+
+            for (let i = 0; i < 100; i++) {
+                let x = rand(0, w);
+                let y = rand(0, h);
+                if (Math.random() < 0.65) {
+                    if (Math.random() < 0.5) {
+                        x = Math.random() < 0.5 ? rand(0, w * 0.18) : rand(w * 0.82, w);
+                    } else {
+                        y = Math.random() < 0.5 ? rand(0, h * 0.18) : rand(h * 0.82, h);
+                    }
+                }
+                ctx.fillStyle = `rgba(${Math.round(rand(205, 245))},${Math.round(rand(160, 195))},${Math.round(rand(55, 95))},${rand(0.5, 0.95)})`;
+                ctx.beginPath();
+                ctx.arc(x, y, rand(0.6, 2.4), 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function eraseBrushStamp(x, y, angle) {
+            const ctx = scratchContext;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+
+            const len = rand(42, 58);
+            const wid = rand(24, 38);
+            const halfLength = len / 2;
+            const halfWidth = wid / 2;
+            ctx.beginPath();
+            ctx.moveTo(-halfLength, rand(-halfWidth * 0.2, halfWidth * 0.2));
+
+            for (let i = 1; i <= 12; i++) {
+                const progress = i / 12;
+                const taper = Math.sin(progress * Math.PI);
+                const x = -halfLength + len * progress + rand(-3, 3);
+                const y = -halfWidth * taper + rand(-wid * 0.22, wid * 0.22);
+                ctx.lineTo(x, y);
+            }
+
+            ctx.lineTo(halfLength, rand(-halfWidth * 0.2, halfWidth * 0.2));
+            for (let i = 11; i >= 1; i--) {
+                const progress = i / 12;
+                const taper = Math.sin(progress * Math.PI);
+                const x = -halfLength + len * progress + rand(-3, 3);
+                const y = halfWidth * taper + rand(-wid * 0.22, wid * 0.22);
+                ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            for (let i = 0; i < 5; i++) {
+                const offset = rand(-halfWidth * 1.25, halfWidth * 1.25);
+                const start = rand(-halfLength * 1.2, halfLength * 0.25);
+                ctx.lineWidth = rand(0.8, 2.5);
+                ctx.beginPath();
+                ctx.moveTo(start, offset);
+                ctx.lineTo(start + rand(12, len * 0.9), offset + rand(-3, 3));
+                ctx.stroke();
+            }
+
+            for (let i = 0; i < 3; i++) {
+                const fleckX = rand(-halfLength, halfLength);
+                const fleckY = rand(-halfWidth * 1.5, halfWidth * 1.5);
+                ctx.beginPath();
+                ctx.ellipse(fleckX, fleckY, rand(1, 3), rand(1, 2), angle, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        function eraseToPoint(point) {
+            if (!lastScratchPoint) {
+                eraseBrushStamp(point.x, point.y, rand(-0.6, 0.6));
+                lastScratchPoint = point;
+                return;
+            }
+
+            const deltaX = point.x - lastScratchPoint.x;
+            const deltaY = point.y - lastScratchPoint.y;
+            const distance = Math.hypot(deltaX, deltaY);
+            const steps = Math.max(1, Math.ceil(distance / 8));
+            const angle = Math.atan2(deltaY, deltaX);
+
+            for (let i = 1; i <= steps; i++) {
+                const progress = i / steps;
+                eraseBrushStamp(
+                    lastScratchPoint.x + deltaX * progress,
+                    lastScratchPoint.y + deltaY * progress,
+                    angle
+                );
+            }
+
+            lastScratchPoint = point;
+        }
+
+        function queueScratchPoint(event) {
+            const bounds = scratchCanvas.getBoundingClientRect();
+            pendingPoints.push({
+                x: event.clientX - bounds.left,
+                y: event.clientY - bounds.top
+            });
+
+            if (!scratchFrame) {
+                scratchFrame = requestAnimationFrame(drawPendingScratch);
+            }
+        }
+
+        function drawPendingScratch() {
+            scratchFrame = 0;
+            for (const point of pendingPoints) eraseToPoint(point);
+            pendingPoints.length = 0;
+        }
+
+        function revealAll() {
+            hasRevealed = true;
+            pendingPoints.length = 0;
+            lastScratchPoint = null;
+            scratchCanvas.classList.add('is-done');
+            scratchHint.classList.add('is-hidden');
+            scratchCard.setAttribute('aria-label', `Reward revealed: ${discountPercentage}% off`);
+        }
+
+        function checkRevealProgress() {
+            const pixels = scratchContext.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height).data;
+            const sampleStep = 32;
+            let transparent = 0;
+            let total = 0;
+
+            for (let i = 3; i < pixels.length; i += sampleStep) {
+                total++;
+                if (pixels[i] < 32) transparent++;
+            }
+
+            if (transparent / total >= 0.45) revealAll();
+        }
+
+        function startScratch(event) {
+            if (hasRevealed || (event.pointerType === 'mouse' && event.button !== 0)) return;
+            isScratching = true;
+            scratchCanvas.setPointerCapture(event.pointerId);
+            scratchHint.classList.add('is-hidden');
+            queueScratchPoint(event);
+        }
+
+        function moveScratch(event) {
+            if (!isScratching || hasRevealed) return;
+            const points = event.getCoalescedEvents ? event.getCoalescedEvents() : [event];
+            points.forEach(queueScratchPoint);
+        }
+
+        function finishScratch(event) {
+            if (!isScratching) return;
+            if (event.type === 'pointerup') queueScratchPoint(event);
+            if (scratchFrame) {
+                cancelAnimationFrame(scratchFrame);
+                drawPendingScratch();
+            }
+            isScratching = false;
+            lastScratchPoint = null;
+            checkRevealProgress();
+        }
+
+        scratchCanvas.addEventListener('pointerdown', startScratch);
+        scratchCanvas.addEventListener('pointermove', moveScratch);
+        scratchCanvas.addEventListener('pointerup', finishScratch);
+        scratchCanvas.addEventListener('pointercancel', finishScratch);
+        scratchCanvas.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                revealAll();
+            }
+        });
+
+        paintScratchCover();
+        let resizeFrame = 0;
+        window.addEventListener('resize', () => {
+            if (resizeFrame) cancelAnimationFrame(resizeFrame);
+            resizeFrame = requestAnimationFrame(() => {
+                resizeFrame = 0;
+                if (!hasRevealed) paintScratchCover(true);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

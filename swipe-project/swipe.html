@@ -104,6 +104,28 @@
             background: #000 url("./images/string_image1.jpg") center / 100% 100% no-repeat;
         }
 
+        .underlay-banner.keep-background .underlay-panel2 {
+            background-image: none;
+        }
+
+        .underlay-banner.keep-charge-background {
+            background-image: url("./images/string_ads_charge.png");
+        }
+
+        .underlay-banner.keep-charge-background .underlay-panel2,
+        .underlay-banner.keep-charge-background .underlay-panel3 {
+            background-image: none;
+        }
+
+        .underlay-banner.keep-final-background {
+            background-image: url("./images/string_ads_charge_100.png");
+        }
+
+        .underlay-banner.keep-final-background .underlay-panel3,
+        .underlay-banner.keep-final-background .underlay-panel4 {
+            background-image: none;
+        }
+
         .underlay-track {
             --slides: 5;
             /* number of panels (slides) */
@@ -116,6 +138,14 @@
             transform: translate3d(0, 0, 0);
             transition: transform 1200ms cubic-bezier(0.22, 1, 0.36, 1);
             will-change: transform;
+        }
+
+        .underlay-track.is-content-transitioning {
+            transition: opacity 450ms ease-in-out;
+        }
+
+        .underlay-track.is-content-hidden {
+            opacity: 0;
         }
 
         /* Slides 1 and 2 */
@@ -369,6 +399,10 @@
                 transition-duration: 0.01ms;
             }
 
+            .underlay-track.is-content-transitioning {
+                transition-duration: 0.01ms;
+            }
+
             .underlay-swipe-cue {
                 animation: none;
             }
@@ -565,9 +599,13 @@
 
                                         <div class="charge-center">
                                             <div class="charge-percent" id="chargePercent">0%</div>
+
                                             <svg class="charge-bolt" viewBox="0 0 24 24" aria-hidden="true">
                                                 <path d="M13 1 L4 14 H10.5 L8.5 23 L20 9.5 H13.5 Z" />
                                             </svg>
+
+                                            ​​​​​​​​​
+
                                         </div>
                                     </div>
                                 </div>
@@ -647,6 +685,7 @@
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
         const underlayTrack = document.getElementById('underlayTrack');
+        const underlayBanner = document.querySelector('.underlay-banner');
         const btnLearnMore = document.getElementById('btnLearnMore');
         const slideCount = underlayTrack.children.length;   // 4
         const CHARGE_SLIDE = 2;                              // index of the charging slide (slide 3)
@@ -655,7 +694,7 @@
         // false = no scratch cover: your slide images show straight away, only swipe works.
         // true  = scratch layer on slides 1 and 2 (needs a cover image, see topImage below).
         const SCRATCH_ENABLED = false;
-        const INTRO_AUTO_NEXT_DELAY = 5000;
+        const INTRO_AUTO_NEXT_DELAY = 3000;
 
         underlayTrack.style.setProperty('--slides', slideCount);
 
@@ -670,12 +709,13 @@
         let gestureType = null;   // 'swipe' | 'scratch' | null
         let gestureActive = false;
         let didSwipe = false;
+        let isContentTransitioning = false;
 
         /* ---------- Charge gauges ----------
            Slide 3: 0% -> 25% -> 50%  (then auto-go to slide 4)
            Slide 4: 50% -> 100%       (title changes to "Charged", then auto-go to slide 5) */
         const RING_LENGTH = 377;       // visible arc length (270deg) = 100%
-        const CHARGE_DELAY = 850;      // wait for the slide transition before charging starts
+        const CHARGE_DELAY = 1200;     // wait for the 1.2s slide transition before charging starts
         const AUTO_NEXT_DELAY = 500;   // pause on 50% before moving to slide 4
 
         const gauge3 = {
@@ -800,7 +840,49 @@
 
             const prevSlide = activeSlide;
             activeSlide = nextSlide;
-            underlayTrack.style.transform = `translate3d(-${activeSlide * (100 / slideCount)}%, 0, 0)`;
+            const shouldFadeContent = (prevSlide === 1 && activeSlide === CHARGE_SLIDE)
+                || (prevSlide === CHARGE_SLIDE && activeSlide === FINAL_SLIDE)
+                || (prevSlide === FINAL_SLIDE && activeSlide === END_SLIDE);
+
+            if (shouldFadeContent) {
+                const fadeDuration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 450;
+                isContentTransitioning = true;
+                underlayBanner.classList.remove(
+                    'keep-background',
+                    'keep-charge-background',
+                    'keep-final-background'
+                );
+                const backgroundClass = prevSlide === FINAL_SLIDE
+                    ? 'keep-final-background'
+                    : prevSlide === CHARGE_SLIDE
+                        ? 'keep-charge-background'
+                        : 'keep-background';
+                underlayBanner.classList.add(backgroundClass);
+                underlayTrack.classList.add('is-content-transitioning', 'is-content-hidden');
+
+                setTimeout(() => {
+                    underlayTrack.style.transform = `translate3d(-${activeSlide * (100 / slideCount)}%, 0, 0)`;
+                    requestAnimationFrame(() => {
+                        underlayTrack.classList.remove('is-content-hidden');
+                        setTimeout(() => {
+                            underlayTrack.classList.remove('is-content-transitioning');
+                            underlayBanner.classList.remove(
+                                'keep-background',
+                                'keep-charge-background',
+                                'keep-final-background'
+                            );
+                            isContentTransitioning = false;
+                        }, fadeDuration);
+                    });
+                }, fadeDuration);
+            } else {
+                underlayBanner.classList.remove(
+                    'keep-background',
+                    'keep-charge-background',
+                    'keep-final-background'
+                );
+                underlayTrack.style.transform = `translate3d(-${activeSlide * (100 / slideCount)}%, 0, 0)`;
+            }
             scratchCheckThrottle = 0;
 
             if (activeSlide >= CHARGE_SLIDE) {
@@ -934,6 +1016,7 @@
 
         /* ---------- Unified gesture handling (on the stage, so swipe works on every slide) ---------- */
         function gestureStart(x, y) {
+            if (isContentTransitioning) return;
             startX = x;
             startY = y;
             gestureType = null;
@@ -993,11 +1076,11 @@
         // Horizontal trackpad / mouse-wheel swipe
         let wheelLocked = false;
         stage.addEventListener('wheel', (e) => {
-            if (wheelLocked) return;
+            if (wheelLocked || isContentTransitioning) return;
             if (Math.abs(e.deltaX) > 30 && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
                 wheelLocked = true;
                 changeSlide(activeSlide + (e.deltaX > 0 ? 1 : -1));
-                setTimeout(() => { wheelLocked = false; }, 700); // wait for the 0.6s transition
+                setTimeout(() => { wheelLocked = false; }, 1250); // keep input locked through the slide transition
             }
         }, { passive: true });
 
