@@ -5,6 +5,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Khmer Daily News - Underlay Scroll Reveal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Montserrat:wght@500;600;700;800&display=swap"
+        rel="stylesheet" />
     <style>
         body {
             font-family: 'Kantumruy Pro', 'Arial', sans-serif;
@@ -13,7 +18,22 @@
             background-color: #f0f2f5;
         }
 
-        /* Outer Wrapper Container */
+        /* Visually hidden, but available to screen readers */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Outer Wrapper Container
+           NOTE: do NOT add transform / filter / will-change to this element or its
+           parents, it would break the position:fixed underlay trick below. */
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -102,31 +122,6 @@
             gap: 22px;
         }
 
-        /* ---------- Heading above card ---------- */
-        .scratch-title {
-            text-align: center;
-            color: #fff;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-            pointer-events: none;
-            font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
-        }
-
-        .scratch-title small {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.32em;
-            margin-bottom: 10px;
-        }
-
-        .scratch-title h3 {
-            margin: 0;
-            font-size: clamp(28px, 8vw, 38px);
-            font-weight: 700;
-            line-height: 1.2;
-            letter-spacing: 0.06em;
-        }
-
         /* ---------- Card ---------- */
         .scratch-card {
             position: relative;
@@ -141,7 +136,7 @@
                 0 18px 40px rgba(0, 0, 0, 0.4);
         }
 
-        /* Prize layer (revealed under the grey coating) */
+        /* Prize layer (revealed under the coating) */
         .scratch-prize {
             position: absolute;
             inset: 0;
@@ -194,6 +189,7 @@
             font-weight: 800;
             letter-spacing: 0.04em;
             line-height: 1.2;
+            min-height: 1.2em;
         }
 
         .scratch-cover {
@@ -244,6 +240,7 @@
             transform: translate(-50%, -50%);
             pointer-events: none;
             transition: opacity 0.2s ease;
+            font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
         }
 
         .scratch-hint-finger {
@@ -307,18 +304,6 @@
             }
         }
 
-        .ad-label {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            color: #fff;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 3px;
-            z-index: 5;
-        }
-
         footer {
             text-align: center;
             padding: 20px 0;
@@ -356,13 +341,10 @@
             <div class="underlay-slot">
                 <div class="underlay-fixed-content">
                     <div class="underlay-banner">
-                        <!-- <div class="scratch-title">
-                            <small>SCRATCH &amp; WIN</small>
-                            <h3>A SPECIAL<br>REWARD</h3>
-                        </div> -->
 
                         <div class="scratch-card">
-                            <div class="scratch-prize" aria-live="polite">
+                            <!-- aria-hidden: the result is announced through #scratch-status only after reveal -->
+                            <div class="scratch-prize" aria-hidden="true">
                                 <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
                                     <path
                                         d="M8 21h32v22H8zM5 15h38v8H5zM24 15v28M24 15c-8 0-13-2-13-6 0-3 3-5 6-4 4 1 7 10 7 10Zm0 0c8 0 13-2 13-6 0-3-3-5-6-4-4 1-7 10-7 10Z"
@@ -370,17 +352,17 @@
                                         stroke-width="2.5" />
                                 </svg>
                                 <span>YOU WIN</span>
+                                <!-- Filled in only when the card is revealed -->
                                 <strong class="scratch-discount"></strong>
                             </div>
                             <canvas class="scratch-cover" role="button" tabindex="0"
-                                aria-label="Scratch the card to reveal your reward"></canvas>
+                                aria-label="Scratch the card to reveal your reward. Press Enter to reveal."></canvas>
                             <div class="scratch-hint">
                                 <span class="scratch-hint-finger" aria-hidden="true">👆</span>
                                 <span class="scratch-hint-text">Scratch the card to reveal your reward</span>
                             </div>
-
+                            <div class="sr-only" id="scratch-status" role="status" aria-live="polite"></div>
                         </div>
-
 
                     </div>
                 </div>
@@ -418,20 +400,52 @@
         const scratchCanvas = document.querySelector('.scratch-cover');
         const scratchHint = document.querySelector('.scratch-hint');
         const scratchDiscount = document.querySelector('.scratch-discount');
-        const scratchContext = scratchCanvas.getContext('2d');
+        const scratchStatus = document.getElementById('scratch-status');
+        // FIX: willReadFrequently avoids slow GPU readbacks since we call getImageData repeatedly
+        const scratchContext = scratchCanvas.getContext('2d', { willReadFrequently: true });
         const pendingPoints = [];
 
+        // ------------------------------------------------------------------
+        // REWARD SOURCE
+        // For a reward with real value, the server must decide the prize
+        // (and validate it / issue a one-time code). Replace the body of
+        // fetchReward() with your API call, e.g.:
+        //
+        //   const res = await fetch('/api/scratch/claim', { method: 'POST', credentials: 'include' });
+        //   if (!res.ok) throw new Error('claim failed');
+        //   return await res.json();   // { percent: 20, code: 'ABC123' }
+        //
+        // The default below is client-side random (demo only, NOT secure).
+        // ------------------------------------------------------------------
         const discountOptions = [10, 15, 20, 25, 30, 50];
-        const discountPercentage = discountOptions[Math.floor(Math.random() * discountOptions.length)];
+
+        async function fetchReward() {
+            const percent = discountOptions[Math.floor(Math.random() * discountOptions.length)];
+            return { percent, code: null };
+        }
 
         let isScratching = false;
         let hasRevealed = false;
         let lastScratchPoint = null;
         let scratchFrame = 0;
+        let lastProgressCheck = 0;
+
+        // Fraction of coating that must be cleared to show the reward
+        const REVEAL_THRESHOLD = 0.45;
+        // Brush size multiplier (a stamp is roughly 40-60px * scale long)
+        const BRUSH_SCALE = 2;
 
         const rand = (min, max) => min + Math.random() * (max - min);
 
-        scratchDiscount.textContent = `${discountPercentage}% OFF`;
+        // FIX: always put the context into a clean "eraser" state.
+        // destination-out erases in proportion to the fill ALPHA, so fill/stroke
+        // must be fully opaque, otherwise the coating is only partly removed.
+        function setEraseMode() {
+            scratchContext.globalCompositeOperation = 'destination-out';
+            scratchContext.fillStyle = '#000';
+            scratchContext.strokeStyle = '#000';
+            scratchContext.globalAlpha = 1;
+        }
 
         function paintScratchCover(preserveScratch = false) {
             const bounds = scratchCard.getBoundingClientRect();
@@ -452,6 +466,7 @@
                 previousCanvas.getContext('2d').drawImage(scratchCanvas, 0, 0);
             }
 
+            // Resizing the canvas resets the context state
             scratchCanvas.width = canvasWidth;
             scratchCanvas.height = canvasHeight;
             scratchContext.setTransform(1, 0, 0, 1, 0, 0);
@@ -464,7 +479,7 @@
             }
 
             scratchContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-            scratchContext.globalCompositeOperation = 'destination-out';
+            setEraseMode();
         }
 
         function drawScratchTexture(w, h, pixelRatio) {
@@ -514,8 +529,8 @@
             ctx.translate(x, y);
             ctx.rotate(angle);
 
-            const len = rand(42, 58);
-            const wid = rand(24, 38);
+            const len = rand(42, 58) * BRUSH_SCALE;
+            const wid = rand(24, 38) * BRUSH_SCALE;
             const halfLength = len / 2;
             const halfWidth = wid / 2;
             ctx.beginPath();
@@ -524,18 +539,18 @@
             for (let i = 1; i <= 12; i++) {
                 const progress = i / 12;
                 const taper = Math.sin(progress * Math.PI);
-                const x = -halfLength + len * progress + rand(-3, 3);
-                const y = -halfWidth * taper + rand(-wid * 0.22, wid * 0.22);
-                ctx.lineTo(x, y);
+                const px = -halfLength + len * progress + rand(-3, 3);
+                const py = -halfWidth * taper + rand(-wid * 0.22, wid * 0.22);
+                ctx.lineTo(px, py);
             }
 
             ctx.lineTo(halfLength, rand(-halfWidth * 0.2, halfWidth * 0.2));
             for (let i = 11; i >= 1; i--) {
                 const progress = i / 12;
                 const taper = Math.sin(progress * Math.PI);
-                const x = -halfLength + len * progress + rand(-3, 3);
-                const y = halfWidth * taper + rand(-wid * 0.22, wid * 0.22);
-                ctx.lineTo(x, y);
+                const px = -halfLength + len * progress + rand(-3, 3);
+                const py = halfWidth * taper + rand(-wid * 0.22, wid * 0.22);
+                ctx.lineTo(px, py);
             }
             ctx.closePath();
             ctx.fill();
@@ -602,20 +617,49 @@
             scratchFrame = 0;
             for (const point of pendingPoints) eraseToPoint(point);
             pendingPoints.length = 0;
+
+            // Check progress while scratching (throttled)
+            const now = performance.now();
+            if (!hasRevealed && now - lastProgressCheck > 80) {
+                lastProgressCheck = now;
+                checkRevealProgress();
+            }
         }
 
-        function revealAll() {
-            hasRevealed = true;
+        async function revealAll() {
+            if (hasRevealed) return;
+            hasRevealed = true; // set synchronously so it can't run twice
             pendingPoints.length = 0;
             lastScratchPoint = null;
+            isScratching = false;
+
+            let reward;
+            try {
+                reward = await fetchReward();
+            } catch (err) {
+                console.error(err);
+                reward = null;
+            }
+
+            // The prize text only enters the DOM here, never before the reveal
+            if (reward) {
+                scratchDiscount.textContent = `${reward.percent}% OFF`
+                    + (reward.code ? ` · ${reward.code}` : '');
+                scratchStatus.textContent = `Reward revealed: ${reward.percent}% off`;
+            } else {
+                scratchDiscount.textContent = 'TRY AGAIN';
+                scratchStatus.textContent = 'Could not load your reward. Please try again later.';
+            }
+
+            scratchCard.querySelector('.scratch-prize').removeAttribute('aria-hidden');
             scratchCanvas.classList.add('is-done');
             scratchHint.classList.add('is-hidden');
-            scratchCard.setAttribute('aria-label', `Reward revealed: ${discountPercentage}% off`);
         }
 
         function checkRevealProgress() {
+            if (hasRevealed || !scratchCanvas.width || !scratchCanvas.height) return;
             const pixels = scratchContext.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height).data;
-            const sampleStep = 32;
+            const sampleStep = 32; // multiple of 4, so i always lands on an alpha byte
             let transparent = 0;
             let total = 0;
 
@@ -624,7 +668,7 @@
                 if (pixels[i] < 32) transparent++;
             }
 
-            if (transparent / total >= 0.45) revealAll();
+            if (transparent / total >= REVEAL_THRESHOLD) revealAll();
         }
 
         function startScratch(event) {
@@ -637,8 +681,9 @@
 
         function moveScratch(event) {
             if (!isScratching || hasRevealed) return;
-            const points = event.getCoalescedEvents ? event.getCoalescedEvents() : [event];
-            points.forEach(queueScratchPoint);
+            // FIX: getCoalescedEvents() can return an empty array, fall back to the event itself
+            const coalesced = event.getCoalescedEvents ? event.getCoalescedEvents() : [];
+            (coalesced.length ? coalesced : [event]).forEach(queueScratchPoint);
         }
 
         function finishScratch(event) {
@@ -673,6 +718,7 @@
                 if (!hasRevealed) paintScratchCover(true);
             });
         });
+
     </script>
 
 </body>
