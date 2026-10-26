@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khmer Daily News - Underlay Catch Mini Game</title>
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #0056b3;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #0056b3;
+            font-size: 28px;
+        }
+
+        .post h2 {
+            color: #1a1a1a;
+            line-height: 1.4;
+            font-size: 24px;
+        }
+
+        .post p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .date-meta {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .sknteam_image {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sknteam_image img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 4px;
+        }
+
+        /* --- SCROLL REVEAL UNDERLAY WINDOW --- */
+        .underlay-slot {
+            height: 1000px;
+            margin: 30px 0;
+            position: relative;
+            clip-path: inset(0 0 0 0);
+        }
+
+        .underlay-fixed-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .underlay-banner {
+            width: 100%;
+            height: 100%;
+            /* background-image: url("./images/35f9add529060c4bb0c783cf0324e4f8.jpg"); */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center top;
+            position: relative;
+            pointer-events: auto;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ---------- Catch game ---------- */
+        .catch-game {
+            position: relative;
+            height: min(560px, 82vh);
+            aspect-ratio: 9 / 16;
+            max-width: calc(100% - 24px);
+            overflow: hidden;
+            border-radius: 22px;
+            background: #1b1f3a;
+            font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+            box-shadow:
+                0 0 0 3px #ffffff,
+                0 0 0 6px rgba(255, 255, 255, 0.45),
+                0 18px 40px rgba(0, 0, 0, 0.45);
+
+        }
+
+        .catch-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: pointer;
+            display: block;
+        }
+
+        .catch-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 22px;
+            text-align: center;
+            color: #fff;
+            background: rgba(10, 12, 28, 0.55);
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .catch-overlay.is-hidden {
+            opacity: 0;
+        }
+
+        .catch-finger {
+            font-size: 52px;
+            line-height: 1;
+            animation: catch-point 0.9s ease-in-out infinite alternate;
+        }
+
+        .catch-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+        }
+
+        .catch-sub {
+            max-width: 220px;
+            font-size: 13px;
+            line-height: 1.5;
+            opacity: 0.85;
+        }
+
+        .catch-result {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .catch-result.is-visible {
+            display: flex;
+        }
+
+        .catch-result span {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3em;
+            color: #f5d27a;
+        }
+
+        .catch-result strong {
+            font-size: clamp(34px, 11vw, 44px);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        .catch-result em {
+            font-style: normal;
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        @keyframes catch-point {
+            from {
+                transform: translateY(4px);
+            }
+
+            to {
+                transform: translateY(-4px);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .catch-finger {
+                animation: none;
+            }
+        }
+
+
+        @media (max-width: 767px) {
+
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow-x: hidden;
+            }
+
+            .underlay-slot {
+                width: 100%;
+                height: 100vh;
+                height: 100dvh;
+                margin: 0;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .underlay-fixed-content {
+                position: fixed;
+                inset: 0;
+                width: 100%;
+                height: 100vh;
+                height: 100dvh;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: stretch;
+                pointer-events: none;
+                z-index: 3;
+            }
+
+            .underlay-banner {
+                width: 100%;
+                height: 100%;
+                flex: 1 1 auto;
+                margin: 0;
+                padding: 0;
+                background-size: cover;
+                background-position: center;
+                overflow: hidden;
+            }
+
+            .catch-game {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                min-width: 0;
+                min-height: 0;
+                max-width: none;
+                aspect-ratio: auto;
+                margin: 0;
+                padding: 0;
+                border-radius: 0;
+                box-shadow: none;
+                overflow: hidden;
+            }
+
+            .catch-canvas {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                display: block;
+                touch-action: none;
+            }
+        }
+
+        .ad-label {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            z-index: 5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-size: 14px;
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>សារព័ត៌មាន Khmer Daily</h1>
+        </header>
+
+        <div class="post">
+            <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+            <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+            </div>
+
+            <p>
+                <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+            </p>
+
+            <div class="underlay-slot">
+                <div class="underlay-fixed-content">
+                    <div class="underlay-banner">
+
+                        <div class="catch-game">
+                            <canvas class="catch-canvas" role="application" tabindex="0"
+                                aria-label="Catch the falling cans in the bucket. Avoid bombs. Ice freezes the bucket"></canvas>
+
+                            <div class="catch-overlay">
+                                <div class="catch-finger" aria-hidden="true">👆</div>
+                                <div class="catch-title">TAP TO PLAY</div>
+                                <div class="catch-sub catch-sub-text">Drag to move the bucket. Catch the cans,
+                                    avoid the bombs. Ice freezes your bucket!</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <p>
+                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+            </p>
+
+            <p>
+                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+            </p>
+
+            <p>
+                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+            </p>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+            </div>
+        </div>
+
+        <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+    </div>
+
+    <script>
+        (function () {
+            const game = document.querySelector('.catch-game');
+            const canvas = document.querySelector('.catch-canvas');
+            const ctx = canvas.getContext('2d');
+            const overlay = document.querySelector('.catch-overlay');
+            const overlayTitle = document.querySelector('.catch-title');
+            const overlayFinger = document.querySelector('.catch-finger');
+            const overlaySub = document.querySelector('.catch-sub-text');
+
+            const MAX_LIVES = 3;
+            const BOTTLE_COLORS = [
+                { body: '#2a3140', shine: '#5b6a86' },   // dark
+                { body: '#1f6bff', shine: '#8fbaff' },   // blue
+                { body: '#1f4d3a', shine: '#5fae8c' }    // green
+            ];
+
+            const rand = (min, max) => min + Math.random() * (max - min);
+
+            /* ---------- Can image ---------- */
+            // sting-cans.png can hold every Sting product (all flavours) in one picture.
+            // The game finds each separate can automatically (needs a transparent
+            // background). If your PNG has a solid background, set SPRITE_COLS to the
+            // number of cans in the row (and SPRITE_ROWS if there are several rows).
+            const CAN_SRC = './images/sting-cans.png';
+
+            const CAN_SRC2 = './images/sting-can2.png';
+            const CAN_SRC3 = './images/sting-can3.png';
+            const CAN_SRC4 = './images/sting-can4.png';
+
+            const SPRITE_COLS = 1; // only used for sting-cans.png when it has a solid background
+            const SPRITE_ROWS = 1;
+            const CAN_HEIGHT_RATIO = 3.6; // can height relative to item size
+
+            // Every image that holds Sting cans. sting-can2/3/4.png are single cans (1 x 1);
+            // they are still auto-cropped if they have a transparent background.
+            const CAN_SOURCES = [
+                { src: CAN_SRC, cols: SPRITE_COLS, rows: SPRITE_ROWS },
+                { src: CAN_SRC2, cols: 1, rows: 1 },
+                { src: CAN_SRC3, cols: 1, rows: 1 },
+                { src: CAN_SRC4, cols: 1, rows: 1 }
+            ];
+
+            let canReady = false;
+            let canFrames = []; // every can from every image: { img, sx, sy, sw, sh }
+
+            function gridFrames(img, cols, rows) {
+                const frames = [];
+                const fw = img.naturalWidth / cols;
+                const fh = img.naturalHeight / rows;
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        frames.push({ sx: c * fw, sy: r * fh, sw: fw, sh: fh });
+                    }
+                }
+                return frames;
+            }
+
+            // Split a list of "has pixels" flags into runs separated by empty gaps
+            function findRuns(flags, minGap, minSize) {
+                const runs = [];
+                let start = -1, lastFilled = -1;
+                for (let i = 0; i < flags.length; i++) {
+                    if (flags[i]) {
+                        if (start < 0) start = i;
+                        lastFilled = i;
+                    } else if (start >= 0 && i - lastFilled >= minGap) {
+                        if (lastFilled - start + 1 >= minSize) runs.push([start, lastFilled + 1]);
+                        start = -1;
+                    }
+                }
+                if (start >= 0 && lastFilled - start + 1 >= minSize) runs.push([start, lastFilled + 1]);
+                return runs;
+            }
+
+            function detectFrames(img, gridCols, gridRows) {
+                try {
+                    const cw = img.naturalWidth, ch = img.naturalHeight;
+                    const off = document.createElement('canvas');
+                    off.width = cw;
+                    off.height = ch;
+                    const g = off.getContext('2d', { willReadFrequently: true });
+                    g.drawImage(img, 0, 0);
+                    const data = g.getImageData(0, 0, cw, ch).data;
+
+                    const colFlags = new Uint8Array(cw);
+                    for (let y = 0; y < ch; y++) {
+                        for (let x = 0; x < cw; x++) {
+                            if (data[(y * cw + x) * 4 + 3] > 24) colFlags[x] = 1;
+                        }
+                    }
+                    const cols = findRuns(colFlags, Math.max(3, Math.round(cw * 0.004)), Math.max(8, cw * 0.02));
+                    const frames = [];
+
+                    cols.forEach(([x0, x1]) => {
+                        const rowFlags = new Uint8Array(ch);
+                        for (let y = 0; y < ch; y++) {
+                            for (let x = x0; x < x1; x++) {
+                                if (data[(y * cw + x) * 4 + 3] > 24) { rowFlags[y] = 1; break; }
+                            }
+                        }
+                        const rows = findRuns(rowFlags, Math.max(3, Math.round(ch * 0.01)), Math.max(8, ch * 0.05));
+                        rows.forEach(([y0, y1]) => frames.push({ sx: x0, sy: y0, sw: x1 - x0, sh: y1 - y0 }));
+                    });
+
+                    // Need at least one clearly separate can; otherwise use the manual grid
+                    if (frames.length > 1 || (frames.length === 1 && frames[0].sw < cw * 0.98)) return frames;
+                } catch (e) { /* canvas blocked (e.g. opened from file://) — use grid */ }
+                return gridFrames(img, gridCols, gridRows);
+            }
+
+            // Load every can image; their cans are all added to one pool the game draws from
+            CAN_SOURCES.forEach(({ src, cols, rows }) => {
+                const img = new Image();
+                img.onload = () => {
+                    detectFrames(img, cols, rows).forEach((f) => canFrames.push({ ...f, img }));
+                    canReady = canFrames.length > 0;
+                };
+                img.src = src; // a missing file is simply skipped
+            });
+
+            /* ---------- Bomb image ---------- */
+            // Put your bomb picture at images/bomb.png. If it is missing, a bomb is drawn in code.
+            const BOMB_SRC = './images/bomb.png';
+            const BOMB_HEIGHT_RATIO = 2.6; // bomb height relative to item size
+            const bombImg = new Image();
+            let bombReady = false;
+            bombImg.onload = () => { bombReady = true; };
+            bombImg.src = BOMB_SRC;
+
+            let hitFlash = 0;
+            let flashRGB = '255, 70, 40';
+
+            /* ---------- Ice image ---------- */
+            // Put your ice picture at images/ice.png. If it is missing, an ice cube is drawn in code.
+            // Catching ice freezes the bucket (slow movement) for FREEZE_SECONDS. No heart is lost.
+            const ICE_SRC = './images/ice.png';
+            const ICE_HEIGHT_RATIO = 2.4; // ice height relative to item size
+            const FREEZE_SECONDS = 2;
+            const iceImg = new Image();
+            let iceReady = false;
+            iceImg.onload = () => { iceReady = true; };
+            iceImg.src = ICE_SRC;
+            let freezeTimer = 0;
+
+            let W = 0, H = 0, dpr = 1;
+            let state = 'idle'; // idle | playing | over
+            let score = 0;
+            let lives = MAX_LIVES;
+            let items = [];
+            let spawnTimer = 0;
+            let lastTime = 0;
+            let overAt = 0;
+            let skyline = [];
+
+            const bucket = { x: 0, targetX: 0, w: 0, h: 0, y: 0 };
+
+            function buildSkyline() {
+                skyline = [];
+                let x = -10;
+                while (x < W + 10) {
+                    const bw = rand(W * 0.06, W * 0.12);
+                    const bh = rand(H * 0.12, H * 0.36);
+                    const windows = [];
+                    for (let wy = 10; wy < bh - 6; wy += 12) {
+                        for (let wx = 5; wx < bw - 6; wx += 9) {
+                            if (Math.random() < 0.22) windows.push([wx, wy]);
+                        }
+                    }
+                    skyline.push({ x, w: bw, h: bh, windows });
+                    x += bw + rand(1, 4);
+                }
+            }
+
+            function resize() {
+                const rect = game.getBoundingClientRect();
+                if (!rect.width || !rect.height) return;
+                const prevW = W || rect.width;
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+                W = rect.width;
+                H = rect.height;
+                canvas.width = Math.round(W * dpr);
+                canvas.height = Math.round(H * dpr);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                const ratio = prevW ? bucket.x / prevW : 0.5;
+                bucket.w = W * 0.38;
+                bucket.h = H * 0.12;
+                bucket.y = H - bucket.h - H * 0.07;
+                bucket.x = bucket.x ? ratio * W : W / 2;
+                bucket.targetX = bucket.x;
+                buildSkyline();
+            }
+
+            /* ---------- Spawning ---------- */
+            function spawnItem() {
+                const roll = Math.random();
+                // bombs 15%, ice 15%, cans 70%
+                const type = roll < 0.15 ? 'bomb' : roll < 0.30 ? 'ice' : 'bottle';
+                const speedBoost = Math.min(score / 160, 1);
+                items.push({
+                    type,
+                    color: BOTTLE_COLORS[Math.floor(Math.random() * BOTTLE_COLORS.length)],
+                    pick: Math.random(),
+                    x: rand(W * 0.12, W * 0.88),
+                    y: -50,
+                    vy: H * (rand(0.28, 0.4) + speedBoost * 0.28),
+                    rot: rand(-0.5, 0.5),
+                    vr: rand(-1.6, 1.6),
+                    size: (type === 'bomb' || type === 'ice') ? W * 0.07 : W * 0.06
+                });
+            }
+
+            /* ---------- Drawing ---------- */
+            function drawBackground() {
+                const sky = ctx.createLinearGradient(0, 0, 0, H);
+                sky.addColorStop(0, '#1c2347');
+                sky.addColorStop(0.45, '#7a4a6b');
+                sky.addColorStop(0.72, '#e8845a');
+                sky.addColorStop(1, '#f2b26b');
+                ctx.fillStyle = sky;
+                ctx.fillRect(0, 0, W, H);
+
+                const baseY = H * 0.86;
+                skyline.forEach((b) => {
+                    ctx.fillStyle = '#1a1830';
+                    ctx.fillRect(b.x, baseY - b.h, b.w, b.h);
+                    ctx.fillStyle = 'rgba(255, 207, 120, 0.75)';
+                    b.windows.forEach(([wx, wy]) => {
+                        ctx.fillRect(b.x + wx, baseY - b.h + wy, 3, 5);
+                    });
+                });
+
+                // floor
+                const floor = ctx.createLinearGradient(0, baseY, 0, H);
+                floor.addColorStop(0, '#2a2a3a');
+                floor.addColorStop(1, '#14141f');
+                ctx.fillStyle = floor;
+                ctx.fillRect(0, baseY, W, H - baseY);
+            }
+
+            function heartPath(x, y, s) {
+                ctx.beginPath();
+                ctx.moveTo(x, y + s * 0.35);
+                ctx.bezierCurveTo(x, y - s * 0.1, x - s * 0.55, y - s * 0.1, x - s * 0.55, y + s * 0.3);
+                ctx.bezierCurveTo(x - s * 0.55, y + s * 0.65, x - s * 0.1, y + s * 0.85, x, y + s * 1.05);
+                ctx.bezierCurveTo(x + s * 0.1, y + s * 0.85, x + s * 0.55, y + s * 0.65, x + s * 0.55, y + s * 0.3);
+                ctx.bezierCurveTo(x + s * 0.55, y - s * 0.1, x, y - s * 0.1, x, y + s * 0.35);
+                ctx.closePath();
+            }
+
+            function drawHUD() {
+                const s = 18;
+                for (let i = 0; i < MAX_LIVES; i++) {
+                    const hx = 22 + i * (s + 8);
+                    heartPath(hx, 22, s);
+                    if (i < lives) {
+                        ctx.fillStyle = '#ff3b4e';
+                        ctx.fill();
+                    } else {
+                        ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+                        ctx.lineWidth = 1.5;
+                        ctx.stroke();
+                    }
+                }
+
+                ctx.textAlign = 'right';
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.font = '600 10px Montserrat, Arial, sans-serif';
+                ctx.fillText('SCORE', W - 16, 24);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '800 26px Montserrat, Arial, sans-serif';
+                ctx.fillText(String(score), W - 16, 50);
+            }
+
+            function drawBottle(it) {
+                if (canReady) {
+                    const f = canFrames[Math.floor((it.pick || 0) * canFrames.length) % canFrames.length];
+                    const dh = it.size * CAN_HEIGHT_RATIO;
+                    const dw = dh * (f.sw / f.sh);
+                    ctx.save();
+                    ctx.translate(it.x, it.y);
+                    ctx.rotate(it.rot);
+                    ctx.drawImage(f.img, f.sx, f.sy, f.sw, f.sh, -dw / 2, -dh / 2, dw, dh);
+                    ctx.restore();
+                    return;
+                }
+                const bw = it.size * 0.95;
+                const bh = it.size * 3;
+                ctx.save();
+                ctx.translate(it.x, it.y);
+                ctx.rotate(it.rot);
+
+                // body
+                ctx.fillStyle = it.color.body;
+                ctx.beginPath();
+                ctx.roundRect(-bw / 2, -bh / 2 + bh * 0.16, bw, bh * 0.84, bw * 0.35);
+                ctx.fill();
+                // neck + cap
+                ctx.fillStyle = it.color.body;
+                ctx.fillRect(-bw * 0.28, -bh / 2 + bh * 0.06, bw * 0.56, bh * 0.14);
+                ctx.fillStyle = '#d8dce6';
+                ctx.beginPath();
+                ctx.roundRect(-bw * 0.33, -bh / 2, bw * 0.66, bh * 0.1, 2);
+                ctx.fill();
+                // shine
+                ctx.fillStyle = it.color.shine;
+                ctx.globalAlpha = 0.55;
+                ctx.fillRect(-bw * 0.28, -bh / 2 + bh * 0.26, bw * 0.14, bh * 0.5);
+                ctx.globalAlpha = 1;
+                // label band
+                ctx.fillStyle = 'rgba(255,255,255,0.18)';
+                ctx.fillRect(-bw / 2, -bh / 2 + bh * 0.52, bw, bh * 0.14);
+
+                ctx.restore();
+            }
+
+            function drawIce(it) {
+                ctx.save();
+                ctx.translate(it.x, it.y);
+                ctx.rotate(it.rot);
+
+                if (iceReady) {
+                    const dh = it.size * ICE_HEIGHT_RATIO;
+                    const dw = dh * (iceImg.naturalWidth / iceImg.naturalHeight);
+                    ctx.drawImage(iceImg, -dw / 2, -dh / 2, dw, dh);
+                    ctx.restore();
+                    return;
+                }
+
+                const s = it.size * 1.0;
+                // cube body
+                const g = ctx.createLinearGradient(-s, -s, s, s);
+                g.addColorStop(0, '#e9f8ff');
+                g.addColorStop(0.5, '#a9dcf5');
+                g.addColorStop(1, '#6bb7e6');
+                ctx.shadowColor = 'rgba(140, 210, 255, 0.9)';
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = g;
+                ctx.beginPath();
+                ctx.roundRect(-s, -s, s * 2, s * 2, s * 0.28);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                // edge + shine
+                ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                ctx.beginPath();
+                ctx.roundRect(-s * 0.72, -s * 0.72, s * 0.5, s * 0.22, 3);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+                ctx.beginPath();
+                ctx.moveTo(-s * 0.1, s * 0.1);
+                ctx.lineTo(s * 0.45, s * 0.6);
+                ctx.moveTo(s * 0.2, -s * 0.3);
+                ctx.lineTo(s * 0.6, s * 0.05);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            function drawBomb(it) {
+                ctx.save();
+                ctx.translate(it.x, it.y);
+                ctx.rotate(it.rot * 0.5);
+
+                if (bombReady) {
+                    const dh = it.size * BOMB_HEIGHT_RATIO;
+                    const dw = dh * (bombImg.naturalWidth / bombImg.naturalHeight);
+                    ctx.drawImage(bombImg, -dw / 2, -dh / 2, dw, dh);
+                    ctx.restore();
+                    return;
+                }
+
+                const r = it.size * 0.95;
+                // body
+                const g = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r);
+                g.addColorStop(0, '#5a5f70');
+                g.addColorStop(1, '#101219');
+                ctx.fillStyle = g;
+                ctx.beginPath();
+                ctx.arc(0, r * 0.2, r, 0, Math.PI * 2);
+                ctx.fill();
+                // cap
+                ctx.fillStyle = '#2b2e3a';
+                ctx.fillRect(-r * 0.28, -r * 0.95, r * 0.56, r * 0.3);
+                // fuse
+                ctx.strokeStyle = '#b8924a';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(0, -r * 0.95);
+                ctx.quadraticCurveTo(r * 0.3, -r * 1.35, r * 0.65, -r * 1.2);
+                ctx.stroke();
+                // spark
+                const flick = 0.7 + Math.random() * 0.5;
+                ctx.fillStyle = '#ffd34d';
+                ctx.beginPath();
+                ctx.arc(r * 0.68, -r * 1.22, r * 0.2 * flick, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ff7a2e';
+                ctx.beginPath();
+                ctx.arc(r * 0.68, -r * 1.22, r * 0.11 * flick, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            function drawBucket() {
+                const { x, y, w, h } = bucket;
+                const topW = w;
+                const botW = w * 0.78;
+                const rimH = h * 0.22;
+
+                // ground glow
+                ctx.save();
+                ctx.shadowColor = 'rgba(60, 150, 255, 0.9)';
+                ctx.shadowBlur = 22;
+                ctx.fillStyle = 'rgba(60,150,255,0.25)';
+                ctx.beginPath();
+                ctx.ellipse(x, y + h + 2, topW * 0.5, 7, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
+                // body
+                const body = ctx.createLinearGradient(x - topW / 2, 0, x + topW / 2, 0);
+                body.addColorStop(0, '#2b2e3a');
+                body.addColorStop(0.5, '#555a6c');
+                body.addColorStop(1, '#232632');
+                ctx.fillStyle = body;
+                ctx.beginPath();
+                ctx.moveTo(x - topW / 2, y + rimH / 2);
+                ctx.lineTo(x + topW / 2, y + rimH / 2);
+                ctx.lineTo(x + botW / 2, y + h);
+                ctx.lineTo(x - botW / 2, y + h);
+                ctx.closePath();
+                ctx.fill();
+
+                // ribs
+                ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+                ctx.lineWidth = 1;
+                for (let i = -2; i <= 2; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(x + i * topW * 0.18, y + rimH);
+                    ctx.lineTo(x + i * botW * 0.18, y + h);
+                    ctx.stroke();
+                }
+
+                // neon rim
+                ctx.save();
+                ctx.shadowColor = '#3d9bff';
+                ctx.shadowBlur = 16;
+                ctx.strokeStyle = '#6fb8ff';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.ellipse(x, y + rimH / 2, topW / 2, rimH / 2, 0, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+
+                // inner opening
+                ctx.fillStyle = 'rgba(8, 10, 24, 0.85)';
+                ctx.beginPath();
+                ctx.ellipse(x, y + rimH / 2, topW / 2 - 4, rimH / 2 - 2, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            function drawIdleDecor(t) {
+                // small demo cans drifting in the background when idle
+                for (let i = 0; i < 4; i++) {
+                    const x = W * (0.2 + i * 0.2);
+                    const y = ((t * 0.04 + i * 160) % (H + 100)) - 50;
+                    drawBottle({
+                        x, y, rot: Math.sin(t / 600 + i) * 0.4, size: W * 0.06, pick: (i * 0.29) % 1,
+                        color: BOTTLE_COLORS[i % BOTTLE_COLORS.length]
+                    });
+                }
+            }
+
+            /* ---------- Game flow ---------- */
+            function startGame() {
+                state = 'playing';
+                score = 0;
+                lives = MAX_LIVES;
+                items = [];
+                spawnTimer = 0.2;
+                lastTime = 0;
+                hitFlash = 0;
+                freezeTimer = 0;
+                overlay.classList.add('is-hidden');
+            }
+
+            function endGame() {
+                state = 'over';
+                overAt = performance.now();
+                overlayFinger.style.display = '';
+                overlayTitle.textContent = 'GAME OVER';
+                overlaySub.textContent = 'Tap to play again!';
+                overlay.classList.remove('is-hidden');
+            }
+
+            function update(dt) {
+                const follow = freezeTimer > 0 ? 2.5 : 18;
+                if (freezeTimer > 0) freezeTimer = Math.max(0, freezeTimer - dt);
+                bucket.x += (bucket.targetX - bucket.x) * Math.min(1, dt * follow);
+
+                spawnTimer -= dt;
+                if (spawnTimer <= 0) {
+                    spawnItem();
+                    const base = Math.max(0.45, 0.95 - score / 260);
+                    spawnTimer = rand(base * 0.75, base * 1.2);
+                }
+
+                const catchTop = bucket.y;
+                const halfOpen = bucket.w / 2 - 6;
+
+                for (let i = items.length - 1; i >= 0; i--) {
+                    const it = items[i];
+                    it.y += it.vy * dt;
+                    it.rot += it.vr * dt;
+
+                    const reach = it.type === 'bottle' ? it.size * 1.4 : it.size;
+                    const inRange = it.y + reach >= catchTop && it.y - reach <= catchTop + bucket.h * 0.45;
+                    if (inRange && Math.abs(it.x - bucket.x) < halfOpen) {
+                        if (it.type === 'bottle') {
+                            score += 10;
+                        } else if (it.type === 'ice') {
+                            // Ice freezes the bucket: it moves slowly for a moment
+                            freezeTimer = FREEZE_SECONDS;
+                            flashRGB = '120, 200, 255';
+                            hitFlash = 0.45;
+                        } else if (it.type === 'bomb') {
+                            // Only bombs cost a heart
+                            lives -= 1;
+                            flashRGB = '255, 70, 40';
+                            hitFlash = 0.7;
+                        }
+                        items.splice(i, 1);
+                        if (lives <= 0) { endGame(); return; }
+                        continue;
+                    }
+
+                    if (it.y - 60 > H) items.splice(i, 1);
+                }
+            }
+
+            function frame(now) {
+                if (!W) resize();
+                const dt = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0;
+                lastTime = now;
+
+                if (state === 'playing') update(dt);
+
+                ctx.clearRect(0, 0, W, H);
+                drawBackground();
+                if (state === 'idle') drawIdleDecor(now);
+                items.forEach((it) => {
+                    if (it.type === 'bottle') drawBottle(it);
+                    else if (it.type === 'bomb') drawBomb(it);
+                    else if (it.type === 'ice') drawIce(it);
+                });
+                drawBucket();
+                if (freezeTimer > 0) {
+                    ctx.fillStyle = 'rgba(150, 220, 255, 0.4)';
+                    ctx.beginPath();
+                    ctx.roundRect(bucket.x - bucket.w / 2, bucket.y, bucket.w, bucket.h, 8);
+                    ctx.fill();
+                }
+                drawHUD();
+
+                if (hitFlash > 0) {
+                    ctx.fillStyle = `rgba(${flashRGB}, ${hitFlash})`;
+                    ctx.fillRect(0, 0, W, H);
+                    hitFlash = Math.max(0, hitFlash - dt * 1.8);
+                }
+
+                requestAnimationFrame(frame);
+            }
+
+            /* ---------- Input ---------- */
+            function pointerX(e) {
+                const r = canvas.getBoundingClientRect();
+                return Math.max(bucket.w / 2, Math.min(W - bucket.w / 2, e.clientX - r.left));
+            }
+
+            canvas.addEventListener('pointerdown', (e) => {
+                canvas.setPointerCapture(e.pointerId);
+                if (state === 'idle') { startGame(); }
+                else if (state === 'over' && performance.now() - overAt > 600) { startGame(); }
+                if (state === 'playing') bucket.targetX = pointerX(e);
+            });
+
+            canvas.addEventListener('pointermove', (e) => {
+                if (state !== 'playing') return;
+                if (e.pointerType === 'mouse' || e.buttons) bucket.targetX = pointerX(e);
+            });
+
+            canvas.addEventListener('keydown', (e) => {
+                if (state !== 'playing' && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    if (state === 'idle' || performance.now() - overAt > 600) startGame();
+                    return;
+                }
+                const step = W * 0.08;
+                if (e.key === 'ArrowLeft') bucket.targetX = Math.max(bucket.w / 2, bucket.targetX - step);
+                if (e.key === 'ArrowRight') bucket.targetX = Math.min(W - bucket.w / 2, bucket.targetX + step);
+            });
+
+            window.addEventListener('resize', resize);
+            resize();
+            requestAnimationFrame(frame);
+        })();
+
+    </script>
+
+</body>
+
+</html>
