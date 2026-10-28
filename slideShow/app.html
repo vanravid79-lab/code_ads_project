@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khmer Daily News - Pixelated Slideshow</title>
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #0056b3;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #0056b3;
+            font-size: 28px;
+        }
+
+        .post h2 {
+            color: #1a1a1a;
+            line-height: 1.4;
+            font-size: 24px;
+        }
+
+        .post p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .date-meta {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .sknteam_image {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sknteam_image img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 4px;
+        }
+
+        /* --- UNDERLAY WINDOW (page scrolls, slideshow stays fixed behind the clip) --- */
+        .underlay-slot {
+            height: 1000px;
+            margin: 30px 0;
+            position: relative;
+            clip-path: inset(0 0 0 0);
+        }
+
+        .underlay-fixed-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* --- PIXELATED SLIDESHOW --- */
+        .pixel-slideshow {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            pointer-events: auto;
+            overflow: hidden;
+        }
+
+        .pixel-slideshow canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: pointer;
+        }
+
+        .ps-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            background: rgba(0, 0, 0, 0.35);
+            color: #fff;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            z-index: 4;
+            image-rendering: pixelated;
+            border-radius: 0;
+            /* square = pixel feel */
+            box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .ps-btn:hover {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .ps-btn:active {
+            transform: translateY(-50%) translate(2px, 2px);
+            box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .ps-prev {
+            left: 12px;
+        }
+
+        .ps-next {
+            right: 12px;
+        }
+
+        .ps-dots {
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 4;
+        }
+
+        .ps-dot {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #fff;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 0;
+            cursor: pointer;
+            border-radius: 0;
+        }
+
+        .ps-dot.active {
+            background: #fff;
+        }
+
+        .ad-label {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            z-index: 5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-size: 14px;
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>សារព័ត៌មាន Khmer Daily</h1>
+        </header>
+
+        <div class="post">
+            <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+            <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+            </div>
+
+            <p>
+                <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+            </p>
+
+            <div class="underlay-slot">
+                <div class="underlay-fixed-content">
+                    <div class="pixel-slideshow" id="pixelSlideshow">
+                        <canvas id="psCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <p>
+                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+            </p>
+
+            <p>
+                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+            </p>
+
+            <p>
+                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+            </p>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+            </div>
+        </div>
+
+        <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+    </div>
+
+    <script>
+        (function () {
+            // ====== CONFIG ======
+            // Add as many slides as you like.
+            const SLIDES = [
+                './images/ang11.png',
+                './images/ang22.png',
+                './images/ang33.png'
+            ];
+
+            const AUTOPLAY_MS = 3000;       // time each slide stays on screen
+            const TRANSITION_MS = 1600;     // pixelate-out + pixelate-in duration
+            const MAX_PIXEL = 48;           // blockiness at the midpoint of the transition
+            // =====================
+
+            const root = document.getElementById('pixelSlideshow');
+            const canvas = document.getElementById('psCanvas');
+            const ctx = canvas.getContext('2d');
+            const small = document.createElement('canvas');
+            const sctx = small.getContext('2d');
+
+            let W = 0, H = 0, dpr = 1;
+            let current = 0;
+            let animating = false;
+            let timer = null;
+            const images = [];
+
+            // Load images (fall back to a placeholder if a file is missing)
+            SLIDES.forEach((src, i) => {
+                const img = new Image();
+                img.onload = () => { img.ok = true; if (i === current && !animating) render(img, 1); };
+                img.onerror = () => { img.ok = false; img.failed = true; if (i === current && !animating) render(img, 1); };
+                img.src = src;
+                images.push(img);
+            });
+
+            // Dots (removed)
+            const dots = [];
+
+            function resize() {
+                const r = root.getBoundingClientRect();
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+                W = Math.max(1, Math.round(r.width));
+                H = Math.max(1, Math.round(r.height));
+                canvas.width = W * dpr;
+                canvas.height = H * dpr;
+                render(images[current], 1);
+            }
+
+            // Draw a single slide onto context c (mobile = cover, desktop = contain)
+            function drawOne(c, im) {
+                if (im && im.ok) {
+                    const isMobile = W < 700;
+                    // mobile: "cover" (fills the whole screen, centered); desktop: same as before
+                    const ratio = isMobile
+                        ? Math.max(W / im.naturalWidth, H / im.naturalHeight)
+                        : Math.min(W / im.naturalWidth, H / im.naturalHeight);
+                    const dw = im.naturalWidth * ratio;
+                    const dh = im.naturalHeight * ratio;
+                    c.drawImage(im, (W - dw) / 2, isMobile ? (H - dh) / 2 : 0, dw, dh);
+                } else {
+                    // placeholder while loading / if file is missing
+                    const idx = images.indexOf(im);
+                    const g = c.createLinearGradient(0, 0, W, H);
+                    const hue = (idx * 70 + 200) % 360;
+                    g.addColorStop(0, `hsl(${hue},70%,55%)`);
+                    g.addColorStop(1, `hsl(${(hue + 60) % 360},70%,35%)`);
+                    c.fillStyle = g;
+                    c.fillRect(0, 0, W, H);
+                    c.fillStyle = 'rgba(255,255,255,0.9)';
+                    c.font = 'bold 28px sans-serif';
+                    c.textAlign = 'center';
+                    c.fillText(im && im.failed ? 'Missing: ' + SLIDES[idx] : 'Slide ' + (idx + 1), W / 2, H / 3);
+                }
+            }
+
+            // Render a slide at a pixel block size (1 = sharp).
+            // Optional img2 is cross-faded on top with opacity a2 (0..1).
+            function render(img, px, img2, a2) {
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.scale(dpr, dpr);
+
+                const draw = (c, scale) => {
+                    c.save();
+                    c.scale(scale, scale);
+                    if (img2 && a2 >= 1) {
+                        c.globalAlpha = 1;
+                        drawOne(c, img2);
+                    } else {
+                        c.globalAlpha = 1;
+                        drawOne(c, img);
+                        if (img2 && a2 > 0) {
+                            c.globalAlpha = a2;
+                            drawOne(c, img2);
+                        }
+                    }
+                    c.restore();
+                };
+
+                if (px <= 1.01) {
+                    ctx.imageSmoothingEnabled = true;
+                    draw(ctx, 1);
+                } else {
+                    // Render tiny, then scale up with smoothing off = big square pixels
+                    const sw = Math.max(1, Math.ceil(W / px));
+                    const sh = Math.max(1, Math.ceil(H / px));
+                    if (small.width !== sw) small.width = sw;
+                    if (small.height !== sh) small.height = sh;
+                    sctx.setTransform(1, 0, 0, 1, 0, 0);
+                    sctx.clearRect(0, 0, sw, sh);
+                    sctx.imageSmoothingEnabled = true;
+                    draw(sctx, 1 / px);
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.drawImage(small, 0, 0, sw, sh, 0, 0, sw * px, sh * px);
+                }
+            }
+
+            // Smooth motion: ease-in-out timing, pixel size moves on a log scale
+            // (so every step looks equally "big"), and slides cross-fade in the middle.
+            const easeInOut = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            const smoothstep = (a, b, x) => {
+                const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+                return t * t * (3 - 2 * t);
+            };
+            const pxAt = (e) => Math.pow(MAX_PIXEL, 1 - Math.abs(2 * e - 1)); // 1 -> MAX -> 1
+
+            function goTo(next) {
+                if (animating || next === current) return;
+                animating = true;
+                const from = current;
+                const to = (next + SLIDES.length) % SLIDES.length;
+                const start = performance.now();
+                let swapped = false;
+
+                function frame(now) {
+                    const t = Math.min(1, (now - start) / TRANSITION_MS);
+                    const e = easeInOut(t);
+                    if (t >= 0.5 && !swapped) { swapped = true; current = to; updateDots(); }
+                    render(images[from], pxAt(e), images[to], smoothstep(0.35, 0.65, e));
+                    if (t < 1) requestAnimationFrame(frame);
+                    else { animating = false; render(images[current], 1); restartTimer(); }
+                }
+                clearTimeout(timer);
+                requestAnimationFrame(frame);
+            }
+
+            function updateDots() {
+                dots.forEach((d, i) => d.classList.toggle('active', i === current));
+            }
+
+            const next = () => goTo((current + 1) % SLIDES.length);
+            const prev = () => goTo((current - 1 + SLIDES.length) % SLIDES.length);
+
+            let paused = false;
+            function restartTimer() {
+                clearTimeout(timer);
+                if (!paused) timer = setTimeout(next, AUTOPLAY_MS);
+            }
+
+            // Controls
+            canvas.addEventListener('click', next);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') next();
+                if (e.key === 'ArrowLeft') prev();
+            });
+
+            // Swipe support (horizontal) for mobile
+            let sx = null;
+            canvas.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; }, { passive: true });
+            canvas.addEventListener('touchend', (e) => {
+                if (sx === null) return;
+                const dx = e.changedTouches[0].clientX - sx;
+                if (Math.abs(dx) > 40) (dx < 0 ? next : prev)();
+                sx = null;
+            });
+
+            new ResizeObserver(resize).observe(root);
+            window.addEventListener('resize', resize);
+            resize();
+            restartTimer();
+        })();
+    </script>
+
+</body>
+
+</html>

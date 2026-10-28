@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khmer Daily News - Underlay Scroll Reveal</title>
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+
+        /* Outer Wrapper Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            /* padding: 20px; */
+            background-color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #0056b3;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #0056b3;
+            font-size: 28px;
+        }
+
+        .post h2 {
+            color: #1a1a1a;
+            line-height: 1.4;
+            font-size: 24px;
+        }
+
+        .post p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .date-meta {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .sknteam_image {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sknteam_image img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 4px;
+        }
+
+        /* --- SCROLL UNDERLAY WINDOW --- */
+        .underlay-slot {
+            height: 1000px;
+            margin: 30px 0;
+            position: relative;
+            clip-path: inset(0 0 0 0);
+        }
+
+        .underlay-fixed-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* Base image (bottom layer) */
+        .underlay-banner {
+            width: 100%;
+            height: 100%;
+            background-image: url("./assets/ang44.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center top;
+            position: relative;
+            pointer-events: auto;
+            overflow: hidden;
+        }
+
+        /* Gemini image (top layer, sits on the base image) */
+        .underlay-banner-top {
+            position: absolute;
+            inset: 0;
+            background-image: url("./assets/Gemini_Generated_Image_sqjd5nsqjd5nsqjd-removebg-preview.png");
+            background-size: 18%;
+            background-repeat: no-repeat;
+            background-position: 25% top;
+            pointer-events: none;
+            top: 32rem;
+        }
+
+        /* cans for move the position (all three now share the same size) */
+        .move-can1 {
+            position: absolute;
+            inset: 0;
+            background-image: url("./assets/img_3.png");
+            background-size: 24%;
+            background-repeat: no-repeat;
+            background-position: 42% top;
+            pointer-events: none;
+            top: 30rem;
+            left: 3rem;
+        }
+
+        .move-can2 {
+            position: absolute;
+            inset: 0;
+            background-image: url("./assets/img_4.png");
+            background-size: 24%;
+            background-repeat: no-repeat;
+            background-position: 58% top;
+            pointer-events: none;
+            top: 32rem;
+            left: 4rem;
+        }
+
+        .move-can3 {
+            position: absolute;
+            inset: 0;
+            background-image: url("./assets/img_6.png");
+            background-size: 24%;
+            background-repeat: no-repeat;
+            background-position: 75% top;
+            pointer-events: none;
+            top: 32rem;
+        }
+
+        /* Finger hint: tells the user to click the image */
+        .tap-hint {
+            position: absolute;
+            left: 50%;
+            top: 4rem;
+            /* move up/down to sit on the image */
+            transform: translateX(-50%);
+            width: 3.5rem;
+            height: 3.5rem;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        /* Ripple ring under the fingertip */
+        .tap-hint::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            margin-left: -1.25rem;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
+            animation: tap-ripple 1.4s ease-out infinite;
+        }
+
+        /* Finger pointing up, tapping motion */
+        .tap-hint::after {
+            content: "👆";
+            position: absolute;
+            top: 1rem;
+            left: 50%;
+            margin-left: -1.25rem;
+            font-size: 2.5rem;
+            line-height: 1;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+            animation: tap-finger 1.4s ease-in-out infinite;
+        }
+
+        @keyframes tap-finger {
+
+            0%,
+            100% {
+                transform: translateY(0.8rem);
+            }
+
+            40% {
+                transform: translateY(0);
+            }
+
+            60% {
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes tap-ripple {
+
+            0%,
+            40% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            55% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.4);
+                opacity: 0;
+            }
+        }
+
+        .ad-label {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            z-index: 5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-size: 14px;
+            background-color: #ffffff;
+        }
+
+        /* --- OVERRIDE: center the Gemini image horizontally --- */
+        .underlay-banner-top {
+            background-position: 50% top;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>សារព័ត៌មាន Khmer Daily</h1>
+        </header>
+
+        <div class="post">
+            <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+            <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+            </div>
+
+            <p>
+                <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+            </p>
+
+            <div class="underlay-slot">
+                <div class="underlay-fixed-content">
+                    <div class="underlay-banner">
+                        <div class="underlay-banner-top">
+                            <div class="tap-hint"></div>
+                        </div>
+
+
+                        <div class="move-can1"></div>
+                        <div class="move-can2"></div>
+                        <div class="move-can3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <p>
+                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+            </p>
+
+            <p>
+                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+            </p>
+
+            <p>
+                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+            </p>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+            </div>
+        </div>
+
+        <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+    </div>
+
+</body>
+
+</html>

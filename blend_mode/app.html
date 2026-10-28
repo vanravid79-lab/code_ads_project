@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khmer Daily News - Double Exposure Ad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', Arial, sans-serif;
+            margin: 0;
+            background: #f0f2f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #0056b3;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #0056b3;
+            font-size: 28px;
+        }
+
+        .post h2 {
+            color: #1a1a1a;
+            line-height: 1.4;
+            font-size: 24px;
+        }
+
+        .post p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .date-meta {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .sknteam_image {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sknteam_image img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 4px;
+        }
+
+        /* Underlay window: the page scrolls, the slideshow stays fixed behind the clip */
+        .underlay-slot {
+            height: 1000px;
+            margin: 30px 0;
+            position: relative;
+            clip-path: inset(0);
+        }
+
+        .underlay-fixed {
+            position: fixed;
+            inset: 0;
+            z-index: 3;
+        }
+
+        .dx-slideshow {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .dx-slideshow canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-size: 14px;
+            background: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>សារព័ត៌មាន Khmer Daily</h1>
+        </header>
+
+        <div class="post">
+            <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+            <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+            </div>
+
+            <p>
+                <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+            </p>
+
+            <div class="underlay-slot" id="dxSlot">
+                <div class="underlay-fixed">
+                    <div class="dx-slideshow" id="dxSlideshow">
+                        <canvas id="dxCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <p>
+                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+            </p>
+
+            <p>
+                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+            </p>
+
+            <p>
+                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+            </p>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+            </div>
+        </div>
+
+        <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+    </div>
+
+    <script>
+        (() => {
+            // ================= CONFIG =================
+            // blend = how this slide mixes with the NEXT one:
+            //   'lighten' → bright parts of the next image appear inside this one's dark silhouette
+            //   'darken'  → this image shows only inside the next image's bright shape
+            //   ('screen' / 'multiply' are softer versions of the same two looks)
+            const SLIDES = [
+                { src: './images/ang11.png', blend: 'lighten' },
+                { src: './images/ang22.png', blend: 'darken' },
+                { src: './images/ang33.png', blend: 'lighten' }
+            ];
+            const DRIVE = 'time';       // 'time' = autoplay, 'scroll' = steps follow page scroll
+            const SHOW_MS = 350;        // time mode: single image on screen
+            const MIX_MS = 200;         // time mode: double-exposure frame on screen
+            const SCROLL_LOOPS = 2;     // scroll mode: full loops while the window scrolls past
+            const MONO = false;         // true = black & white look like the reference
+            const MOBILE_BP = 700;      // below: cover, above: contain (top-aligned)
+            const BG = '#ffffff';       // fills transparent areas of PNGs (was showing as dark)
+            // ==========================================
+
+            const slot = document.getElementById('dxSlot');
+            const root = document.getElementById('dxSlideshow');
+            const canvas = document.getElementById('dxCanvas');
+            const ctx = canvas.getContext('2d');
+
+            const N = SLIDES.length;
+            const STEPS = N * 2;        // even step = image, odd step = image + next image
+            const mod = (i, m) => ((i % m) + m) % m;
+
+            let W = 0, H = 0, dpr = 1;
+            let cache = [];
+            let step = 0;
+            let dirty = true;
+
+            // ---------- Images ----------
+            const images = SLIDES.map((s, i) => {
+                const img = new Image();
+                img.decoding = 'async';
+                img.onload = img.onerror = () => { cache[i] = null; dirty = true; };
+                img.src = s.src;
+                return img;
+            });
+            const isReady = (img) => img.complete && img.naturalWidth > 0;
+
+            // ---------- Layers (pre-scaled, pre-filtered once per size) ----------
+            function buildLayer(i) {
+                const img = images[i];
+                const c = document.createElement('canvas');
+                c.width = canvas.width;
+                c.height = canvas.height;
+                const g = c.getContext('2d');
+                g.setTransform(dpr, 0, 0, dpr, 0, 0);
+                g.imageSmoothingQuality = 'high';
+
+                if (isReady(img)) {
+                    g.fillStyle = BG;
+                    g.fillRect(0, 0, W, H);
+                    const mobile = W < MOBILE_BP;
+                    const sx = W / img.naturalWidth, sy = H / img.naturalHeight;
+                    const s = mobile ? Math.max(sx, sy) : Math.min(sx, sy);
+                    const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+                    if (MONO) g.filter = 'grayscale(1) contrast(1.15)';
+                    g.drawImage(img, (W - dw) / 2, mobile ? (H - dh) / 2 : 0, dw, dh);
+                } else {
+                    g.fillStyle = `hsl(0,0%,${20 + i * 25}%)`;
+                    g.fillRect(0, 0, W, H);
+                    g.fillStyle = '#fff';
+                    g.font = 'bold 24px sans-serif';
+                    g.textAlign = 'center';
+                    g.fillText(img.complete ? 'Missing: ' + SLIDES[i].src : 'Loading…', W / 2, H / 3);
+                }
+                return c;
+            }
+            const layer = (i) => cache[i] || (cache[i] = buildLayer(i));
+
+            // ---------- Draw one step (hard cut, no fades) ----------
+            function render() {
+                dirty = false;
+                const i = Math.floor(step / 2);
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.drawImage(layer(i), 0, 0);
+                if (step % 2) {
+                    ctx.globalCompositeOperation = SLIDES[i].blend || 'lighten';
+                    ctx.drawImage(layer(mod(i + 1, N)), 0, 0);
+                    ctx.globalCompositeOperation = 'source-over';
+                }
+            }
+
+            function setStep(s) {
+                s = mod(s, STEPS);
+                if (s !== step) { step = s; dirty = true; }
+            }
+
+            function resize() {
+                const r = root.getBoundingClientRect();
+                const nw = Math.max(1, Math.round(r.width));
+                const nh = Math.max(1, Math.round(r.height));
+                const nd = Math.min(window.devicePixelRatio || 1, 2);
+                if (nw === W && nh === H && nd === dpr) return;
+                W = nw; H = nh; dpr = nd;
+                canvas.width = Math.round(W * dpr);
+                canvas.height = Math.round(H * dpr);
+                cache = [];
+                dirty = true;
+            }
+
+            // ---------- Driving the steps ----------
+            let running = false;
+            let stepSince = 0;
+
+            function scrollStep() {
+                // 0 when the slot enters at the bottom, 1 when it leaves at the top
+                const r = slot.getBoundingClientRect();
+                const vh = window.innerHeight;
+                const p = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
+                return Math.min(STEPS * SCROLL_LOOPS - 1, Math.floor(p * STEPS * SCROLL_LOOPS));
+            }
+
+            function tick(now) {
+                if (!running) return;
+                if (DRIVE === 'scroll') {
+                    setStep(scrollStep());
+                } else if (now - stepSince >= (step % 2 ? MIX_MS : SHOW_MS)) {
+                    setStep(step + 1);
+                    stepSince = now;
+                }
+                if (dirty) render();
+                requestAnimationFrame(tick);
+            }
+
+            function start() {
+                if (running) return;
+                running = true;
+                stepSince = performance.now();
+                requestAnimationFrame(tick);
+            }
+            const stop = () => { running = false; };
+
+            // Manual control (time mode): forward → play the mix into the next image,
+            // back → cut straight to the previous image
+            function nav(dir) {
+                if (DRIVE === 'scroll') return;
+                setStep(dir > 0 ? step + 1 : (step % 2 ? step - 1 : step - 2));
+                stepSince = performance.now();
+            }
+
+            // ---------- Controls ----------
+            canvas.addEventListener('click', () => nav(1));
+            document.addEventListener('keydown', (e) => {
+                if (!running) return;
+                if (e.key === 'ArrowRight') nav(1);
+                if (e.key === 'ArrowLeft') nav(-1);
+            });
+            let touchX = null;
+            canvas.addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+            canvas.addEventListener('touchend', (e) => {
+                if (touchX === null) return;
+                const dx = e.changedTouches[0].clientX - touchX;
+                if (Math.abs(dx) > 40) nav(dx < 0 ? 1 : -1);
+                touchX = null;
+            });
+
+            // ---------- Lifecycle ----------
+            new ResizeObserver(resize).observe(root);
+            window.addEventListener('resize', resize);
+            resize();
+            new IntersectionObserver(([e]) => { e.isIntersecting ? start() : stop(); }).observe(slot);
+        })();
+    </script>
+
+</body>
+
+</html>

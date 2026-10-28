@@ -307,6 +307,31 @@
             background-color: #ffffff;
         }
     </style>
+
+    <style>
+        /* ===== scroll-smoothness fixes (additive) ===== */
+        .catch-canvas {
+            touch-action: pan-y;
+        }
+
+        /* vertical swipes scroll the page, horizontal drag still moves the bucket */
+        .underlay-fixed-content {
+            will-change: transform;
+        }
+
+        /* own compositor layer */
+
+        @media (max-width: 767px) {
+
+            html,
+            body {
+                height: auto;
+                overflow-x: visible;
+                overflow-x: clip;
+                /* prevents sideways overflow without creating a scroll container */
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -378,6 +403,50 @@
 
         <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
     </div>
+
+    <script>
+        /* ===== scroll-smoothness fixes (additive) — must run before the game script ===== */
+        (function () {
+            /* 1) Pause the game loop while the section is off-screen */
+            const slot = document.querySelector('.underlay-slot');
+            const nativeRAF = window.requestAnimationFrame.bind(window);
+            console.log("nativeRAF: ", nativeRAF);
+
+            let visible = true;
+            let pending = [];
+
+            new IntersectionObserver(([entry]) => {
+                visible = entry.isIntersecting;
+                if (visible) {
+                    const queued = pending;
+                    pending = [];
+                    queued.forEach((cb) => nativeRAF(cb));
+                }
+            }).observe(slot);
+
+            window.requestAnimationFrame = function (cb) {
+                if (visible) return nativeRAF(cb);
+                pending.push(cb);
+                return 0;
+            };
+
+            /* 2) Debounce resize so the address bar moving during scroll doesn't rebuild the canvas */
+            let timer;
+            let passing = false;
+
+            window.addEventListener('resize', (e) => {
+                if (passing) return;
+                e.stopImmediatePropagation();
+                clearTimeout(timer);
+
+                timer = setTimeout(() => {
+                    passing = true;
+                    window.dispatchEvent(new Event('resize'));
+                    passing = false;
+                }, 200);
+            }, true);
+        })();
+    </script>
 
     <script>
         (function () {
