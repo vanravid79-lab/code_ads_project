@@ -6,10 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Khmer Daily News - Underlay Catch Mini Game</title>
     <style>
+        :root {
+            /* Stable window height for the mobile underlay.
+               JS overwrites this with a fixed pixel value so the address bar
+               showing/hiding while scrolling never resizes the game. */
+            --app-h: 100vh;
+        }
+
+        @supports (height: 100svh) {
+            :root {
+                --app-h: 100svh;
+            }
+        }
+
+        html,
         body {
-            font-family: 'Kantumruy Pro', 'Arial', sans-serif;
             margin: 0;
             padding: 0;
+            -webkit-text-size-adjust: 100%;
+            overflow-x: clip;
+            /* stop sideways overflow without creating a scroll container */
+        }
+
+        body {
+            font-family: 'Kantumruy Pro', 'Arial', sans-serif;
             background-color: #f0f2f5;
         }
 
@@ -63,12 +83,25 @@
             border-radius: 4px;
         }
 
-        /* --- SCROLL REVEAL UNDERLAY WINDOW --- */
+        /* --- SCROLL REVEAL UNDERLAY WINDOW ---
+           .underlay-slot       : takes up space in the article
+           .underlay-clip       : absolute box clipped with `clip` (reliable on iOS/Android,
+                                  unlike clip-path which makes fixed children flicker)
+           .underlay-fixed-content : fixed to the viewport, so the game stays still while
+                                  the article scrolls over it like a window */
         .underlay-slot {
             height: 1000px;
             margin: 30px 0;
             position: relative;
-            clip-path: inset(0 0 0 0);
+        }
+
+        .underlay-clip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            clip: rect(0, auto, auto, 0);
         }
 
         .underlay-fixed-content {
@@ -82,12 +115,14 @@
             align-items: center;
             pointer-events: none;
             z-index: 3;
+            /* hidden until JS confirms the slot is on screen, so the game
+               can never float over the text below */
+            visibility: hidden;
         }
 
         .underlay-banner {
             width: 100%;
             height: 100%;
-            /* background-image: url("./images/35f9add529060c4bb0c783cf0324e4f8.jpg"); */
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center top;
@@ -114,7 +149,6 @@
                 0 0 0 3px #ffffff,
                 0 0 0 6px rgba(255, 255, 255, 0.45),
                 0 18px 40px rgba(0, 0, 0, 0.45);
-
         }
 
         .catch-canvas {
@@ -122,9 +156,12 @@
             inset: 0;
             width: 100%;
             height: 100%;
-            touch-action: none;
+            /* vertical swipes scroll the page, horizontal drag moves the bucket */
+            touch-action: pan-y;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
             cursor: pointer;
             display: block;
         }
@@ -214,75 +251,47 @@
             }
         }
 
-
+        /* ---------- Mobile: full-screen underlay ---------- */
         @media (max-width: 767px) {
-
-            html,
-            body {
-                margin: 0;
-                padding: 0;
-                width: 100%;
-                height: 100%;
-                overflow-x: hidden;
+            .post {
+                padding: 0 16px;
             }
 
+            /* full-bleed window, exactly one stable screen tall */
             .underlay-slot {
-                width: 100%;
-                height: 100vh;
-                height: 100dvh;
-                margin: 0;
-                position: relative;
-                overflow: hidden;
+                /* taller than one screen: the game fills the whole screen for
+                   half a screen of scrolling before the article covers it again */
+                height: calc(var(--app-h) * 1.5);
+                margin: 0 -16px;
             }
 
+            /* The layer always covers the largest possible screen height, so no
+               white can show below it when the browser bar hides or shows.
+               Any extra space is filled with the game's floor color. */
             .underlay-fixed-content {
-                position: fixed;
-                inset: 0;
-                width: 100%;
                 height: 100vh;
-                height: 100dvh;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                justify-content: center;
-                align-items: stretch;
-                pointer-events: none;
-                z-index: 3;
+                height: 100lvh;
+                align-items: flex-start;
+                background: #14141f;
             }
 
+            /* the game itself keeps a stable, locked height at the top */
             .underlay-banner {
-                width: 100%;
-                height: 100%;
-                flex: 1 1 auto;
-                margin: 0;
-                padding: 0;
+                height: var(--app-h);
+                flex: 0 0 auto;
                 background-size: cover;
                 background-position: center;
-                overflow: hidden;
             }
 
             .catch-game {
-                position: relative;
                 width: 100%;
                 height: 100%;
                 min-width: 0;
                 min-height: 0;
                 max-width: none;
                 aspect-ratio: auto;
-                margin: 0;
-                padding: 0;
                 border-radius: 0;
                 box-shadow: none;
-                overflow: hidden;
-            }
-
-            .catch-canvas {
-                position: absolute;
-                inset: 0;
-                width: 100%;
-                height: 100%;
-                display: block;
-                touch-action: none;
             }
         }
 
@@ -305,31 +314,6 @@
             color: #777;
             font-size: 14px;
             background-color: #ffffff;
-        }
-    </style>
-
-    <style>
-        /* ===== scroll-smoothness fixes (additive) ===== */
-        .catch-canvas {
-            touch-action: pan-y;
-        }
-
-        /* vertical swipes scroll the page, horizontal drag still moves the bucket */
-        .underlay-fixed-content {
-            will-change: transform;
-        }
-
-        /* own compositor layer */
-
-        @media (max-width: 767px) {
-
-            html,
-            body {
-                height: auto;
-                overflow-x: visible;
-                overflow-x: clip;
-                /* prevents sideways overflow without creating a scroll container */
-            }
         }
     </style>
 </head>
@@ -358,21 +342,23 @@
             </p>
 
             <div class="underlay-slot">
-                <div class="underlay-fixed-content">
-                    <div class="underlay-banner">
+                <div class="underlay-clip">
+                    <div class="underlay-fixed-content">
+                        <div class="underlay-banner">
 
-                        <div class="catch-game">
-                            <canvas class="catch-canvas" role="application" tabindex="0"
-                                aria-label="Catch the falling cans in the bucket. Avoid bombs. Ice freezes the bucket"></canvas>
+                            <div class="catch-game">
+                                <canvas class="catch-canvas" role="application" tabindex="0"
+                                    aria-label="Catch the falling cans in the bucket. Avoid bombs. Ice freezes the bucket"></canvas>
 
-                            <div class="catch-overlay">
-                                <div class="catch-finger" aria-hidden="true">👆</div>
-                                <div class="catch-title">TAP TO PLAY</div>
-                                <div class="catch-sub catch-sub-text">Drag to move the bucket. Catch the cans,
-                                    avoid the bombs. Ice freezes your bucket!</div>
+                                <div class="catch-overlay">
+                                    <div class="catch-finger" aria-hidden="true">👆</div>
+                                    <div class="catch-title">TAP TO PLAY</div>
+                                    <div class="catch-sub catch-sub-text">Drag to move the bucket. Catch the cans,
+                                        avoid the bombs. Ice freezes your bucket!</div>
+                                </div>
                             </div>
-                        </div>
 
+                        </div>
                     </div>
                 </div>
             </div>
@@ -405,51 +391,8 @@
     </div>
 
     <script>
-        /* ===== scroll-smoothness fixes (additive) — must run before the game script ===== */
         (function () {
-            /* 1) Pause the game loop while the section is off-screen */
             const slot = document.querySelector('.underlay-slot');
-            const nativeRAF = window.requestAnimationFrame.bind(window);
-            console.log("nativeRAF: ", nativeRAF);
-
-            let visible = true;
-            let pending = [];
-
-            new IntersectionObserver(([entry]) => {
-                visible = entry.isIntersecting;
-                if (visible) {
-                    const queued = pending;
-                    pending = [];
-                    queued.forEach((cb) => nativeRAF(cb));
-                }
-            }).observe(slot);
-
-            window.requestAnimationFrame = function (cb) {
-                if (visible) return nativeRAF(cb);
-                pending.push(cb);
-                return 0;
-            };
-
-            /* 2) Debounce resize so the address bar moving during scroll doesn't rebuild the canvas */
-            let timer;
-            let passing = false;
-
-            window.addEventListener('resize', (e) => {
-                if (passing) return;
-                e.stopImmediatePropagation();
-                clearTimeout(timer);
-
-                timer = setTimeout(() => {
-                    passing = true;
-                    window.dispatchEvent(new Event('resize'));
-                    passing = false;
-                }, 200);
-            }, true);
-        })();
-    </script>
-
-    <script>
-        (function () {
             const game = document.querySelector('.catch-game');
             const canvas = document.querySelector('.catch-canvas');
             const ctx = canvas.getContext('2d');
@@ -466,6 +409,20 @@
             ];
 
             const rand = (min, max) => min + Math.random() * (max - min);
+
+            /* ---------- Stable mobile height ----------
+               On phones the address bar grows/shrinks while scrolling, which changes
+               100vh and used to resize the canvas mid-scroll (the "not clean" look).
+               We lock the window height to a fixed pixel value and only update it when
+               the screen width changes (rotation). */
+            const mobileMQ = window.matchMedia('(max-width: 767px)');
+            let lockedWidth = window.innerWidth;
+
+            function lockAppHeight() {
+                lockedWidth = window.innerWidth;
+                document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px');
+            }
+            lockAppHeight();
 
             /* ---------- Can image ---------- */
             // sting-cans.png can hold every Sting product (all flavours) in one picture.
@@ -991,8 +948,14 @@
                 }
             }
 
+            /* ---------- Render loop (pauses while the window is off-screen) ---------- */
+            let visible = true;
+            let running = false;
+
             function frame(now) {
+                if (!visible) { running = false; return; }
                 if (!W) resize();
+                syncWindow();
                 const dt = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0;
                 lastTime = now;
 
@@ -1024,6 +987,45 @@
                 requestAnimationFrame(frame);
             }
 
+            function kick() {
+                if (running || !visible) return;
+                running = true;
+                lastTime = 0; // avoid a big time jump after being off-screen
+                requestAnimationFrame(frame);
+            }
+
+            new IntersectionObserver(([entry]) => {
+                visible = entry.isIntersecting;
+                kick();
+            }, { rootMargin: '120px 0px' }).observe(slot);
+
+            /* ---------- Window sync ----------
+               Clip the fixed layer itself to the slot's on-screen rectangle.
+               This does not depend on the browser clipping fixed children
+               through a parent, which is what failed on some mobile browsers. */
+            const fixedEl = document.querySelector('.underlay-fixed-content');
+
+            function syncWindow() {
+                const r = slot.getBoundingClientRect();
+                const ew = fixedEl.offsetWidth;
+                const eh = fixedEl.offsetHeight;
+                const top = Math.max(0, r.top);
+                const bottom = Math.min(eh, r.bottom);
+                const left = Math.max(0, r.left);
+                const right = Math.min(ew, r.right);
+
+                if (bottom <= top || right <= left) {
+                    fixedEl.style.visibility = 'hidden';
+                    return;
+                }
+                fixedEl.style.clipPath =
+                    'inset(' + top + 'px ' + (ew - right) + 'px ' + (eh - bottom) + 'px ' + left + 'px)';
+                fixedEl.style.visibility = 'visible';
+            }
+
+            window.addEventListener('scroll', syncWindow, { passive: true });
+            window.addEventListener('resize', syncWindow);
+
             /* ---------- Input ---------- */
             function pointerX(e) {
                 const r = canvas.getBoundingClientRect();
@@ -1053,13 +1055,34 @@
                 if (e.key === 'ArrowRight') bucket.targetX = Math.min(W - bucket.w / 2, bucket.targetX + step);
             });
 
-            window.addEventListener('resize', resize);
+            /* ---------- Resize ----------
+               On mobile, ignore height-only changes (address bar moving during scroll).
+               Rebuild only when the width changes (rotation / real resize). */
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    if (mobileMQ.matches) {
+                        if (window.innerWidth === lockedWidth) return;
+                        lockAppHeight();
+                        // let the new --app-h apply before measuring
+                        requestAnimationFrame(resize);
+                        return;
+                    }
+                    resize();
+                }, 150);
+            });
+
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => { lockAppHeight(); resize(); }, 250);
+            });
+
             resize();
-            requestAnimationFrame(frame);
+            syncWindow();
+            kick();
         })();
 
     </script>
-
 </body>
 
 </html>

@@ -167,22 +167,21 @@
     <script>
         (() => {
             // ================= CONFIG =================
-            // blend = how this slide mixes with the NEXT one:
-            //   'lighten' → bright parts of the next image appear inside this one's dark silhouette
-            //   'darken'  → this image shows only inside the next image's bright shape
-            //   ('screen' / 'multiply' are softer versions of the same two looks)
             const SLIDES = [
                 { src: './images/ang11.png', blend: 'lighten' },
                 { src: './images/ang22.png', blend: 'darken' },
                 { src: './images/ang33.png', blend: 'lighten' }
             ];
-            const DRIVE = 'time';       // 'time' = autoplay, 'scroll' = steps follow page scroll
-            const SHOW_MS = 350;        // time mode: single image on screen
-            const MIX_MS = 200;         // time mode: double-exposure frame on screen
-            const SCROLL_LOOPS = 2;     // scroll mode: full loops while the window scrolls past
-            const MONO = false;         // true = black & white look like the reference
-            const MOBILE_BP = 700;      // below: cover, above: contain (top-aligned)
-            const BG = '#ffffff';       // fills transparent areas of PNGs (was showing as dark)
+            const DRIVE = 'time';         // 'time' = autoplay, 'scroll' = follows page scroll
+            // One image's cycle: hold -> blend fades in -> blend holds -> fades into the next image
+            const SHOW_MS = 1200;         // clean image on screen
+            const FADE_IN_MS = 1000;      // double-exposure fades in
+            const MIX_MS = 900;           // full double-exposure on screen
+            const FADE_OUT_MS = 1000;     // double-exposure fades into the next clean image
+            const SCROLL_LOOPS = 2;       // scroll mode: full loops while the window scrolls past
+            const MONO = false;
+            const MOBILE_BP = 700;
+            const BG = '#ffffff';
             // ==========================================
 
             const slot = document.getElementById('dxSlot');
@@ -191,12 +190,13 @@
             const ctx = canvas.getContext('2d');
 
             const N = SLIDES.length;
-            const STEPS = N * 2;        // even step = image, odd step = image + next image
+            const CYCLE = SHOW_MS + FADE_IN_MS + MIX_MS + FADE_OUT_MS;
             const mod = (i, m) => ((i % m) + m) % m;
+            const ease = (t) => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, t)));
 
             let W = 0, H = 0, dpr = 1;
             let cache = [];
-            let step = 0;
+            let clock = 0;               // ms on the timeline
             let dirty = true;
 
             // ---------- Images ----------
@@ -209,7 +209,7 @@
             });
             const isReady = (img) => img.complete && img.naturalWidth > 0;
 
-            // ---------- Layers (pre-scaled, pre-filtered once per size) ----------
+            // ---------- Layers (pre-scaled once per size) ----------
             function buildLayer(i) {
                 const img = images[i];
                 const c = document.createElement('canvas');
@@ -240,23 +240,40 @@
             }
             const layer = (i) => cache[i] || (cache[i] = buildLayer(i));
 
-            // ---------- Draw one step (hard cut, no fades) ----------
+            // ---------- Draw the frame at the current clock ----------
             function render() {
                 dirty = false;
-                const i = Math.floor(step / 2);
+                const cycleIndex = Math.floor(clock / CYCLE);
+                const local = clock - cycleIndex * CYCLE;
+                const i = mod(cycleIndex, N);
+                const next = mod(i + 1, N);
+                const blend = SLIDES[i].blend || 'lighten';
+
+                const t1 = SHOW_MS;                 // blend starts fading in
+                const t2 = t1 + FADE_IN_MS;         // blend fully in
+                const t3 = t2 + MIX_MS;             // start fading to next image
+
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.globalAlpha = 1;
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.drawImage(layer(i), 0, 0);
-                if (step % 2) {
-                    ctx.globalCompositeOperation = SLIDES[i].blend || 'lighten';
-                    ctx.drawImage(layer(mod(i + 1, N)), 0, 0);
-                    ctx.globalCompositeOperation = 'source-over';
-                }
-            }
 
-            function setStep(s) {
-                s = mod(s, STEPS);
-                if (s !== step) { step = s; dirty = true; }
+                if (local >= t1) {
+                    // blend strength: 0 -> 1 while fading in, stays 1 afterwards
+                    const a = local < t2 ? ease((local - t1) / FADE_IN_MS) : 1;
+                    ctx.globalCompositeOperation = blend;
+                    ctx.globalAlpha = a;
+                    ctx.drawImage(layer(next), 0, 0);
+
+                    if (local >= t3) {
+                        // cross-fade the blended frame into the clean next image
+                        ctx.globalCompositeOperation = 'source-over';
+                        ctx.globalAlpha = ease((local - t3) / FADE_OUT_MS);
+                        ctx.drawImage(layer(next), 0, 0);
+                    }
+                }
+                ctx.globalAlpha = 1;
+                ctx.globalCompositeOperation = 'source-over';
             }
 
             function resize() {
@@ -272,26 +289,27 @@
                 dirty = true;
             }
 
-            // ---------- Driving the steps ----------
+            // ---------- Driving the timeline ----------
             let running = false;
-            let stepSince = 0;
+            let last = 0;
 
-            function scrollStep() {
-                // 0 when the slot enters at the bottom, 1 when it leaves at the top
+            function scrollClock() {
                 const r = slot.getBoundingClientRect();
                 const vh = window.innerHeight;
                 const p = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
-                return Math.min(STEPS * SCROLL_LOOPS - 1, Math.floor(p * STEPS * SCROLL_LOOPS));
+                return Math.min(0.9999, p) * N * SCROLL_LOOPS * CYCLE;
             }
 
             function tick(now) {
                 if (!running) return;
                 if (DRIVE === 'scroll') {
-                    setStep(scrollStep());
-                } else if (now - stepSince >= (step % 2 ? MIX_MS : SHOW_MS)) {
-                    setStep(step + 1);
-                    stepSince = now;
+                    const c = scrollClock();
+                    if (c !== clock) { clock = c; dirty = true; }
+                } else {
+                    clock += now - last;
+                    dirty = true;
                 }
+                last = now;
                 if (dirty) render();
                 requestAnimationFrame(tick);
             }
@@ -299,17 +317,18 @@
             function start() {
                 if (running) return;
                 running = true;
-                stepSince = performance.now();
+                last = performance.now();
                 requestAnimationFrame(tick);
             }
             const stop = () => { running = false; };
 
-            // Manual control (time mode): forward → play the mix into the next image,
-            // back → cut straight to the previous image
+            // Manual control (time mode): jump to the start of the next / previous image
             function nav(dir) {
                 if (DRIVE === 'scroll') return;
-                setStep(dir > 0 ? step + 1 : (step % 2 ? step - 1 : step - 2));
-                stepSince = performance.now();
+                const c = Math.floor(clock / CYCLE);
+                const local = clock - c * CYCLE;
+                clock = dir > 0 ? (c + 1) * CYCLE : (local > SHOW_MS ? c : c - 1) * CYCLE;
+                dirty = true;
             }
 
             // ---------- Controls ----------
