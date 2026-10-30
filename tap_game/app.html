@@ -138,8 +138,9 @@
         /* ---------- Catch game ---------- */
         .catch-game {
             position: relative;
-            height: min(560px, 82vh);
-            aspect-ratio: 9 / 16;
+            height: min(640px, 82vh);
+            aspect-ratio: 1 / 2;
+            /* 640 x 1280 */
             max-width: calc(100% - 24px);
             overflow: hidden;
             border-radius: 22px;
@@ -284,6 +285,7 @@
             }
 
             .catch-game {
+                /* full screen on mobile: fills the whole width and height */
                 width: 100%;
                 height: 100%;
                 min-width: 0;
@@ -550,6 +552,11 @@
             iceImg.src = ICE_SRC;
             let freezeTimer = 0;
 
+            /* The game is drawn on a fixed 640-wide canvas. Height follows the screen:
+               exactly 640 x 1280 on a 1:2 screen, taller or shorter on other phones.
+               `scale` = on-screen px per game unit, `u` = size unit for HUD/details. */
+            const DESIGN_W = 640;
+            let scale = 1, u = 640 / 360;
             let W = 0, H = 0, dpr = 1;
             let state = 'idle'; // idle | playing | over
             let score = 0;
@@ -569,8 +576,8 @@
                     const bw = rand(W * 0.06, W * 0.12);
                     const bh = rand(H * 0.12, H * 0.36);
                     const windows = [];
-                    for (let wy = 10; wy < bh - 6; wy += 12) {
-                        for (let wx = 5; wx < bw - 6; wx += 9) {
+                    for (let wy = 10 * u; wy < bh - 6 * u; wy += 12 * u) {
+                        for (let wx = 5 * u; wx < bw - 6 * u; wx += 9 * u) {
                             if (Math.random() < 0.22) windows.push([wx, wy]);
                         }
                     }
@@ -582,13 +589,15 @@
             function resize() {
                 const rect = game.getBoundingClientRect();
                 if (!rect.width || !rect.height) return;
-                const prevW = W || rect.width;
+                const prevW = W || DESIGN_W;
                 dpr = Math.min(window.devicePixelRatio || 1, 2);
-                W = rect.width;
-                H = rect.height;
-                canvas.width = Math.round(W * dpr);
-                canvas.height = Math.round(H * dpr);
-                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                scale = rect.width / DESIGN_W;
+                W = DESIGN_W;
+                H = rect.height / scale;
+                u = W / 360;
+                canvas.width = Math.round(rect.width * dpr);
+                canvas.height = Math.round(rect.height * dpr);
+                ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
 
                 const ratio = prevW ? bucket.x / prevW : 0.5;
                 bucket.w = W * 0.38;
@@ -610,7 +619,7 @@
                     color: BOTTLE_COLORS[Math.floor(Math.random() * BOTTLE_COLORS.length)],
                     pick: Math.random(),
                     x: rand(W * 0.12, W * 0.88),
-                    y: -50,
+                    y: -50 * u,
                     vy: H * (rand(0.28, 0.4) + speedBoost * 0.28),
                     rot: rand(-0.5, 0.5),
                     vr: rand(-1.6, 1.6),
@@ -634,7 +643,7 @@
                     ctx.fillRect(b.x, baseY - b.h, b.w, b.h);
                     ctx.fillStyle = 'rgba(255, 207, 120, 0.75)';
                     b.windows.forEach(([wx, wy]) => {
-                        ctx.fillRect(b.x + wx, baseY - b.h + wy, 3, 5);
+                        ctx.fillRect(b.x + wx, baseY - b.h + wy, 3 * u, 5 * u);
                     });
                 });
 
@@ -657,27 +666,27 @@
             }
 
             function drawHUD() {
-                const s = 18;
+                const s = 18 * u;
                 for (let i = 0; i < MAX_LIVES; i++) {
-                    const hx = 22 + i * (s + 8);
-                    heartPath(hx, 22, s);
+                    const hx = 22 * u + i * (s + 8 * u);
+                    heartPath(hx, 22 * u, s);
                     if (i < lives) {
                         ctx.fillStyle = '#ff3b4e';
                         ctx.fill();
                     } else {
                         ctx.strokeStyle = 'rgba(255,255,255,0.7)';
-                        ctx.lineWidth = 1.5;
+                        ctx.lineWidth = 1.5 * u;
                         ctx.stroke();
                     }
                 }
 
                 ctx.textAlign = 'right';
                 ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                ctx.font = '600 10px Montserrat, Arial, sans-serif';
-                ctx.fillText('SCORE', W - 16, 24);
+                ctx.font = '600 ' + (10 * u) + 'px Montserrat, Arial, sans-serif';
+                ctx.fillText('SCORE', W - 16 * u, 24 * u);
                 ctx.fillStyle = '#ffffff';
-                ctx.font = '800 26px Montserrat, Arial, sans-serif';
-                ctx.fillText(String(score), W - 16, 50);
+                ctx.font = '800 ' + (26 * u) + 'px Montserrat, Arial, sans-serif';
+                ctx.fillText(String(score), W - 16 * u, 50 * u);
             }
 
             function drawBottle(it) {
@@ -823,7 +832,7 @@
                 ctx.shadowBlur = 22;
                 ctx.fillStyle = 'rgba(60,150,255,0.25)';
                 ctx.beginPath();
-                ctx.ellipse(x, y + h + 2, topW * 0.5, 7, 0, 0, Math.PI * 2);
+                ctx.ellipse(x, y + h + 2 * u, topW * 0.5, 7 * u, 0, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
 
@@ -856,7 +865,7 @@
                 ctx.shadowColor = '#3d9bff';
                 ctx.shadowBlur = 16;
                 ctx.strokeStyle = '#6fb8ff';
-                ctx.lineWidth = 3;
+                ctx.lineWidth = 3 * u;
                 ctx.beginPath();
                 ctx.ellipse(x, y + rimH / 2, topW / 2, rimH / 2, 0, 0, Math.PI * 2);
                 ctx.stroke();
@@ -1029,7 +1038,8 @@
             /* ---------- Input ---------- */
             function pointerX(e) {
                 const r = canvas.getBoundingClientRect();
-                return Math.max(bucket.w / 2, Math.min(W - bucket.w / 2, e.clientX - r.left));
+                const gx = (e.clientX - r.left) / scale; // screen px -> game units
+                return Math.max(bucket.w / 2, Math.min(W - bucket.w / 2, gx));
             }
 
             canvas.addEventListener('pointerdown', (e) => {
@@ -1081,8 +1091,8 @@
             syncWindow();
             kick();
         })();
-
     </script>
+
 </body>
 
 </html>
