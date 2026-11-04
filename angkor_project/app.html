@@ -5,25 +5,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Khmer Daily News - Underlay Scroll Reveal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600&display=swap" rel="stylesheet" />
+
     <style>
-        body {
-            font-family: 'Kantumruy Pro', 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f2f5;
+        /* ===== Base ===== */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
         }
 
-        /* Outer Wrapper Container */
+        body {
+            margin: 0;
+            font-family: 'Kantumruy Pro', Arial, sans-serif;
+            background: #f0f2f5;
+        }
+
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            /* padding: 20px; */
-            background-color: #ffffff;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
             position: relative;
             z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
         }
 
+        /* ===== Header / Article ===== */
         header {
             text-align: center;
             padding: 20px 0;
@@ -36,202 +45,37 @@
             font-size: 28px;
         }
 
+        .post {
+            padding: 0 20px;
+        }
+
         .post h2 {
             color: #1a1a1a;
-            line-height: 1.4;
             font-size: 24px;
+            line-height: 1.4;
         }
 
         .post p {
-            line-height: 1.8;
             color: #333;
+            line-height: 1.8;
             margin-bottom: 15px;
         }
 
         .date-meta {
             color: #888;
             font-size: 0.9em;
-            margin-bottom: 15px;
+            margin: 15px 0;
         }
 
-        .sknteam_image {
+        .news-image {
             text-align: center;
             margin: 20px 0;
         }
 
-        .sknteam_image img {
+        .news-image img {
             width: 100%;
             max-width: 500px;
             border-radius: 4px;
-        }
-
-        /* --- SCROLL UNDERLAY WINDOW --- */
-        .underlay-slot {
-            height: 1000px;
-            margin: 30px 0;
-            position: relative;
-            clip-path: inset(0 0 0 0);
-        }
-
-        .underlay-fixed-content {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            pointer-events: none;
-            z-index: 3;
-        }
-
-        /* Base image (bottom layer) */
-        .underlay-banner {
-            width: 100%;
-            height: 100%;
-            background-image: url("./assets/ang44.png");
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center top;
-            position: relative;
-            pointer-events: auto;
-            overflow: hidden;
-        }
-
-        /* Gemini image (top layer, sits on the base image) */
-        .underlay-banner-top {
-            position: absolute;
-            inset: 0;
-            background-image: url("./assets/Gemini_Generated_Image_sqjd5nsqjd5nsqjd-removebg-preview.png");
-            background-size: 18%;
-            background-repeat: no-repeat;
-            background-position: 25% top;
-            pointer-events: none;
-            top: 32rem;
-        }
-
-        /* cans for move the position (all three now share the same size) */
-        .move-can1 {
-            position: absolute;
-            inset: 0;
-            background-image: url("./assets/img_3.png");
-            background-size: 24%;
-            background-repeat: no-repeat;
-            background-position: 42% top;
-            pointer-events: none;
-            top: 30rem;
-            left: 3rem;
-        }
-
-        .move-can2 {
-            position: absolute;
-            inset: 0;
-            background-image: url("./assets/img_4.png");
-            background-size: 24%;
-            background-repeat: no-repeat;
-            background-position: 58% top;
-            pointer-events: none;
-            top: 32rem;
-            left: 4rem;
-        }
-
-        .move-can3 {
-            position: absolute;
-            inset: 0;
-            background-image: url("./assets/img_6.png");
-            background-size: 24%;
-            background-repeat: no-repeat;
-            background-position: 75% top;
-            pointer-events: none;
-            top: 32rem;
-        }
-
-        /* Finger hint: tells the user to click the image */
-        .tap-hint {
-            position: absolute;
-            left: 50%;
-            top: 4rem;
-            /* move up/down to sit on the image */
-            transform: translateX(-50%);
-            width: 3.5rem;
-            height: 3.5rem;
-            pointer-events: none;
-            z-index: 4;
-        }
-
-        /* Ripple ring under the fingertip */
-        .tap-hint::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 2.5rem;
-            height: 2.5rem;
-            margin-left: -1.25rem;
-            border-radius: 50%;
-            border: 3px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
-            animation: tap-ripple 1.4s ease-out infinite;
-        }
-
-        /* Finger pointing up, tapping motion */
-        .tap-hint::after {
-            content: "👆";
-            position: absolute;
-            top: 1rem;
-            left: 50%;
-            margin-left: -1.25rem;
-            font-size: 2.5rem;
-            line-height: 1;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-            animation: tap-finger 1.4s ease-in-out infinite;
-        }
-
-        @keyframes tap-finger {
-
-            0%,
-            100% {
-                transform: translateY(0.8rem);
-            }
-
-            40% {
-                transform: translateY(0);
-            }
-
-            60% {
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes tap-ripple {
-
-            0%,
-            40% {
-                transform: scale(0.3);
-                opacity: 0;
-            }
-
-            55% {
-                opacity: 1;
-            }
-
-            100% {
-                transform: scale(1.4);
-                opacity: 0;
-            }
-        }
-
-        .ad-label {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            color: #fff;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 3px;
-            z-index: 5;
         }
 
         footer {
@@ -240,30 +84,286 @@
             border-top: 1px solid #ddd;
             color: #777;
             font-size: 14px;
-            background-color: #ffffff;
+            background: #fff;
         }
 
-        /* --- OVERRIDE: center the Gemini image horizontally --- */
-        .underlay-banner-top {
-            background-position: 50% top;
+        /* ===== Scroll underlay window ===== */
+        .underlay-slot {
+            position: relative;
+            height: 1000px;
+            /* Negative side margins cancel the article's 20px padding,
+               so the ad window reaches the screen edges */
+            margin: 30px -20px;
+            clip-path: inset(0);
+            /* Only shows the fixed layer inside this slot. */
+        }
+
+        .underlay-fixed {
+            position: fixed;
+            inset: 0;
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .underlay-banner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            /* Fill the whole screen (crops edges instead of leaving gaps) */
+            background: url("./assets/ang44.png") center center / cover no-repeat;
+            overflow: hidden;
+        }
+
+        .ad-label {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            z-index: 5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-size: 10px;
+        }
+
+        /* ===== Product group: pinned to the bottom of the screen ===== */
+        .product-group {
+            /* One size for all four images */
+            --item-w: min(22vw, 170px);
+            --item-h: 200px;
+            --item-gap: 3vw;
+            --slide-speed: 30s;
+            /* fallback; JS sets the real duration from SLIDE_SPEED */
+
+            /* Zoom for the main product only. JavaScript measures the real
+               (non-transparent) size of every PNG and sets this
+               automatically so the main product matches the cans.
+               This value is only a fallback if that measurement fails. */
+            --main-scale: 1;
+
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 20px;
+            height: var(--item-h);
+            pointer-events: none;
+        }
+
+        /* ===== Auto-sliding cans: run across the main product ===== */
+        .can-viewport {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .can-track {
+            display: flex;
+            align-items: flex-end;
+            width: max-content;
+            will-change: transform;
+            animation: can-slide var(--slide-speed) linear infinite;
+        }
+
+        /* FIX: same HEIGHT for every can; width follows each image's shape.
+           Transparent edges are trimmed in JS, so every can fills the
+           full height and all cans look exactly the same size. */
+        .can-track .layer-can {
+            display: block;
+            flex: 0 0 auto;
+            width: auto;
+            height: var(--item-h);
+            object-fit: contain;
+            object-position: center bottom;
+            margin: 0 var(--item-gap) 0 0;
+        }
+
+        /* Pause sliding while the popup is open */
+        .product-group.is-paused .can-track {
+            animation-play-state: paused;
+        }
+
+        @keyframes can-slide {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Cans can be dragged (also on touch screens) */
+        .layer-can {
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* The copy of the can that follows the finger / mouse */
+        .drag-ghost {
+            position: fixed;
+            z-index: 50;
+            margin: 0;
+            object-fit: contain;
+            pointer-events: none;
+            cursor: grabbing;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.35));
+        }
+
+        /* Main product glows while a can is held inside its frame */
+        .main-wrap.is-target .layer-main {
+            filter: drop-shadow(0 0 14px rgba(255, 200, 0, 0.95));
+            transform: scale(1.05);
+        }
+
+        /* Main product bounces when a can lands in it */
+        .main-wrap.is-landed .layer-main {
+            animation: land-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes land-pop {
+            0% {
+                transform: scale(1);
+            }
+
+            40% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Main product centered in the same row, underneath the sliding cans */
+        .main-wrap {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            z-index: 1;
+            transform: translateX(-50%);
+        }
+
+        .layer {
+            display: block;
+            width: var(--item-w);
+            height: var(--item-h);
+            object-fit: contain;
+            cursor: pointer;
+            pointer-events: auto;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.2s ease, filter 0.15s ease;
+        }
+
+        .layer:hover,
+        .layer:active {
+            transform: scale(1.05);
+        }
+
+        /* Main product: same box as the cans, zoomed so the product itself
+           appears the same size. Uses the separate `scale` property so the
+           hover / glow `transform` above still stacks on top of it. */
+        .layer-main {
+            /* FIX: same height as the cans (transparent edges trimmed in JS) */
+            width: auto;
+            height: var(--item-h);
+            object-position: center bottom;
+            scale: var(--main-scale);
+            transform-origin: bottom center;
+            /* grows upward, stays on the bottom line */
+        }
+
+        @media (max-width: 600px) {
+            .product-group {
+                --item-w: 28vw;
+                --item-h: 150px;
+                bottom: 12px;
+            }
+        }
+
+        /* ===== Popup ===== */
+        .popup {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.55);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .popup.is-open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-box {
+            position: relative;
+            width: 100%;
+            max-width: 360px;
+            padding: 24px 20px 20px;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            transform: scale(0.85) translateY(10px);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .popup.is-open .popup-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .popup-title {
+            margin: 0 0 8px;
+            color: #0056b3;
+            font-size: 20px;
+        }
+
+        .popup-text {
+            margin: 0;
+            color: #333;
+            line-height: 1.7;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            border: 0;
+            background: none;
+            font-size: 24px;
+            line-height: 1;
+            color: #888;
+            cursor: pointer;
         }
     </style>
 </head>
 
 <body>
-
     <div class="container">
         <header>
             <h1>សារព័ត៌មាន Khmer Daily</h1>
         </header>
 
-        <div class="post">
+        <article class="post">
             <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
 
             <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
 
-            <div class="sknteam_image">
-                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+            <div class="news-image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image"
+                    data-popup-title="Angkor Sankranta" data-popup-text="Your text for the top news image." />
             </div>
 
             <p>
@@ -273,17 +373,31 @@
                 ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
             </p>
 
+            <!-- Ad: scroll underlay -->
             <div class="underlay-slot">
-                <div class="underlay-fixed-content">
+                <div class="underlay-fixed">
                     <div class="underlay-banner">
-                        <div class="underlay-banner-top">
-                            <div class="tap-hint"></div>
+
+
+                        <div class="product-group">
+                            <!-- Cans slide automatically; JS duplicates them for a seamless loop -->
+                            <div class="can-viewport">
+                                <div class="can-track">
+                                    <img class="layer layer-can can-1" src="./assets/img_3.png" alt=""
+                                        data-popup-title="Can 1" data-popup-text="Your text for can 1." />
+                                    <img class="layer layer-can can-2" src="./assets/img_4.png" alt=""
+                                        data-popup-title="Can 2" data-popup-text="Your text for can 2." />
+                                    <img class="layer layer-can can-3" src="./assets/img_6.png" alt=""
+                                        data-popup-title="Can 3" data-popup-text="Your text for can 3." />
+                                </div>
+                            </div>
+
+                            <div class="main-wrap">
+                                <img class="layer layer-main"
+                                    src="./assets/Gemini_Generated_Image_sqjd5nsqjd5nsqjd-removebg-preview.png" alt=""
+                                    data-popup-title="Main Product" data-popup-text="Your text for the main image." />
+                            </div>
                         </div>
-
-
-                        <div class="move-can1"></div>
-                        <div class="move-can2"></div>
-                        <div class="move-can3"></div>
                     </div>
                 </div>
             </div>
@@ -307,14 +421,414 @@
                 និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
             </p>
 
-            <div class="sknteam_image">
-                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+            <div class="news-image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" data-popup-title="Khmer Daily"
+                    data-popup-text="Your text for the bottom image." />
             </div>
-        </div>
+        </article>
 
         <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
     </div>
 
+    <!-- Popup (shared by all images) -->
+    <div class="popup" id="popup" role="dialog" aria-modal="true" aria-labelledby="popup-title">
+        <div class="popup-box">
+            <button class="popup-close" type="button" aria-label="Close">&times;</button>
+            <h3 class="popup-title" id="popup-title"></h3>
+            <p class="popup-text"></p>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const popup = document.getElementById('popup');
+            const titleEl = popup.querySelector('.popup-title');
+            const textEl = popup.querySelector('.popup-text');
+            const group = document.querySelector('.product-group');
+            const viewport = document.querySelector('.can-viewport');
+            const track = document.querySelector('.can-track');
+            const mainImg = document.querySelector('.layer-main');
+
+            const mainWrap = document.querySelector('.main-wrap');
+
+            // How much of the dragged can must be inside the main product's frame to count as "fit"
+            // (1 = 100% inside, 0.6 = at least 60% of the can's area is inside the frame)
+            const FIT_RATIO = 0.6;
+
+            // Auto-slide speed in pixels per second. Smaller = slower.
+            // (e.g. 20 = very slow, 40 = slow, 80 = fast)
+            const SLIDE_SPEED = 70;
+
+            /* ---------- Seamless auto-slide ---------- */
+            const originals = Array.from(track.querySelectorAll('.layer-can'));
+
+            function buildTrack() {
+                // Include each can's right margin when measuring one set.
+                // Measure BEFORE clearing the track — once the cans are removed
+                // from the page their width reads as 0.
+                const setWidth = originals.reduce(function (total, can) {
+                    const styles = getComputedStyle(can);
+                    const marginRight = parseFloat(styles.marginRight) || 0;
+                    const width = can.getBoundingClientRect().width || parseFloat(styles.width) || 0;
+                    return total + width + marginRight;
+                }, 0);
+
+                if (!setWidth) return;
+
+                // Rebuild from the three original cans whenever the viewport changes.
+                track.innerHTML = '';
+
+                // Make the first half wider than the viewport so no empty gap appears.
+                const copies = Math.max(1, Math.ceil(viewport.clientWidth / setWidth) + 1);
+                const firstHalf = [];
+
+                for (let i = 0; i < copies; i++) {
+                    originals.forEach(function (can) {
+                        const item = i === 0 ? can : can.cloneNode(true);
+                        firstHalf.push(item);
+                        track.appendChild(item);
+                    });
+                }
+
+                // Duplicate the exact first half; translateX(-50%) then loops smoothly.
+                firstHalf.forEach(function (can) {
+                    track.appendChild(can.cloneNode(true));
+                });
+
+                // Same speed on every screen size: duration = distance / speed
+                const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const speed = reduce ? SLIDE_SPEED / 2 : SLIDE_SPEED;
+                const distance = track.scrollWidth / 2; // one loop = half the track
+                group.style.setProperty('--slide-speed', (distance / speed).toFixed(2) + 's');
+            }
+
+            buildTrack();
+
+            /* ---------- Auto-match main product size to the cans ---------- */
+            // PNGs have different amounts of empty transparent space around the
+            // product, so equal boxes don't give equal-looking products.
+            // Measure the visible pixels of each image and scale the main one
+            // so its visible height equals the cans' visible height.
+            const boxCache = new Map();
+
+            // Visible (non-transparent) area as fractions of the image: {top, bottom, left, right}
+            function getVisibleBox(img) {
+                if (boxCache.has(img.src)) return boxCache.get(img.src);
+                let box = null;
+                try {
+                    const nw = img.naturalWidth, nh = img.naturalHeight;
+                    const k = Math.min(1, 400 / Math.max(nw, nh)); // downscale for speed
+                    const cw = Math.max(1, Math.round(nw * k));
+                    const ch = Math.max(1, Math.round(nh * k));
+                    const canvas = document.createElement('canvas');
+                    canvas.width = cw;
+                    canvas.height = ch;
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                    ctx.drawImage(img, 0, 0, cw, ch);
+                    const data = ctx.getImageData(0, 0, cw, ch).data;
+                    let top = ch, bottom = -1, left = cw, right = -1;
+                    for (let y = 0; y < ch; y++) {
+                        for (let x = 0; x < cw; x++) {
+                            if (data[(y * cw + x) * 4 + 3] > 20) { // alpha threshold
+                                if (y < top) top = y;
+                                if (y > bottom) bottom = y;
+                                if (x < left) left = x;
+                                if (x > right) right = x;
+                            }
+                        }
+                    }
+                    if (bottom >= 0) {
+                        box = { top: top / ch, bottom: (bottom + 1) / ch, left: left / cw, right: (right + 1) / cw };
+                    }
+                } catch (err) {
+                    // Canvas blocked (e.g. page opened as file://) — keep CSS fallback
+                    console.warn('Could not measure image, using CSS --main-scale fallback.', err);
+                }
+                boxCache.set(img.src, box);
+                return box;
+            }
+
+            // Visible product height (px) as drawn in its box with object-fit: contain
+            function visibleHeight(img) {
+                const box = getVisibleBox(img);
+                if (!box) return 0;
+                const w = img.offsetWidth, h = img.offsetHeight; // layout size, ignores transforms
+                const s = Math.min(w / img.naturalWidth, h / img.naturalHeight);
+                return (box.bottom - box.top) * img.naturalHeight * s;
+            }
+
+            function matchMainSize() {
+                const canHeights = originals.map(visibleHeight).filter(Boolean);
+                const mainH = visibleHeight(mainImg);
+                if (!canHeights.length || !mainH) return;
+                const target = Math.max.apply(null, canHeights); // tallest can
+                group.style.setProperty('--main-scale', (target / mainH).toFixed(3));
+            }
+
+            function whenLoaded(img) {
+                return img.complete && img.naturalWidth
+                    ? Promise.resolve()
+                    : new Promise(function (res) {
+                        img.addEventListener('load', res, { once: true });
+                        img.addEventListener('error', res, { once: true });
+                    });
+            }
+
+            /* ---------- FIX: trim transparent edges from each can PNG ---------- */
+            // Some PNGs (like img_3.png) have extra empty space around the can,
+            // which makes the can look smaller. Crop that space away so every
+            // can fills its box the same way.
+            function trimImage(img) {
+                return whenLoaded(img).then(function () {
+                    try {
+                        const nw = img.naturalWidth, nh = img.naturalHeight;
+                        if (!nw || !nh) return;
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = nw;
+                        canvas.height = nh;
+                        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                        ctx.drawImage(img, 0, 0);
+                        const data = ctx.getImageData(0, 0, nw, nh).data;
+
+                        let top = nh, bottom = -1, left = nw, right = -1;
+                        for (let y = 0; y < nh; y++) {
+                            for (let x = 0; x < nw; x++) {
+                                if (data[(y * nw + x) * 4 + 3] > 20) {
+                                    if (y < top) top = y;
+                                    if (y > bottom) bottom = y;
+                                    if (x < left) left = x;
+                                    if (x > right) right = x;
+                                }
+                            }
+                        }
+                        if (bottom < 0) return; // fully transparent image
+
+                        const w = right - left + 1, h = bottom - top + 1;
+                        if (w === nw && h === nh) return; // nothing to trim
+
+                        const out = document.createElement('canvas');
+                        out.width = w;
+                        out.height = h;
+                        out.getContext('2d').drawImage(canvas, left, top, w, h, 0, 0, w, h);
+
+                        return new Promise(function (res) {
+                            img.addEventListener('load', res, { once: true });
+                            img.addEventListener('error', res, { once: true });
+                            img.src = out.toDataURL('image/png');
+                        });
+                    } catch (err) {
+                        console.warn('Could not trim image (open the page through a local server, not file://).', err);
+                    }
+                });
+            }
+
+            // FIX: trim the cans AND the main product first, then build the slider from the trimmed images
+            Promise.all(originals.concat(mainImg).map(trimImage)).then(function () {
+                buildTrack();
+                matchMainSize();
+            });
+
+            let resizeTimer;
+            window.addEventListener('resize', function () {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function () {
+                    buildTrack();
+                    matchMainSize();
+                }, 150);
+
+            });
+
+            /* ---------- Fit-inside-frame check ---------- */
+            // Share of rect a's area that lies inside rect b
+            function overlapRatio(a, b) {
+                const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+                const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+                return (w * h) / (a.width * a.height);
+            }
+
+            function isInsideFrame(rect) {
+                return overlapRatio(rect, mainImg.getBoundingClientRect()) >= FIT_RATIO;
+            }
+
+            /* ---------- Drag a can into the frame ---------- */
+            let drag = null;          // the can currently being dragged
+            let snapped = null;       // a can sitting in the frame while its popup is open
+            let suppressClick = false;
+
+            // Stop the browser's built-in image dragging
+            track.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
+            track.addEventListener('pointerdown', function (e) {
+                const can = e.target.closest('.layer-can');
+                if (!can || drag || snapped) return;
+                e.preventDefault();
+
+                group.classList.add('is-paused'); // freeze the slide while dragging
+
+                const r = can.getBoundingClientRect();
+                const ghost = can.cloneNode(true);
+                ghost.classList.add('drag-ghost');
+                ghost.style.left = r.left + 'px';
+                ghost.style.top = r.top + 'px';
+                ghost.style.width = r.width + 'px';
+                ghost.style.height = r.height + 'px';
+                ghost.style.transition = 'none';
+                ghost.style.transform = 'translate(0px, 0px)';
+                document.body.appendChild(ghost);
+                can.style.visibility = 'hidden';
+
+                drag = { can: can, ghost: ghost, origin: r, startX: e.clientX, startY: e.clientY, moved: false };
+            });
+
+            window.addEventListener('pointermove', function (e) {
+                if (!drag) return;
+                const dx = e.clientX - drag.startX;
+                const dy = e.clientY - drag.startY;
+                if (Math.abs(dx) + Math.abs(dy) > 5) drag.moved = true;
+                drag.ghost.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+                drag.x = dx;
+                drag.y = dy;
+                mainWrap.classList.toggle('is-target', isInsideFrame(drag.ghost.getBoundingClientRect()));
+            });
+
+            window.addEventListener('pointerup', endDrag);
+            window.addEventListener('pointercancel', endDrag);
+
+            /* ---------- Smooth ghost animation ---------- */
+            // Moves the ghost from where it is now to (x, y).
+            // arc: true = flies along a gentle curve with a small zoom
+            function moveGhost(d, x, y, duration, arc, done) {
+                const fx = d.x || 0, fy = d.y || 0;
+                const t = function (px, py, s) {
+                    return 'translate(' + px + 'px, ' + py + 'px) scale(' + s + ')';
+                };
+
+                let frames;
+                if (arc) {
+                    // Lift the middle of the path upward for a natural "toss"
+                    const lift = Math.min(90, 30 + Math.hypot(x - fx, y - fy) * 0.2);
+                    frames = [
+                        { transform: t(fx, fy, 1), easing: 'cubic-bezier(0.33, 0, 0.67, 1)' },
+                        { transform: t((fx + x) / 2, (fy + y) / 2 - lift, 1.12), offset: 0.5, easing: 'cubic-bezier(0.33, 0, 0.2, 1)' },
+                        { transform: t(x, y, 1) }
+                    ];
+                } else {
+                    frames = [
+                        { transform: t(fx, fy, 1) },
+                        { transform: t(x, y, 1) }
+                    ];
+                }
+
+                d.ghost.style.transition = 'none';
+                const anim = d.ghost.animate(frames, {
+                    duration: duration,
+                    easing: arc ? 'linear' : 'cubic-bezier(0.22, 1, 0.36, 1)',
+                    fill: 'forwards'
+                });
+                anim.onfinish = function () {
+                    d.ghost.style.transform = t(x, y, 1);
+                    anim.cancel();
+                    d.x = x;
+                    d.y = y;
+                    done();
+                };
+            }
+
+            // Little "bounce" on the main product when a can lands in it
+            function popMain() {
+                mainWrap.classList.remove('is-landed');
+                void mainWrap.offsetWidth; // restart the animation
+                mainWrap.classList.add('is-landed');
+            }
+
+            function endDrag() {
+                if (!drag) return;
+                const d = drag;
+                drag = null;
+                mainWrap.classList.remove('is-target');
+                if (d.moved) {
+                    suppressClick = true;
+                    // On touch screens no click may follow the drag, so don't
+                    // let the flag swallow the user's next real tap
+                    setTimeout(function () { suppressClick = false; }, 0);
+                }
+
+                // A simple tap (no drag) OR a drag that ends inside the frame:
+                // fly the can into the main product, then show its popup
+                if (!d.moved || isInsideFrame(d.ghost.getBoundingClientRect())) {
+                    const m = mainImg.getBoundingClientRect();
+                    const x = m.left + (m.width - d.origin.width) / 2 - d.origin.left;
+                    const y = m.top + (m.height - d.origin.height) / 2 - d.origin.top;
+                    snapped = d;
+                    moveGhost(d, x, y, 650, true, function () {
+                        popMain();
+                        // Short pause so the landing is seen before the popup
+                        setTimeout(function () {
+                            openPopup(d.can.dataset.popupTitle, d.can.dataset.popupText);
+                        }, 180);
+                    });
+                } else {
+                    // Outside the frame: glide back, no popup
+                    moveGhost(d, 0, 0, 400, false, function () { returnCan(d); });
+                }
+            }
+
+            function returnCan(d) {
+                d.ghost.remove();
+                d.can.style.visibility = '';
+                group.classList.remove('is-paused');
+            }
+
+            /* ---------- Popup ---------- */
+            function openPopup(title, text) {
+                titleEl.textContent = title || '';
+                titleEl.hidden = !title;
+                textEl.textContent = text || '';
+                popup.classList.add('is-open');
+                group.classList.add('is-paused');
+            }
+
+            function closePopup() {
+                popup.classList.remove('is-open');
+                // Fly a snapped can back to its place in the slider,
+                // keeping the slider paused until it has arrived
+                if (snapped) {
+                    const d = snapped;
+                    moveGhost(d, 0, 0, 550, true, function () {
+                        returnCan(d);
+                        snapped = null;
+                    });
+                } else {
+                    group.classList.remove('is-paused');
+                }
+            }
+
+            document.addEventListener('click', function (e) {
+                // Ignore the click that follows a drag
+                if (suppressClick) {
+                    suppressClick = false;
+                    return;
+                }
+
+                // Cans are handled in endDrag (tap or drag), so skip them here
+                if (e.target.closest('.layer-can')) return;
+
+                // Everything else with data-popup-text opens the popup normally
+                const target = e.target.closest('[data-popup-text]');
+                if (!target) return;
+                openPopup(target.dataset.popupTitle, target.dataset.popupText);
+            });
+
+            // Close on backdrop, X button, or Escape
+            popup.addEventListener('click', function (e) {
+                if (e.target === popup || e.target.closest('.popup-close')) closePopup();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && popup.classList.contains('is-open')) closePopup();
+            });
+        })();
+    </script>
 </body>
 
 </html>

@@ -1,0 +1,1574 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khmer Daily News - Underlay Catch Mini Game</title>
+    <style>
+        /* ==========================================================================
+   Khmer Daily News – Underlay Catch Mini Game
+   Paste this inside the <style> tag. Nothing in the HTML or JS changes.
+   ========================================================================== */
+
+
+        /* ==========================================================================
+   1. Root & Base
+   ========================================================================== */
+
+        :root {
+            /* Stable window height for the mobile underlay.
+       JS overwrites this with a fixed pixel value so the address bar
+       showing/hiding while scrolling never resizes the game. */
+            --app-h: 100vh;
+        }
+
+        @supports (height: 100svh) {
+            :root {
+                --app-h: 100svh;
+            }
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%;
+            overflow-x: clip;
+            /* stop sideways overflow without creating a scroll container */
+        }
+
+        body {
+            font-family: 'Kantumruy Pro', 'Arial', sans-serif;
+            background-color: #f0f2f5;
+        }
+
+
+        /* ==========================================================================
+   2. Page Layout
+   ========================================================================== */
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        header {
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 3px solid #0056b3;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #0056b3;
+        }
+
+        footer {
+            padding: 20px 0;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+            background-color: #ffffff;
+            border-top: 1px solid #ddd;
+        }
+
+
+        /* ==========================================================================
+   3. Article Content
+   ========================================================================== */
+
+        .post h2 {
+            font-size: 24px;
+            line-height: 1.4;
+            color: #1a1a1a;
+        }
+
+        .post p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .date-meta {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .sknteam_image {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .sknteam_image img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 4px;
+        }
+
+
+        /* ==========================================================================
+   4. Scroll-Reveal Underlay Window
+   --------------------------------------------------------------------------
+   .underlay-slot          Takes up space in the article.
+   .underlay-clip          Absolute box clipped with `clip` (reliable on
+                           iOS/Android, unlike clip-path which makes fixed
+                           children flicker).
+   .underlay-fixed-content Fixed to the viewport, so the game stays still
+                           while the article scrolls over it like a window.
+   ========================================================================== */
+
+        .underlay-slot {
+            position: relative;
+            height: 1000px;
+            margin: 30px 0;
+        }
+
+        .underlay-clip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            clip: rect(0, auto, auto, 0);
+        }
+
+        .underlay-fixed-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            /* hidden until JS confirms the slot is on screen, so the game
+       can never float over the text below */
+            visibility: hidden;
+        }
+
+        .underlay-banner {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: auto;
+            background-repeat: no-repeat;
+            background-position: center top;
+            background-size: contain;
+        }
+
+        .ad-label {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            z-index: 5;
+            padding: 2px 6px;
+            font-size: 10px;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 3px;
+        }
+
+
+        /* ==========================================================================
+   5. Catch Game – Container & Canvas
+   ========================================================================== */
+
+        .catch-game {
+            position: relative;
+            height: min(640px, 82vh);
+            max-width: calc(100% - 24px);
+            aspect-ratio: 1 / 2;
+            /* 640 x 1280 */
+            overflow: hidden;
+            font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+            background: #7f101b;
+            border-radius: 22px;
+            box-shadow:
+                0 0 0 3px #ffffff,
+                0 0 0 6px rgba(255, 255, 255, 0.45),
+                0 18px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        .catch-canvas {
+            position: absolute;
+            inset: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            /* vertical swipes scroll the page, horizontal drag moves the bucket */
+            touch-action: pan-y;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+
+        /* ==========================================================================
+   6. Beer Collection Panel
+   ========================================================================== */
+
+        .beer-collection {
+            position: absolute;
+            top: 62px;
+            right: 8px;
+            left: 8px;
+            z-index: 4;
+            padding: 9px;
+            color: #263547;
+            background: rgba(255, 248, 231, 0.96);
+            border: 2px solid #d5aa5b;
+            border-radius: 12px;
+            box-shadow: 0 5px 0 rgba(91, 56, 20, 0.32), 0 12px 28px rgba(0, 0, 0, 0.24);
+            pointer-events: none;
+        }
+
+        .beer-collection-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 0 2px 8px;
+            color: #263547;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+        }
+
+        .beer-collection-total {
+            padding: 3px 7px;
+            color: #fff8e8;
+            background: #263547;
+            border-radius: 5px;
+            font-size: 8px;
+            white-space: nowrap;
+        }
+
+        .beer-collection-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 8px;
+            color: #276343;
+        }
+
+        .beer-collection-live::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            background: #35a866;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px rgba(53, 168, 102, 0.16);
+        }
+
+        .beer-collection-items {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 6px;
+        }
+
+        .beer-collection-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 3px;
+            min-width: 0;
+            min-height: 98px;
+            padding: 5px 3px 4px;
+            background: #fffdf8;
+            border: 1px solid #e6d8bc;
+            border-radius: 8px;
+            transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+        }
+
+        .beer-collection-card img {
+            display: block;
+            width: 100%;
+            height: 56px;
+            object-fit: contain;
+        }
+
+        .beer-collection-name {
+            max-width: 100%;
+            overflow: hidden;
+            color: #556171;
+            font-size: 7px;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .beer-collection-count {
+            min-width: 22px;
+            margin-top: auto;
+            padding: 2px 6px;
+            color: #fff8e8;
+            background: #a94632;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 900;
+            line-height: 1.3;
+            text-align: center;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .beer-collection-card.has-caught {
+            background: #fff2d1;
+            border-color: #c49339;
+            transform: translateY(-2px);
+        }
+
+        .beer-collection-card.has-caught .beer-collection-count {
+            background: #28714b;
+            transform: scale(1.08);
+        }
+
+        .beer-collection-card.catch-pop {
+            animation: beer-catch-pop 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .beer-collection-count.count-pop {
+            animation: beer-count-pop 360ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes beer-catch-pop {
+            0% {
+                transform: translateY(-2px) scale(1);
+            }
+
+            45% {
+                transform: translateY(-5px) scale(1.08);
+                box-shadow: 0 5px 16px rgba(40, 113, 75, 0.3);
+            }
+
+            100% {
+                transform: translateY(-2px) scale(1);
+            }
+        }
+
+        @keyframes beer-count-pop {
+
+            0%,
+            100% {
+                transform: scale(1.08);
+            }
+
+            55% {
+                transform: scale(1.35);
+            }
+        }
+
+
+        /* ========================================================================== 
+   7. Game Overlay (start / game over)
+   ========================================================================== */
+
+        .catch-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 22px;
+            text-align: center;
+            color: #fff;
+            background: rgba(10, 12, 28, 0.55);
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .catch-overlay.is-hidden {
+            opacity: 0;
+        }
+
+        .catch-finger {
+            font-size: 52px;
+            line-height: 1;
+            animation: catch-point 0.9s ease-in-out infinite alternate;
+        }
+
+        .catch-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+        }
+
+        .catch-sub {
+            max-width: 220px;
+            font-size: 13px;
+            line-height: 1.5;
+            opacity: 0.85;
+        }
+
+        .catch-result {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .catch-result.is-visible {
+            display: flex;
+        }
+
+        .catch-result span {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3em;
+            color: #f5d27a;
+        }
+
+        .catch-result strong {
+            font-size: clamp(34px, 11vw, 44px);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        .catch-result em {
+            font-size: 13px;
+            font-style: normal;
+            opacity: 0.85;
+        }
+
+
+        /* ==========================================================================
+   8. Animations
+   ========================================================================== */
+
+        @keyframes catch-point {
+            from {
+                transform: translateY(4px);
+            }
+
+            to {
+                transform: translateY(-4px);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .catch-finger,
+            .beer-collection-card.catch-pop,
+            .beer-collection-count.count-pop {
+                animation: none;
+            }
+        }
+
+
+        /* ==========================================================================
+   9. Responsive
+   ========================================================================== */
+
+        /* ---------- Small phones ---------- */
+        @media (max-width: 380px) {
+            .beer-collection {
+                top: 58px;
+                right: 6px;
+                left: 6px;
+                padding: 6px;
+            }
+
+            .beer-collection-items {
+                gap: 3px;
+            }
+
+            .beer-collection-card {
+                min-height: 92px;
+            }
+
+            .beer-collection-card img {
+                height: 50px;
+            }
+        }
+
+        /* ---------- Mobile: full-screen underlay ---------- */
+        @media (max-width: 767px) {
+            .post {
+                padding: 0 16px;
+            }
+
+            /* Full-bleed window. Taller than one screen: the game fills the whole
+       screen for half a screen of scrolling before the article covers it again. */
+            .underlay-slot {
+                height: calc(var(--app-h) * 1.5);
+                margin: 0 -16px;
+            }
+
+            /* The layer always covers the largest possible screen height, so no white
+       can show below it when the browser bar hides or shows. Any extra space
+       is filled with the game's floor color. */
+            .underlay-fixed-content {
+                align-items: flex-start;
+                height: 100vh;
+                height: 100lvh;
+                background: #7f101b;
+            }
+
+            /* The game itself keeps a stable, locked height at the top. */
+            .underlay-banner {
+                flex: 0 0 auto;
+                height: var(--app-h);
+                background-position: center;
+                background-size: cover;
+            }
+
+            /* Full screen on mobile: fills the whole width and height. */
+            .catch-game {
+                width: 100%;
+                height: 100%;
+                min-width: 0;
+                min-height: 0;
+                max-width: none;
+                aspect-ratio: auto;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>សារព័ត៌មាន Khmer Daily</h1>
+        </header>
+
+        <div class="post">
+            <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+            <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+            </div>
+
+            <p>
+                <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+            </p>
+
+            <div class="underlay-slot">
+                <div class="underlay-clip">
+                    <div class="underlay-fixed-content">
+                        <div class="underlay-banner">
+
+                            <div class="catch-game">
+                                <canvas class="catch-canvas" role="application" tabindex="0"
+                                    aria-label="Catch Angkor beer bottles in the basket. Avoid bombs. Ice slows the basket"></canvas>
+
+                                <section class="beer-collection" aria-label="Live beer collection">
+                                    <div class="beer-collection-heading">
+                                        <span>BEER COLLECTION</span>
+                                        <span class="beer-collection-total">TOTAL <span data-beer-total>0</span></span>
+                                        <span class="beer-collection-live">LIVE</span>
+                                    </div>
+                                    <div class="beer-collection-items" role="list" aria-live="polite">
+                                        <div class="beer-collection-card" role="listitem" data-beer-card="0">
+                                            <img src="./images/img_3.png" alt="" />
+                                            <span class="beer-collection-name">Classic</span>
+                                            <strong class="beer-collection-count" data-beer-count>0</strong>
+                                        </div>
+                                        <div class="beer-collection-card" role="listitem" data-beer-card="1">
+                                            <img src="./images/img_4.png" alt="" />
+                                            <span class="beer-collection-name">Sky Bottle</span>
+                                            <strong class="beer-collection-count" data-beer-count>0</strong>
+                                        </div>
+                                        <div class="beer-collection-card" role="listitem" data-beer-card="2">
+                                            <img src="./images/img_5.png" alt="" />
+                                            <span class="beer-collection-name">Sky Can</span>
+                                            <strong class="beer-collection-count" data-beer-count>0</strong>
+                                        </div>
+                                        <div class="beer-collection-card" role="listitem" data-beer-card="3">
+                                            <img src="./images/img_6.png" alt="" />
+                                            <span class="beer-collection-name">Stout</span>
+                                            <strong class="beer-collection-count" data-beer-count>0</strong>
+                                        </div>
+                                        <div class="beer-collection-card" role="listitem" data-beer-card="4">
+                                            <img src="./images/img_7.png" alt="" />
+                                            <span class="beer-collection-name">Angkor Can</span>
+                                            <strong class="beer-collection-count" data-beer-count>0</strong>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <div class="catch-overlay">
+                                    <div class="catch-finger" aria-hidden="true">👆</div>
+                                    <div class="catch-title">TAP TO PLAY</div>
+                                    <div class="catch-sub catch-sub-text">Drag to move the basket. Catch Angkor beer,
+                                        avoid the deadly cans. Ice slows you and costs 10 points!</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p>
+                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+            </p>
+
+            <p>
+                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+            </p>
+
+            <p>
+                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+            </p>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+            </div>
+        </div>
+        <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+
+    </div>
+
+    <script>
+        (function () {
+            const slot = document.querySelector('.underlay-slot');
+            const game = document.querySelector('.catch-game');
+            const canvas = document.querySelector('.catch-canvas');
+            const ctx = canvas.getContext('2d');
+            const overlay = document.querySelector('.catch-overlay');
+            const overlayTitle = document.querySelector('.catch-title');
+            const overlayFinger = document.querySelector('.catch-finger');
+            const overlaySub = document.querySelector('.catch-sub-text');
+            const beerCountElements = document.querySelectorAll('[data-beer-count]');
+            const beerCardElements = document.querySelectorAll('[data-beer-card]');
+            const beerTotalElement = document.querySelector('[data-beer-total]');
+
+            const MAX_LIVES = 3;
+            const BEER_VARIANTS = [
+                { glass: '#8d3c12', shine: '#f4ad52', label: '#c82832' },
+                { glass: '#48261e', shine: '#bd7650', label: '#d8b454' },
+                { glass: '#9b501b', shine: '#ffd17a', label: '#e8e3d3' }
+            ];
+            const BEER_IMAGE_HEIGHT_RATIO = 7;
+            const BEER_IMAGES = [
+                { src: './images/angPa1.png', image: new Image(), caught: 0 },
+                { src: './images/angPa2.png', image: new Image(), caught: 0 },
+                { src: './images/angPa4.png', image: new Image(), caught: 0 },
+                { src: './images/angPa3.png', image: new Image(), caught: 0 },
+                { src: './images/angPa5.png', image: new Image(), caught: 0 }
+            ];
+            BEER_IMAGES.forEach(({ src, image }) => {
+                image.onerror = () => console.error('Unable to load beer image:', src);
+                image.src = src;
+            });
+
+            function updateBeerCollection() {
+                let total = 0;
+                BEER_IMAGES.forEach((beer, index) => {
+                    total += beer.caught;
+                    beerCountElements[index].textContent = String(beer.caught);
+                    beerCardElements[index].classList.toggle('has-caught', beer.caught > 0);
+                });
+                beerTotalElement.textContent = String(total);
+            }
+
+            function animateBeerCatch(index) {
+                const card = beerCardElements[index];
+                const count = beerCountElements[index];
+                card.classList.remove('catch-pop');
+                count.classList.remove('count-pop');
+                void card.offsetWidth;
+                card.classList.add('catch-pop');
+                count.classList.add('count-pop');
+            }
+
+            const rand = (min, max) => min + Math.random() * (max - min);
+
+            /* ---------- Stable mobile height ----------
+               On phones the address bar grows/shrinks while scrolling, which changes
+               100vh and used to resize the canvas mid-scroll (the "not clean" look).
+               We lock the window height to a fixed pixel value and only update it when
+               the screen width changes (rotation). */
+            const mobileMQ = window.matchMedia('(max-width: 767px)');
+            let lockedWidth = window.innerWidth;
+
+            function lockAppHeight() {
+                lockedWidth = window.innerWidth;
+                document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px');
+            }
+            lockAppHeight();
+
+            let hitFlash = 0;
+            let flashRGB = '255, 70, 40';
+
+            // Catching the frosty beer mug slows the basket for a moment.
+            const FREEZE_SECONDS = 2;
+            let freezeTimer = 0;
+
+            /* The game is drawn on a fixed 640-wide canvas. Height follows the screen:
+               exactly 640 x 1280 on a 1:2 screen, taller or shorter on other phones.
+               `scale` = on-screen px per game unit, `u` = size unit for HUD/details. */
+            const DESIGN_W = 640;
+            let scale = 1, u = 640 / 360;
+            let W = 0, H = 0, dpr = 1;
+            let state = 'idle'; // idle | playing | over
+            let score = 0;
+            let lives = MAX_LIVES;
+            let items = [];
+            let spawnTimer = 0;
+            let lastTime = 0;
+            let overAt = 0;
+            const bucket = { x: 0, targetX: 0, w: 0, h: 0, y: 0 };
+
+            function resize() {
+                const rect = game.getBoundingClientRect();
+                if (!rect.width || !rect.height) return;
+                const prevW = W || DESIGN_W;
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+                scale = rect.width / DESIGN_W;
+                W = DESIGN_W;
+                H = rect.height / scale;
+                u = W / 360;
+                canvas.width = Math.round(rect.width * dpr);
+                canvas.height = Math.round(rect.height * dpr);
+                ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
+
+                const ratio = prevW ? bucket.x / prevW : 0.5;
+                bucket.w = W * 0.38;
+                bucket.h = H * 0.12;
+                bucket.y = H - bucket.h - H * 0.07;
+                bucket.x = bucket.x ? ratio * W : W / 2;
+                bucket.targetX = bucket.x;
+            }
+
+            /* ---------- Spawning ---------- */
+            function spawnItem() {
+                const roll = Math.random();
+                // bombs 15%, ice 15%, Angkor beer 70%
+                const type = roll < 0.15 ? 'bomb' : roll < 0.30 ? 'ice' : 'beer';
+                const speedBoost = Math.min(score / 160, 1);
+                items.push({
+                    type,
+                    color: BEER_VARIANTS[Math.floor(Math.random() * BEER_VARIANTS.length)],
+                    beerIndex: Math.floor(Math.random() * BEER_IMAGES.length),
+                    x: rand(W * 0.12, W * 0.88),
+                    y: -50 * u,
+                    vy: H * (rand(0.28, 0.4) + speedBoost * 0.28),
+                    rot: rand(-0.5, 0.5),
+                    vr: rand(-1.6, 1.6),
+                    size: (type === 'bomb' || type === 'ice') ? W * 0.07 : W * 0.06
+                });
+            }
+
+            /* ---------- Drawing ---------- */
+            function drawBackground() {
+                const sky = ctx.createLinearGradient(0, 0, 0, H);
+                sky.addColorStop(0, '#430812');
+                sky.addColorStop(0.48, '#9e1526');
+                sky.addColorStop(0.76, '#d83a38');
+                sky.addColorStop(1, '#ef7950');
+                ctx.fillStyle = sky;
+                ctx.fillRect(0, 0, W, H);
+
+                const baseY = H * 0.86;
+                const moonX = W * 0.82;
+                const moonY = H * 0.15;
+                const moonGlow = ctx.createRadialGradient(moonX, moonY, 2, moonX, moonY, W * 0.13);
+                moonGlow.addColorStop(0, 'rgba(255, 226, 173, 0.82)');
+                moonGlow.addColorStop(1, 'rgba(255, 226, 173, 0)');
+                ctx.fillStyle = moonGlow;
+                ctx.fillRect(moonX - W * 0.13, moonY - W * 0.13, W * 0.26, W * 0.26);
+                ctx.fillStyle = '#ffe4b2';
+                ctx.beginPath();
+                ctx.arc(moonX, moonY, W * 0.025, 0, Math.PI * 2);
+                ctx.fill();
+
+                drawPhnomPenhSkyline(baseY);
+
+                const river = ctx.createLinearGradient(0, baseY - H * 0.06, 0, H);
+                river.addColorStop(0, '#761827');
+                river.addColorStop(0.35, '#4b101d');
+                river.addColorStop(1, '#260911');
+                ctx.fillStyle = river;
+                ctx.fillRect(0, baseY - H * 0.06, W, H - baseY + H * 0.06);
+
+                const floor = ctx.createLinearGradient(0, baseY, 0, H);
+                floor.addColorStop(0, '#52121c');
+                floor.addColorStop(1, '#26090f');
+                ctx.fillStyle = floor;
+                ctx.fillRect(0, baseY, W, H - baseY);
+
+                ctx.save();
+                ctx.globalAlpha = 0.3;
+                ctx.strokeStyle = '#f5bc76';
+                ctx.lineWidth = 2 * u;
+                for (let i = 0; i < 8; i++) {
+                    const y = baseY + H * (0.025 + i * 0.014);
+                    const halfWidth = W * (0.08 + i * 0.023);
+                    ctx.beginPath();
+                    ctx.moveTo(W / 2 - halfWidth, y);
+                    ctx.lineTo(W / 2 + halfWidth, y);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            function drawPhnomPenhSkyline(baseY) {
+                const buildingColor = '#4b101d';
+                const windowColor = 'rgba(255, 203, 126, 0.72)';
+                const buildings = [
+                    { x: 0.03, w: 0.11, h: 0.2 }, { x: 0.16, w: 0.08, h: 0.13 },
+                    { x: 0.76, w: 0.09, h: 0.17 }, { x: 0.87, w: 0.1, h: 0.23 }
+                ];
+                buildings.forEach(({ x, w, h }) => {
+                    const bx = W * x, bw = W * w, bh = H * h;
+                    ctx.fillStyle = buildingColor;
+                    ctx.fillRect(bx, baseY - bh, bw, bh);
+                    ctx.fillStyle = windowColor;
+                    for (let wy = baseY - bh + 10 * u; wy < baseY - 8 * u; wy += 17 * u) {
+                        for (let wx = bx + 7 * u; wx < bx + bw - 4 * u; wx += 12 * u) {
+                            const row = Math.floor((wy - (baseY - bh)) / (17 * u));
+                            const column = Math.floor((wx - bx) / (12 * u));
+                            if ((row * 3 + column) % 4 !== 0) ctx.fillRect(wx, wy, 3 * u, 5 * u);
+                        }
+                    }
+                });
+
+                const centerX = W / 2;
+                const hallBase = baseY - H * 0.015;
+                const hallWidth = W * 0.43;
+                const hallTop = baseY - H * 0.19;
+                ctx.fillStyle = '#70202a';
+                ctx.fillRect(centerX - hallWidth / 2, hallTop, hallWidth, hallBase - hallTop);
+
+                ctx.fillStyle = 'rgba(255, 205, 124, 0.82)';
+                for (let i = 0; i < 7; i++) {
+                    const pillarX = centerX - hallWidth * 0.42 + i * hallWidth * 0.14;
+                    ctx.fillRect(pillarX, hallTop + H * 0.055, 2.5 * u, hallBase - hallTop - H * 0.055);
+                    ctx.fillRect(pillarX - 2 * u, hallTop + H * 0.055, 6.5 * u, 3 * u);
+                }
+                ctx.fillStyle = 'rgba(255, 210, 135, 0.9)';
+                ctx.fillRect(centerX - hallWidth * 0.12, hallTop + H * 0.065, hallWidth * 0.24, H * 0.07);
+
+                const roof = (width, y, rise) => {
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - width / 2, y);
+                    ctx.quadraticCurveTo(centerX - width * 0.24, y - rise * 0.08, centerX, y - rise);
+                    ctx.quadraticCurveTo(centerX + width * 0.24, y - rise * 0.08, centerX + width / 2, y);
+                    ctx.lineTo(centerX + width * 0.43, y + H * 0.012);
+                    ctx.quadraticCurveTo(centerX, y - rise * 0.58, centerX - width * 0.43, y + H * 0.012);
+                    ctx.closePath();
+                    const roofGradient = ctx.createLinearGradient(0, y - rise, 0, y + H * 0.012);
+                    roofGradient.addColorStop(0, '#f6d184');
+                    roofGradient.addColorStop(1, '#a86939');
+                    ctx.fillStyle = roofGradient;
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(255, 225, 163, 0.95)';
+                    ctx.lineWidth = 2 * u;
+                    ctx.stroke();
+                };
+
+                roof(W * 0.55, hallTop + H * 0.07, H * 0.085);
+                roof(W * 0.4, hallTop + H * 0.005, H * 0.09);
+                roof(W * 0.24, hallTop - H * 0.06, H * 0.1);
+
+                const spire = (x, y, height, width) => {
+                    ctx.fillStyle = '#f4c66e';
+                    ctx.beginPath();
+                    ctx.moveTo(x - width / 2, y);
+                    ctx.lineTo(x - width * 0.3, y - height * 0.25);
+                    ctx.lineTo(x - width * 0.19, y - height * 0.25);
+                    ctx.lineTo(x - width * 0.13, y - height * 0.53);
+                    ctx.lineTo(x - width * 0.08, y - height * 0.53);
+                    ctx.lineTo(x, y - height);
+                    ctx.lineTo(x + width * 0.08, y - height * 0.53);
+                    ctx.lineTo(x + width * 0.13, y - height * 0.53);
+                    ctx.lineTo(x + width * 0.19, y - height * 0.25);
+                    ctx.lineTo(x + width * 0.3, y - height * 0.25);
+                    ctx.lineTo(x + width / 2, y);
+                    ctx.closePath();
+                    ctx.fill();
+                };
+                spire(centerX, hallTop - H * 0.135, H * 0.19, W * 0.055);
+                spire(centerX - hallWidth * 0.36, hallTop + H * 0.005, H * 0.11, W * 0.035);
+                spire(centerX + hallWidth * 0.36, hallTop + H * 0.005, H * 0.11, W * 0.035);
+            }
+
+            function heartPath(x, y, s) {
+                ctx.beginPath();
+                ctx.moveTo(x, y + s * 0.35);
+                ctx.bezierCurveTo(x, y - s * 0.1, x - s * 0.55, y - s * 0.1, x - s * 0.55, y + s * 0.3);
+                ctx.bezierCurveTo(x - s * 0.55, y + s * 0.65, x - s * 0.1, y + s * 0.85, x, y + s * 1.05);
+                ctx.bezierCurveTo(x + s * 0.1, y + s * 0.85, x + s * 0.55, y + s * 0.65, x + s * 0.55, y + s * 0.3);
+                ctx.bezierCurveTo(x + s * 0.55, y - s * 0.1, x, y - s * 0.1, x, y + s * 0.35);
+                ctx.closePath();
+            }
+
+            function drawHUD() {
+                const s = 18 * u;
+                for (let i = 0; i < MAX_LIVES; i++) {
+                    const hx = 22 * u + i * (s + 8 * u);
+                    heartPath(hx, 22 * u, s);
+                    if (i < lives) {
+                        ctx.fillStyle = '#ff3b4e';
+                        ctx.fill();
+                    } else {
+                        ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+                        ctx.lineWidth = 1.5 * u;
+                        ctx.stroke();
+                    }
+                }
+
+                ctx.textAlign = 'right';
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.font = '600 ' + (10 * u) + 'px Montserrat, Arial, sans-serif';
+                ctx.fillText('SCORE', W - 16 * u, 24 * u);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '800 ' + (26 * u) + 'px Montserrat, Arial, sans-serif';
+                ctx.fillText(String(score), W - 16 * u, 50 * u);
+            }
+
+            function drawBeer(it) {
+                const beer = BEER_IMAGES[it.beerIndex];
+                const image = beer.image;
+                if (image.complete && image.naturalWidth > 0) {
+                    const height = it.size * BEER_IMAGE_HEIGHT_RATIO;
+                    const width = height * (image.naturalWidth / image.naturalHeight);
+                    ctx.save();
+                    ctx.translate(it.x, it.y);
+                    ctx.rotate(it.rot);
+                    ctx.drawImage(image, -width / 2, -height / 2, width, height);
+                    ctx.restore();
+                    return;
+                }
+
+                const bw = it.size * 1.05;
+                const bh = it.size * 3.2;
+                const neckW = bw * 0.34;
+                const shoulderY = -bh * 0.2;
+                ctx.save();
+                ctx.translate(it.x, it.y);
+                ctx.rotate(it.rot);
+
+                const glass = ctx.createLinearGradient(-bw / 2, 0, bw / 2, 0);
+                glass.addColorStop(0, '#482013');
+                glass.addColorStop(0.28, it.color.glass);
+                glass.addColorStop(0.58, it.color.shine);
+                glass.addColorStop(0.78, it.color.glass);
+                glass.addColorStop(1, '#35180f');
+                ctx.fillStyle = glass;
+                ctx.beginPath();
+                ctx.moveTo(-neckW / 2, -bh / 2);
+                ctx.lineTo(neckW / 2, -bh / 2);
+                ctx.lineTo(neckW / 2, shoulderY - bh * 0.08);
+                ctx.quadraticCurveTo(neckW / 2, shoulderY - bh * 0.015, bw * 0.36, shoulderY + bh * 0.02);
+                ctx.quadraticCurveTo(bw / 2, shoulderY + bh * 0.11, bw / 2, shoulderY + bh * 0.2);
+                ctx.lineTo(bw * 0.44, bh * 0.43);
+                ctx.quadraticCurveTo(bw * 0.42, bh / 2, 0, bh / 2);
+                ctx.quadraticCurveTo(-bw * 0.42, bh / 2, -bw * 0.44, bh * 0.43);
+                ctx.lineTo(-bw / 2, shoulderY + bh * 0.2);
+                ctx.quadraticCurveTo(-bw / 2, shoulderY + bh * 0.11, -bw * 0.36, shoulderY + bh * 0.02);
+                ctx.quadraticCurveTo(-neckW / 2, shoulderY - bh * 0.015, -neckW / 2, shoulderY - bh * 0.08);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = 'rgba(255, 224, 160, 0.68)';
+                ctx.fillRect(-neckW * 0.42, -bh * 0.43, neckW * 0.16, bh * 0.45);
+
+                ctx.fillStyle = '#d7bd75';
+                ctx.fillRect(-neckW * 0.62, -bh * 0.51, neckW * 1.24, bh * 0.065);
+                ctx.fillStyle = '#f3d991';
+                ctx.fillRect(-neckW * 0.62, -bh * 0.51, neckW * 1.24, bh * 0.018);
+
+                const labelY = -bh * 0.015;
+                const labelH = bh * 0.31;
+                ctx.fillStyle = it.color.label;
+                ctx.beginPath();
+                ctx.roundRect(-bw * 0.46, labelY, bw * 0.92, labelH, bw * 0.13);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255, 224, 155, 0.95)';
+                ctx.lineWidth = Math.max(1, bw * 0.035);
+                ctx.stroke();
+
+                ctx.fillStyle = '#f7d88e';
+                ctx.beginPath();
+                ctx.moveTo(-bw * 0.22, labelY + labelH * 0.37);
+                ctx.lineTo(-bw * 0.13, labelY + labelH * 0.18);
+                ctx.lineTo(-bw * 0.05, labelY + labelH * 0.37);
+                ctx.lineTo(0, labelY + labelH * 0.11);
+                ctx.lineTo(bw * 0.05, labelY + labelH * 0.37);
+                ctx.lineTo(bw * 0.13, labelY + labelH * 0.18);
+                ctx.lineTo(bw * 0.22, labelY + labelH * 0.37);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = '#fff6db';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = 'bold ' + Math.max(5, bw * 0.21) + 'px Arial, sans-serif';
+                ctx.fillText('ANGKOR', 0, labelY + labelH * 0.68, bw * 0.82);
+
+                ctx.restore();
+            }
+
+            function drawIce(it) {
+                ctx.save();
+                ctx.translate(it.x, it.y);
+                ctx.rotate(it.rot);
+                const s = it.size;
+                const cupW = s * 1.15;
+                const cupH = s * 1.5;
+                const left = -cupW * 0.42;
+                const right = cupW * 0.42;
+                const top = -cupH * 0.48;
+                const bottom = cupH * 0.48;
+
+                ctx.shadowColor = 'rgba(145, 226, 255, 0.88)';
+                ctx.shadowBlur = 14 * u;
+                ctx.strokeStyle = '#b7efff';
+                ctx.lineWidth = Math.max(3 * u, s * 0.14);
+                ctx.beginPath();
+                ctx.moveTo(right - s * 0.04, top + cupH * 0.2);
+                ctx.bezierCurveTo(s * 1.05, top + cupH * 0.14, s * 1.05, bottom - cupH * 0.12, right - s * 0.02, bottom - cupH * 0.1);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                const glass = ctx.createLinearGradient(left, 0, right, 0);
+                glass.addColorStop(0, 'rgba(227, 250, 255, 0.95)');
+                glass.addColorStop(0.28, 'rgba(119, 207, 238, 0.84)');
+                glass.addColorStop(0.7, 'rgba(187, 238, 255, 0.92)');
+                glass.addColorStop(1, 'rgba(82, 175, 216, 0.9)');
+                ctx.fillStyle = glass;
+                ctx.beginPath();
+                ctx.moveTo(left, top);
+                ctx.lineTo(right, top);
+                ctx.lineTo(right * 0.82, bottom - s * 0.08);
+                ctx.quadraticCurveTo(0, bottom + s * 0.04, left * 0.82, bottom - s * 0.08);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(237, 252, 255, 0.95)';
+                ctx.lineWidth = 2 * u;
+                ctx.stroke();
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(left, top);
+                ctx.lineTo(right, top);
+                ctx.lineTo(right * 0.82, bottom - s * 0.08);
+                ctx.quadraticCurveTo(0, bottom + s * 0.04, left * 0.82, bottom - s * 0.08);
+                ctx.closePath();
+                ctx.clip();
+                const beer = ctx.createLinearGradient(0, -s * 0.12, 0, bottom);
+                beer.addColorStop(0, 'rgba(255, 202, 82, 0.92)');
+                beer.addColorStop(1, 'rgba(183, 92, 24, 0.94)');
+                ctx.fillStyle = beer;
+                ctx.fillRect(left, -s * 0.12, cupW, cupH);
+                ctx.restore();
+
+                ctx.fillStyle = '#f6ffff';
+                ctx.beginPath();
+                ctx.ellipse(0, top + s * 0.08, cupW * 0.45, s * 0.18, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.76)';
+                ctx.beginPath();
+                ctx.roundRect(left + s * 0.13, -s * 0.18, s * 0.1, cupH * 0.48, s * 0.05);
+                ctx.fill();
+
+                ctx.fillStyle = '#e9fbff';
+                ctx.beginPath();
+                ctx.roundRect(-s * 0.37, s * 0.12, s * 0.74, s * 0.32, s * 0.07);
+                ctx.fill();
+                ctx.fillStyle = '#308db3';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = '900 ' + (s * 0.2) + 'px Arial, sans-serif';
+                ctx.fillText('ICE', 0, s * 0.28);
+
+                ctx.strokeStyle = '#effdff';
+                ctx.lineWidth = Math.max(1.5 * u, s * 0.055);
+                ctx.lineCap = 'round';
+                for (let i = 0; i < 3; i++) {
+                    const angle = i * Math.PI / 3;
+                    const dx = Math.cos(angle) * s * 0.22;
+                    const dy = Math.sin(angle) * s * 0.22;
+                    ctx.beginPath();
+                    ctx.moveTo(-dx, -s * 0.28 - dy);
+                    ctx.lineTo(dx, -s * 0.28 + dy);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            function drawBomb(it) {
+                ctx.save();
+                ctx.translate(it.x, it.y);
+                ctx.rotate(it.rot * 0.5);
+                const r = it.size * 0.95;
+                const canW = r * 1.28;
+                const canH = r * 1.85;
+                const canX = -canW / 2;
+                const canY = -canH * 0.38;
+                const flash = 0.82 + Math.sin(performance.now() / 90) * 0.18;
+
+                ctx.save();
+                ctx.globalAlpha = flash * 0.7;
+                ctx.fillStyle = '#ff633d';
+                ctx.beginPath();
+                ctx.arc(r * 0.58, -r * 0.9, r * 0.24, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
+                // A dented beer can with a lit fuse marks this as the hazard.
+                const can = ctx.createLinearGradient(canX, 0, canX + canW, 0);
+                can.addColorStop(0, '#391720');
+                can.addColorStop(0.28, '#702434');
+                can.addColorStop(0.55, '#a83a37');
+                can.addColorStop(0.8, '#68202e');
+                can.addColorStop(1, '#301521');
+                ctx.fillStyle = can;
+                ctx.beginPath();
+                ctx.roundRect(canX, canY, canW, canH, r * 0.2);
+                ctx.fill();
+                ctx.strokeStyle = '#e7b66a';
+                ctx.lineWidth = Math.max(1.5 * u, r * 0.07);
+                ctx.stroke();
+
+                ctx.fillStyle = '#d7c18c';
+                ctx.beginPath();
+                ctx.ellipse(0, canY + r * 0.08, canW * 0.43, r * 0.12, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#4b1a22';
+                ctx.beginPath();
+                ctx.ellipse(0, canY + r * 0.08, canW * 0.28, r * 0.065, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#d7c18c';
+                ctx.fillRect(canX + r * 0.08, canY + canH - r * 0.12, canW - r * 0.16, r * 0.1);
+
+                ctx.fillStyle = '#f5d485';
+                ctx.beginPath();
+                ctx.roundRect(-canW * 0.4, -r * 0.13, canW * 0.8, r * 0.74, r * 0.1);
+                ctx.fill();
+                ctx.strokeStyle = '#fff0bd';
+                ctx.lineWidth = Math.max(1, r * 0.035);
+                ctx.stroke();
+                ctx.fillStyle = '#9b2932';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = '900 ' + Math.max(5, r * 0.22) + 'px Arial, sans-serif';
+                ctx.fillText('BAD', 0, r * 0.02);
+
+                ctx.fillStyle = '#a52931';
+                ctx.beginPath();
+                ctx.moveTo(0, r * 0.17);
+                ctx.lineTo(-r * 0.12, r * 0.4);
+                ctx.lineTo(r * 0.12, r * 0.4);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.strokeStyle = '#f7d17c';
+                ctx.lineWidth = Math.max(2 * u, r * 0.09);
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(r * 0.12, canY + r * 0.08);
+                ctx.quadraticCurveTo(r * 0.42, canY - r * 0.42, r * 0.61, -r * 0.9);
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffd34d';
+                ctx.beginPath();
+                ctx.arc(r * 0.61, -r * 0.9, r * 0.15 * flash, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fff3b0';
+                ctx.beginPath();
+                ctx.arc(r * 0.61, -r * 0.9, r * 0.07 * flash, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            function drawBucket() {
+                const { x, y, w, h } = bucket;
+                const cupW = w * 0.72;
+                const left = x - cupW / 2;
+                const right = x + cupW / 2;
+                const top = y + h * 0.16;
+                const bottom = y + h * 0.92;
+                const bodyPath = () => {
+                    ctx.beginPath();
+                    ctx.moveTo(left + cupW * 0.035, top);
+                    ctx.lineTo(right - cupW * 0.035, top);
+                    ctx.quadraticCurveTo(right, top, right - cupW * 0.015, top + h * 0.1);
+                    ctx.lineTo(right - cupW * 0.11, bottom - h * 0.06);
+                    ctx.quadraticCurveTo(x, bottom + h * 0.025, left + cupW * 0.11, bottom - h * 0.06);
+                    ctx.lineTo(left + cupW * 0.015, top + h * 0.1);
+                    ctx.quadraticCurveTo(left, top, left + cupW * 0.035, top);
+                    ctx.closePath();
+                };
+
+                ctx.save();
+                ctx.shadowColor = 'rgba(255, 194, 93, 0.48)';
+                ctx.shadowBlur = 14 * u;
+                ctx.fillStyle = 'rgba(255, 190, 75, 0.2)';
+                ctx.beginPath();
+                ctx.ellipse(x, bottom + h * 0.015, cupW * 0.54, 5 * u, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
+                // Draw the handle first so it sits naturally behind the glass.
+                ctx.save();
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#f2cc7b';
+                ctx.lineWidth = Math.max(5 * u, w * 0.055);
+                ctx.beginPath();
+                ctx.moveTo(right - cupW * 0.03, top + h * 0.17);
+                ctx.bezierCurveTo(x + w * 0.59, top + h * 0.12, x + w * 0.59, bottom - h * 0.12, right - cupW * 0.04, bottom - h * 0.12);
+                ctx.stroke();
+                ctx.strokeStyle = '#7b351d';
+                ctx.lineWidth = Math.max(2 * u, w * 0.022);
+                ctx.beginPath();
+                ctx.moveTo(right - cupW * 0.025, top + h * 0.22);
+                ctx.bezierCurveTo(x + w * 0.53, top + h * 0.2, x + w * 0.53, bottom - h * 0.2, right - cupW * 0.04, bottom - h * 0.18);
+                ctx.stroke();
+                ctx.restore();
+
+                bodyPath();
+                ctx.save();
+                ctx.clip();
+                const beer = ctx.createLinearGradient(0, top + h * 0.16, 0, bottom);
+                beer.addColorStop(0, '#f8c451');
+                beer.addColorStop(0.16, '#db8a27');
+                beer.addColorStop(1, '#8e3b18');
+                ctx.fillStyle = beer;
+                const beerTop = top + h * 0.19;
+                ctx.beginPath();
+                ctx.moveTo(left, beerTop + h * 0.025);
+                ctx.quadraticCurveTo(x - cupW * 0.2, beerTop - h * 0.025, x, beerTop + h * 0.01);
+                ctx.quadraticCurveTo(x + cupW * 0.2, beerTop + h * 0.04, right, beerTop);
+                ctx.lineTo(right, bottom);
+                ctx.lineTo(left, bottom);
+                ctx.closePath();
+                ctx.fill();
+
+                const glass = ctx.createLinearGradient(left, 0, right, 0);
+                glass.addColorStop(0, 'rgba(255, 237, 177, 0.62)');
+                glass.addColorStop(0.18, 'rgba(255, 255, 255, 0.08)');
+                glass.addColorStop(0.52, 'rgba(255, 255, 255, 0.02)');
+                glass.addColorStop(0.84, 'rgba(255, 255, 255, 0.12)');
+                glass.addColorStop(1, 'rgba(255, 218, 125, 0.52)');
+                ctx.fillStyle = glass;
+                ctx.fillRect(left, top, cupW, bottom - top);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.48)';
+                ctx.beginPath();
+                ctx.ellipse(left + cupW * 0.16, top + h * 0.48, cupW * 0.025, h * 0.2, 0.04, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
+                bodyPath();
+                ctx.strokeStyle = '#ffe4a0';
+                ctx.lineWidth = 2.5 * u;
+                ctx.shadowColor = 'rgba(255, 214, 124, 0.5)';
+                ctx.shadowBlur = 5 * u;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = '#fff8e8';
+                ctx.beginPath();
+                ctx.ellipse(x, top + h * 0.055, cupW * 0.51, h * 0.115, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#f2d794';
+                ctx.beginPath();
+                ctx.ellipse(x, top + h * 0.105, cupW * 0.48, h * 0.055, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fffaf0';
+                [[-0.34, 0.02, 0.12], [-0.17, -0.02, 0.1], [0.08, 0.015, 0.13], [0.3, -0.015, 0.1]].forEach(([offset, lift, size]) => {
+                    ctx.beginPath();
+                    ctx.arc(x + cupW * offset, top + h * (0.02 + lift), h * size * 0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                const badgeY = y + h * 0.56;
+                const badgeW = cupW * 0.84;
+                const badgeH = h * 0.36;
+                ctx.fillStyle = '#b62d2b';
+                ctx.beginPath();
+                ctx.roundRect(x - badgeW / 2, badgeY - badgeH / 2, badgeW, badgeH, 7 * u);
+                ctx.fill();
+                ctx.strokeStyle = '#f8d985';
+                ctx.lineWidth = 2 * u;
+                ctx.stroke();
+
+                ctx.strokeStyle = 'rgba(255, 231, 161, 0.72)';
+                ctx.lineWidth = 1.2 * u;
+                ctx.beginPath();
+                ctx.roundRect(x - badgeW / 2 + 4 * u, badgeY - badgeH / 2 + 4 * u, badgeW - 8 * u, badgeH - 8 * u, 5 * u);
+                ctx.stroke();
+
+                ctx.fillStyle = '#fff8e8';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(49, 12, 12, 0.72)';
+                ctx.shadowBlur = 2 * u;
+                ctx.shadowOffsetY = 1 * u;
+                ctx.font = '900 ' + (14 * u) + 'px Arial, sans-serif';
+                ctx.fillText('ANGKOR', x, badgeY - badgeH * 0.12, badgeW * 0.82);
+                ctx.font = '800 ' + (8 * u) + 'px Arial, sans-serif';
+                ctx.letterSpacing = (0.8 * u) + 'px';
+                ctx.fillText('BEER', x, badgeY + badgeH * 0.28, badgeW * 0.72);
+                ctx.letterSpacing = '0px';
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetY = 0;
+
+                ctx.fillStyle = 'rgba(255,255,255,0.45)';
+                ctx.beginPath();
+                ctx.ellipse(left + cupW * 0.14, y + h * 0.52, cupW * 0.025, h * 0.17, 0.04, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = '#fff0c4';
+                ctx.lineWidth = 2 * u;
+                ctx.beginPath();
+                ctx.ellipse(x, top + h * 0.055, cupW * 0.51, h * 0.115, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            function drawIdleDecor(t) {
+                // Small beer bottles drift in the background while idle.
+                for (let i = 0; i < 4; i++) {
+                    const x = W * (0.2 + i * 0.2);
+                    const y = ((t * 0.04 + i * 160) % (H + 100)) - 50;
+                    drawBeer({
+                        x, y, rot: Math.sin(t / 600 + i) * 0.4, size: W * 0.06, beerIndex: i % BEER_IMAGES.length,
+                        color: BEER_VARIANTS[i % BEER_VARIANTS.length]
+                    });
+                }
+            }
+
+            /* ---------- Game flow ---------- */
+            function startGame() {
+                state = 'playing';
+                score = 0;
+                lives = MAX_LIVES;
+                BEER_IMAGES.forEach((beer) => { beer.caught = 0; });
+                updateBeerCollection();
+                items = [];
+                spawnTimer = 0.2;
+                lastTime = 0;
+                hitFlash = 0;
+                freezeTimer = 0;
+                overlay.classList.add('is-hidden');
+            }
+
+            function endGame() {
+                state = 'over';
+                overAt = performance.now();
+                overlayFinger.style.display = '';
+                overlayTitle.textContent = 'GAME OVER';
+                overlaySub.textContent = 'Tap to play again!';
+                overlay.classList.remove('is-hidden');
+            }
+
+            function update(dt) {
+                const follow = freezeTimer > 0 ? 2.5 : 18;
+                if (freezeTimer > 0) freezeTimer = Math.max(0, freezeTimer - dt);
+                bucket.x += (bucket.targetX - bucket.x) * Math.min(1, dt * follow);
+
+                spawnTimer -= dt;
+                if (spawnTimer <= 0) {
+                    spawnItem();
+                    const base = Math.max(0.45, 0.95 - score / 260);
+                    spawnTimer = rand(base * 0.75, base * 1.2);
+                }
+
+                const catchTop = bucket.y + bucket.h * 0.16;
+                const halfOpen = bucket.w / 2 - 6;
+
+                for (let i = items.length - 1; i >= 0; i--) {
+                    const it = items[i];
+                    it.y += it.vy * dt;
+                    it.rot += it.vr * dt;
+
+                    const reach = it.type === 'beer' ? it.size * BEER_IMAGE_HEIGHT_RATIO / 2 : it.size;
+                    const inRange = it.y + reach >= catchTop && it.y - reach <= catchTop + bucket.h * 0.28;
+                    if (inRange && Math.abs(it.x - bucket.x) < halfOpen) {
+                        if (it.type === 'beer') {
+                            score += 10;
+                            BEER_IMAGES[it.beerIndex].caught += 1;
+                            updateBeerCollection();
+                            animateBeerCatch(it.beerIndex);
+                        } else if (it.type === 'ice') {
+                            score = Math.max(0, score - 10);
+                            freezeTimer = FREEZE_SECONDS;
+                            flashRGB = '120, 200, 255';
+                            hitFlash = 0.45;
+                        } else if (it.type === 'bomb') {
+                            lives = 0;
+                            flashRGB = '255, 70, 40';
+                            hitFlash = 0.7;
+                        }
+                        items.splice(i, 1);
+                        if (lives <= 0) { endGame(); return; }
+                        continue;
+                    }
+
+                    if (it.y - 60 > H) items.splice(i, 1);
+                }
+            }
+
+            /* ---------- Render loop (pauses while the window is off-screen) ---------- */
+            let visible = true;
+            let running = false;
+
+            function frame(now) {
+                if (!visible) { running = false; return; }
+                if (!W) resize();
+                syncWindow();
+                const dt = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0;
+                lastTime = now;
+
+                if (state === 'playing') update(dt);
+
+                ctx.clearRect(0, 0, W, H);
+                drawBackground();
+                if (state === 'idle') drawIdleDecor(now);
+                items.forEach((it) => {
+                    if (it.type === 'beer') drawBeer(it);
+                    else if (it.type === 'bomb') drawBomb(it);
+                    else if (it.type === 'ice') drawIce(it);
+                });
+                drawBucket();
+                drawHUD();
+
+                if (hitFlash > 0) {
+                    ctx.fillStyle = `rgba(${flashRGB}, ${hitFlash})`;
+                    ctx.fillRect(0, 0, W, H);
+                    hitFlash = Math.max(0, hitFlash - dt * 1.8);
+                }
+
+                requestAnimationFrame(frame);
+            }
+
+            function kick() {
+                if (running || !visible) return;
+                running = true;
+                lastTime = 0; // avoid a big time jump after being off-screen
+                requestAnimationFrame(frame);
+            }
+
+            new IntersectionObserver(([entry]) => {
+                visible = entry.isIntersecting;
+                kick();
+            }, { rootMargin: '120px 0px' }).observe(slot);
+
+            /* ---------- Window sync ----------
+               Clip the fixed layer itself to the slot's on-screen rectangle.
+               This does not depend on the browser clipping fixed children
+               through a parent, which is what failed on some mobile browsers. */
+            const fixedEl = document.querySelector('.underlay-fixed-content');
+
+            function syncWindow() {
+                const r = slot.getBoundingClientRect();
+                const ew = fixedEl.offsetWidth;
+                const eh = fixedEl.offsetHeight;
+                const top = Math.max(0, r.top);
+                const bottom = Math.min(eh, r.bottom);
+                const left = Math.max(0, r.left);
+                const right = Math.min(ew, r.right);
+
+                if (bottom <= top || right <= left) {
+                    fixedEl.style.visibility = 'hidden';
+                    return;
+                }
+                fixedEl.style.clipPath =
+                    'inset(' + top + 'px ' + (ew - right) + 'px ' + (eh - bottom) + 'px ' + left + 'px)';
+                fixedEl.style.visibility = 'visible';
+            }
+
+            window.addEventListener('scroll', syncWindow, { passive: true });
+            window.addEventListener('resize', syncWindow);
+
+            /* ---------- Input ---------- */
+            function pointerX(e) {
+                const r = canvas.getBoundingClientRect();
+                const gx = (e.clientX - r.left) / scale; // screen px -> game units
+                return Math.max(bucket.w / 2, Math.min(W - bucket.w / 2, gx));
+            }
+
+            canvas.addEventListener('pointerdown', (e) => {
+                canvas.setPointerCapture(e.pointerId);
+                if (state === 'idle') { startGame(); }
+                else if (state === 'over' && performance.now() - overAt > 600) { startGame(); }
+                if (state === 'playing') bucket.targetX = pointerX(e);
+            });
+
+            canvas.addEventListener('pointermove', (e) => {
+                if (state !== 'playing') return;
+                if (e.pointerType === 'mouse' || e.buttons) bucket.targetX = pointerX(e);
+            });
+
+            canvas.addEventListener('keydown', (e) => {
+                if (state !== 'playing' && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    if (state === 'idle' || performance.now() - overAt > 600) startGame();
+                    return;
+                }
+                const step = W * 0.08;
+                if (e.key === 'ArrowLeft') bucket.targetX = Math.max(bucket.w / 2, bucket.targetX - step);
+                if (e.key === 'ArrowRight') bucket.targetX = Math.min(W - bucket.w / 2, bucket.targetX + step);
+            });
+
+            /* ---------- Resize ----------
+               On mobile, ignore height-only changes (address bar moving during scroll).
+               Rebuild only when the width changes (rotation / real resize). */
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    if (mobileMQ.matches) {
+                        if (window.innerWidth === lockedWidth) return;
+                        lockAppHeight();
+                        // let the new --app-h apply before measuring
+                        requestAnimationFrame(resize);
+                        return;
+                    }
+                    resize();
+                }, 150);
+            });
+
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => { lockAppHeight(); resize(); }, 250);
+            });
+
+            resize();
+            syncWindow();
+            kick();
+        })();
+    </script>
+
+</body>
+
+</html>
