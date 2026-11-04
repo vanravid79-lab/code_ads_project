@@ -4,13 +4,22 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Khmer Daily News - Underlay Scroll Reveal</title>
+    <title>Khmer Daily News | Angkor Sankranta 2026</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600&display=swap" rel="stylesheet" />
 
     <style>
-        /* ===== Base ===== */
+        :root {
+            color-scheme: light;
+            --color-brand: #0056b3;
+            --color-text: #1a1a1a;
+            --color-muted: #777;
+            --color-page: #f0f2f5;
+            --color-surface: #fff;
+            --color-border: #ddd;
+        }
+
         *,
         *::before,
         *::after {
@@ -20,28 +29,28 @@
         body {
             margin: 0;
             font-family: 'Kantumruy Pro', Arial, sans-serif;
-            background: #f0f2f5;
+            color: var(--color-text);
+            background: var(--color-page);
         }
 
         .container {
             position: relative;
             z-index: 1;
-            max-width: 800px;
+            width: min(100%, 800px);
             margin: 0 auto;
-            background: #fff;
+            background: var(--color-surface);
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
         }
 
-        /* ===== Header / Article ===== */
         header {
             text-align: center;
-            padding: 20px 0;
-            border-bottom: 3px solid #0056b3;
+            padding: 20px;
+            border-bottom: 3px solid var(--color-brand);
         }
 
         header h1 {
             margin: 0;
-            color: #0056b3;
+            color: var(--color-brand);
             font-size: 28px;
         }
 
@@ -50,19 +59,18 @@
         }
 
         .post h2 {
-            color: #1a1a1a;
             font-size: 24px;
             line-height: 1.4;
         }
 
         .post p {
-            color: #333;
             line-height: 1.8;
             margin-bottom: 15px;
         }
 
         .date-meta {
-            color: #888;
+            display: block;
+            color: var(--color-muted);
             font-size: 0.9em;
             margin: 15px 0;
         }
@@ -73,29 +81,35 @@
         }
 
         .news-image img {
+            display: block;
             width: 100%;
+            height: auto;
             max-width: 500px;
+            margin: 0 auto;
             border-radius: 4px;
+            cursor: pointer;
+        }
+
+        [data-popup-text]:focus-visible,
+        .popup-close:focus-visible {
+            outline: 3px solid var(--color-brand);
+            outline-offset: 4px;
         }
 
         footer {
             text-align: center;
             padding: 20px 0;
-            border-top: 1px solid #ddd;
-            color: #777;
+            border-top: 1px solid var(--color-border);
+            color: var(--color-muted);
             font-size: 14px;
-            background: #fff;
+            background: var(--color-surface);
         }
 
-        /* ===== Scroll underlay window ===== */
         .underlay-slot {
             position: relative;
             height: 1000px;
-            /* Negative side margins cancel the article's 20px padding,
-               so the ad window reaches the screen edges */
             margin: 30px -20px;
             clip-path: inset(0);
-            /* Only shows the fixed layer inside this slot. */
         }
 
         .underlay-fixed {
@@ -111,47 +125,25 @@
             position: relative;
             width: 100%;
             height: 100%;
-            /* Fill the whole screen (crops edges instead of leaving gaps) */
-            background: url("./assets/ang44.png") center center / cover no-repeat;
+            background: url("./assets/angkor1.png") center center / cover no-repeat;
             overflow: hidden;
         }
 
-        .ad-label {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            z-index: 5;
-            padding: 2px 6px;
-            border-radius: 3px;
-            background: rgba(0, 0, 0, 0.5);
-            color: #fff;
-            font-size: 10px;
-        }
-
-        /* ===== Product group: pinned to the bottom of the screen ===== */
         .product-group {
-            /* One size for all four images */
-            --item-w: min(22vw, 170px);
-            --item-h: 200px;
+            --item-h: 240px;
             --item-gap: 3vw;
             --slide-speed: 30s;
-            /* fallback; JS sets the real duration from SLIDE_SPEED */
-
-            /* Zoom for the main product only. JavaScript measures the real
-               (non-transparent) size of every PNG and sets this
-               automatically so the main product matches the cans.
-               This value is only a fallback if that measurement fails. */
             --main-scale: 1;
 
             position: absolute;
             left: 0;
             right: 0;
-            bottom: 20px;
+            top: 50%;
             height: var(--item-h);
             pointer-events: none;
+            transform: translateY(-50%);
         }
 
-        /* ===== Auto-sliding cans: run across the main product ===== */
         .can-viewport {
             position: absolute;
             inset: 0;
@@ -168,9 +160,6 @@
             animation: can-slide var(--slide-speed) linear infinite;
         }
 
-        /* FIX: same HEIGHT for every can; width follows each image's shape.
-           Transparent edges are trimmed in JS, so every can fills the
-           full height and all cans look exactly the same size. */
         .can-track .layer-can {
             display: block;
             flex: 0 0 auto;
@@ -181,7 +170,6 @@
             margin: 0 var(--item-gap) 0 0;
         }
 
-        /* Pause sliding while the popup is open */
         .product-group.is-paused .can-track {
             animation-play-state: paused;
         }
@@ -196,7 +184,6 @@
             }
         }
 
-        /* Cans can be dragged (also on touch screens) */
         .layer-can {
             cursor: grab;
             touch-action: none;
@@ -205,43 +192,52 @@
             -webkit-user-drag: none;
         }
 
-        /* The copy of the can that follows the finger / mouse */
         .drag-ghost {
             position: fixed;
             z-index: 50;
             margin: 0;
-            object-fit: contain;
             pointer-events: none;
             cursor: grabbing;
+        }
+
+        .drag-ghost-image {
+            display: block;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            object-fit: contain;
             filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.35));
         }
 
-        /* Main product glows while a can is held inside its frame */
         .main-wrap.is-target .layer-main {
-            filter: drop-shadow(0 0 14px rgba(255, 200, 0, 0.95));
+            filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 18px rgba(255, 200, 0, 0.95));
             transform: scale(1.05);
         }
 
-        /* Main product bounces when a can lands in it */
-        .main-wrap.is-landed .layer-main {
-            animation: land-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        .main-wrap.is-wiggling .layer-main {
+            animation: main-wiggle 1.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        @keyframes land-pop {
-            0% {
-                transform: scale(1);
-            }
+        @keyframes main-wiggle {
 
-            40% {
-                transform: scale(1.1);
-            }
-
+            0%,
             100% {
-                transform: scale(1);
+                transform: rotate(0);
+            }
+
+            25% {
+                transform: rotate(-6deg);
+            }
+
+            50% {
+                transform: rotate(0);
+            }
+
+            75% {
+                transform: rotate(6deg);
             }
         }
 
-        /* Main product centered in the same row, underneath the sliding cans */
         .main-wrap {
             position: absolute;
             left: 50%;
@@ -252,7 +248,6 @@
 
         .layer {
             display: block;
-            width: var(--item-w);
             height: var(--item-h);
             object-fit: contain;
             cursor: pointer;
@@ -266,28 +261,21 @@
             transform: scale(1.05);
         }
 
-        /* Main product: same box as the cans, zoomed so the product itself
-           appears the same size. Uses the separate `scale` property so the
-           hover / glow `transform` above still stacks on top of it. */
         .layer-main {
-            /* FIX: same height as the cans (transparent edges trimmed in JS) */
             width: auto;
             height: var(--item-h);
             object-position: center bottom;
             scale: var(--main-scale);
+            filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 4px rgba(190, 130, 0, 0.9));
             transform-origin: bottom center;
-            /* grows upward, stays on the bottom line */
         }
 
         @media (max-width: 600px) {
             .product-group {
-                --item-w: 28vw;
-                --item-h: 150px;
-                bottom: 12px;
+                --item-h: 180px;
             }
         }
 
-        /* ===== Popup ===== */
         .popup {
             position: fixed;
             inset: 0;
@@ -299,12 +287,13 @@
             background: rgba(0, 0, 0, 0.55);
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            pointer-events: none;
         }
 
         .popup.is-open {
             opacity: 1;
             visibility: visible;
+            pointer-events: auto;
         }
 
         .popup-box {
@@ -313,26 +302,19 @@
             max-width: 360px;
             padding: 24px 20px 20px;
             border-radius: 12px;
-            background: #fff;
+            background: var(--color-surface);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
-            transform: scale(0.85) translateY(10px);
-            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .popup.is-open .popup-box {
-            transform: scale(1) translateY(0);
         }
 
         .popup-title {
             margin: 0 0 8px;
-            color: #0056b3;
+            color: var(--color-brand);
             font-size: 20px;
         }
 
         .popup-text {
             margin: 0;
-            color: #333;
             line-height: 1.7;
         }
 
@@ -344,8 +326,20 @@
             background: none;
             font-size: 24px;
             line-height: 1;
-            color: #888;
+            color: var(--color-muted);
             cursor: pointer;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
@@ -357,13 +351,14 @@
         </header>
 
         <article class="post">
-            <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+            <time class="date-meta" datetime="2026-04-09">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</time>
 
             <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
 
             <div class="news-image">
-                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image"
-                    data-popup-title="Angkor Sankranta" data-popup-text="Your text for the top news image." />
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="រូបភាពអមព័ត៌មានអំពីអង្គរសង្ក្រាន្ត"
+                    data-popup-title="អង្គរសង្ក្រាន្ត ២០២៦"
+                    data-popup-text="ព្រឹត្តិការណ៍អបអរសាទរបុណ្យចូលឆ្នាំថ្មីនៅខេត្តសៀមរាប។" tabindex="0" role="button" />
             </div>
 
             <p>
@@ -377,25 +372,31 @@
             <div class="underlay-slot">
                 <div class="underlay-fixed">
                     <div class="underlay-banner">
-
-
                         <div class="product-group">
                             <!-- Cans slide automatically; JS duplicates them for a seamless loop -->
                             <div class="can-viewport">
                                 <div class="can-track">
-                                    <img class="layer layer-can can-1" src="./assets/img_3.png" alt=""
-                                        data-popup-title="Can 1" data-popup-text="Your text for can 1." />
-                                    <img class="layer layer-can can-2" src="./assets/img_4.png" alt=""
-                                        data-popup-title="Can 2" data-popup-text="Your text for can 2." />
-                                    <img class="layer layer-can can-3" src="./assets/img_6.png" alt=""
-                                        data-popup-title="Can 3" data-popup-text="Your text for can 3." />
+                                    <img class="layer layer-can" src="./assets/img_3.png" alt="កំប៉ុងផលិតផលទី១"
+                                        data-popup-title="ផលិតផលទី១"
+                                        data-popup-text="រូបភាពផលិតផលក្នុងយុទ្ធនាការផ្សព្វផ្សាយនេះ។" tabindex="0"
+                                        role="button" />
+                                    <img class="layer layer-can" src="./assets/img_4.png" alt="កំប៉ុងផលិតផលទី២"
+                                        data-popup-title="ផលិតផលទី២"
+                                        data-popup-text="រូបភាពផលិតផលក្នុងយុទ្ធនាការផ្សព្វផ្សាយនេះ។" tabindex="0"
+                                        role="button" />
+                                    <img class="layer layer-can" src="./assets/img_6.png" alt="កំប៉ុងផលិតផលទី៣"
+                                        data-popup-title="ផលិតផលទី៣"
+                                        data-popup-text="រូបភាពផលិតផលក្នុងយុទ្ធនាការផ្សព្វផ្សាយនេះ។" tabindex="0"
+                                        role="button" />
                                 </div>
                             </div>
 
                             <div class="main-wrap">
                                 <img class="layer layer-main"
-                                    src="./assets/Gemini_Generated_Image_sqjd5nsqjd5nsqjd-removebg-preview.png" alt=""
-                                    data-popup-title="Main Product" data-popup-text="Your text for the main image." />
+                                    src="./assets/Gemini_Generated_Image_sqjd5nsqjd5nsqjd-removebg-preview.png"
+                                    alt="ផលិតផលក្នុងយុទ្ធនាការផ្សព្វផ្សាយ" data-popup-title="ផលិតផលក្នុងយុទ្ធនាការ"
+                                    data-popup-text="រូបភាពផលិតផលក្នុងយុទ្ធនាការផ្សព្វផ្សាយនេះ។" tabindex="0"
+                                    role="button" />
                             </div>
                         </div>
                     </div>
@@ -420,20 +421,16 @@
                 ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
                 និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
             </p>
-
-            <div class="news-image">
-                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" data-popup-title="Khmer Daily"
-                    data-popup-text="Your text for the bottom image." />
-            </div>
         </article>
 
         <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
     </div>
 
     <!-- Popup (shared by all images) -->
-    <div class="popup" id="popup" role="dialog" aria-modal="true" aria-labelledby="popup-title">
+    <div class="popup" id="popup" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="popup-title"
+        tabindex="-1">
         <div class="popup-box">
-            <button class="popup-close" type="button" aria-label="Close">&times;</button>
+            <button class="popup-close" type="button" aria-label="បិទ">&times;</button>
             <h3 class="popup-title" id="popup-title"></h3>
             <p class="popup-text"></p>
         </div>
@@ -444,16 +441,14 @@
             const popup = document.getElementById('popup');
             const titleEl = popup.querySelector('.popup-title');
             const textEl = popup.querySelector('.popup-text');
+            const closeButton = popup.querySelector('.popup-close');
             const group = document.querySelector('.product-group');
             const viewport = document.querySelector('.can-viewport');
             const track = document.querySelector('.can-track');
             const mainImg = document.querySelector('.layer-main');
 
             const mainWrap = document.querySelector('.main-wrap');
-
-            // How much of the dragged can must be inside the main product's frame to count as "fit"
-            // (1 = 100% inside, 0.6 = at least 60% of the can's area is inside the frame)
-            const FIT_RATIO = 0.6;
+            let popupTrigger = null;
 
             // Auto-slide speed in pixels per second. Smaller = slower.
             // (e.g. 20 = very slow, 40 = slow, 80 = fast)
@@ -461,6 +456,15 @@
 
             /* ---------- Seamless auto-slide ---------- */
             const originals = Array.from(track.querySelectorAll('.layer-can'));
+
+            function makeDecorativeClone(can) {
+                const clone = can.cloneNode(true);
+                clone.setAttribute('aria-hidden', 'true');
+                clone.removeAttribute('tabindex');
+                clone.removeAttribute('role');
+                clone.alt = '';
+                return clone;
+            }
 
             function buildTrack() {
                 // Include each can's right margin when measuring one set.
@@ -475,7 +479,7 @@
 
                 if (!setWidth) return;
 
-                // Rebuild from the three original cans whenever the viewport changes.
+                // Rebuild from the original cans whenever the viewport changes.
                 track.innerHTML = '';
 
                 // Make the first half wider than the viewport so no empty gap appears.
@@ -484,7 +488,7 @@
 
                 for (let i = 0; i < copies; i++) {
                     originals.forEach(function (can) {
-                        const item = i === 0 ? can : can.cloneNode(true);
+                        const item = i === 0 ? can : makeDecorativeClone(can);
                         firstHalf.push(item);
                         track.appendChild(item);
                     });
@@ -492,14 +496,12 @@
 
                 // Duplicate the exact first half; translateX(-50%) then loops smoothly.
                 firstHalf.forEach(function (can) {
-                    track.appendChild(can.cloneNode(true));
+                    track.appendChild(makeDecorativeClone(can));
                 });
 
-                // Same speed on every screen size: duration = distance / speed
-                const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                const speed = reduce ? SLIDE_SPEED / 2 : SLIDE_SPEED;
+                // Keep a consistent slide speed across viewport sizes.
                 const distance = track.scrollWidth / 2; // one loop = half the track
-                group.style.setProperty('--slide-speed', (distance / speed).toFixed(2) + 's');
+                group.style.setProperty('--slide-speed', (distance / SLIDE_SPEED).toFixed(2) + 's');
             }
 
             buildTrack();
@@ -511,39 +513,68 @@
             // so its visible height equals the cans' visible height.
             const boxCache = new Map();
 
-            // Visible (non-transparent) area as fractions of the image: {top, bottom, left, right}
+            function getVisibleBounds(img, maxDimension) {
+                const nw = img.naturalWidth;
+                const nh = img.naturalHeight;
+                if (!nw || !nh) return null;
+
+                const scale = maxDimension
+                    ? Math.min(1, maxDimension / Math.max(nw, nh))
+                    : 1;
+                const width = Math.max(1, Math.round(nw * scale));
+                const height = Math.max(1, Math.round(nh * scale));
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                const context = canvas.getContext('2d', { willReadFrequently: true });
+                if (!context) throw new Error('Canvas 2D context is unavailable.');
+                context.drawImage(img, 0, 0, width, height);
+
+                const pixels = context.getImageData(0, 0, width, height).data;
+                let top = height;
+                let bottom = -1;
+                let left = width;
+                let right = -1;
+
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        if (pixels[(y * width + x) * 4 + 3] <= 20) continue;
+                        if (y < top) top = y;
+                        if (y > bottom) bottom = y;
+                        if (x < left) left = x;
+                        if (x > right) right = x;
+                    }
+                }
+
+                if (bottom < 0) return null;
+
+                return {
+                    left: Math.floor(left * nw / width),
+                    top: Math.floor(top * nh / height),
+                    right: Math.ceil((right + 1) * nw / width),
+                    bottom: Math.ceil((bottom + 1) * nh / height)
+                };
+            }
+
             function getVisibleBox(img) {
                 if (boxCache.has(img.src)) return boxCache.get(img.src);
+
                 let box = null;
                 try {
-                    const nw = img.naturalWidth, nh = img.naturalHeight;
-                    const k = Math.min(1, 400 / Math.max(nw, nh)); // downscale for speed
-                    const cw = Math.max(1, Math.round(nw * k));
-                    const ch = Math.max(1, Math.round(nh * k));
-                    const canvas = document.createElement('canvas');
-                    canvas.width = cw;
-                    canvas.height = ch;
-                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-                    ctx.drawImage(img, 0, 0, cw, ch);
-                    const data = ctx.getImageData(0, 0, cw, ch).data;
-                    let top = ch, bottom = -1, left = cw, right = -1;
-                    for (let y = 0; y < ch; y++) {
-                        for (let x = 0; x < cw; x++) {
-                            if (data[(y * cw + x) * 4 + 3] > 20) { // alpha threshold
-                                if (y < top) top = y;
-                                if (y > bottom) bottom = y;
-                                if (x < left) left = x;
-                                if (x > right) right = x;
-                            }
-                        }
-                    }
-                    if (bottom >= 0) {
-                        box = { top: top / ch, bottom: (bottom + 1) / ch, left: left / cw, right: (right + 1) / cw };
+                    const bounds = getVisibleBounds(img, 400);
+                    if (bounds) {
+                        box = {
+                            top: bounds.top / img.naturalHeight,
+                            bottom: bounds.bottom / img.naturalHeight,
+                            left: bounds.left / img.naturalWidth,
+                            right: bounds.right / img.naturalWidth
+                        };
                     }
                 } catch (err) {
-                    // Canvas blocked (e.g. page opened as file://) — keep CSS fallback
-                    console.warn('Could not measure image, using CSS --main-scale fallback.', err);
+                    console.warn('Could not measure image; using the CSS scale fallback.', err);
                 }
+
                 boxCache.set(img.src, box);
                 return box;
             }
@@ -561,12 +592,12 @@
                 const canHeights = originals.map(visibleHeight).filter(Boolean);
                 const mainH = visibleHeight(mainImg);
                 if (!canHeights.length || !mainH) return;
-                const target = Math.max.apply(null, canHeights); // tallest can
+                const target = Math.max.apply(null, canHeights);
                 group.style.setProperty('--main-scale', (target / mainH).toFixed(3));
             }
 
             function whenLoaded(img) {
-                return img.complete && img.naturalWidth
+                return img.complete
                     ? Promise.resolve()
                     : new Promise(function (res) {
                         img.addEventListener('load', res, { once: true });
@@ -574,43 +605,26 @@
                     });
             }
 
-            /* ---------- FIX: trim transparent edges from each can PNG ---------- */
+            /* Trim transparent edges from product images. */
             // Some PNGs (like img_3.png) have extra empty space around the can,
             // which makes the can look smaller. Crop that space away so every
             // can fills its box the same way.
             function trimImage(img) {
                 return whenLoaded(img).then(function () {
                     try {
-                        const nw = img.naturalWidth, nh = img.naturalHeight;
-                        if (!nw || !nh) return;
+                        const bounds = getVisibleBounds(img);
+                        if (!bounds) return;
 
-                        const canvas = document.createElement('canvas');
-                        canvas.width = nw;
-                        canvas.height = nh;
-                        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-                        ctx.drawImage(img, 0, 0);
-                        const data = ctx.getImageData(0, 0, nw, nh).data;
-
-                        let top = nh, bottom = -1, left = nw, right = -1;
-                        for (let y = 0; y < nh; y++) {
-                            for (let x = 0; x < nw; x++) {
-                                if (data[(y * nw + x) * 4 + 3] > 20) {
-                                    if (y < top) top = y;
-                                    if (y > bottom) bottom = y;
-                                    if (x < left) left = x;
-                                    if (x > right) right = x;
-                                }
-                            }
-                        }
-                        if (bottom < 0) return; // fully transparent image
-
-                        const w = right - left + 1, h = bottom - top + 1;
-                        if (w === nw && h === nh) return; // nothing to trim
+                        const width = bounds.right - bounds.left;
+                        const height = bounds.bottom - bounds.top;
+                        if (width === img.naturalWidth && height === img.naturalHeight) return;
 
                         const out = document.createElement('canvas');
-                        out.width = w;
-                        out.height = h;
-                        out.getContext('2d').drawImage(canvas, left, top, w, h, 0, 0, w, h);
+                        out.width = width;
+                        out.height = height;
+                        const context = out.getContext('2d');
+                        if (!context) throw new Error('Canvas 2D context is unavailable.');
+                        context.drawImage(img, bounds.left, bounds.top, width, height, 0, 0, width, height);
 
                         return new Promise(function (res) {
                             img.addEventListener('load', res, { once: true });
@@ -618,12 +632,12 @@
                             img.src = out.toDataURL('image/png');
                         });
                     } catch (err) {
-                        console.warn('Could not trim image (open the page through a local server, not file://).', err);
+                        console.warn('Could not trim image; retaining its original dimensions.', err);
                     }
                 });
             }
 
-            // FIX: trim the cans AND the main product first, then build the slider from the trimmed images
+            // Build the slider after trimming so its measurements use the final images.
             Promise.all(originals.concat(mainImg).map(trimImage)).then(function () {
                 buildTrack();
                 matchMainSize();
@@ -639,22 +653,25 @@
 
             });
 
-            /* ---------- Fit-inside-frame check ---------- */
-            // Share of rect a's area that lies inside rect b
-            function overlapRatio(a, b) {
-                const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
-                const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
-                return (w * h) / (a.width * a.height);
+            /* ---------- Drop-target checks ---------- */
+            function isInsideFrame(rect) {
+                const frame = mainImg.getBoundingClientRect();
+                const overlapWidth = Math.min(rect.right, frame.right) - Math.max(rect.left, frame.left);
+                const overlapHeight = Math.min(rect.bottom, frame.bottom) - Math.max(rect.top, frame.top);
+                return overlapWidth > 0 && overlapHeight > 0;
             }
 
-            function isInsideFrame(rect) {
-                return overlapRatio(rect, mainImg.getBoundingClientRect()) >= FIT_RATIO;
+            function isPointInsideFrame(x, y) {
+                const frame = mainImg.getBoundingClientRect();
+                return x >= frame.left && x <= frame.right &&
+                    y >= frame.top && y <= frame.bottom;
             }
 
             /* ---------- Drag a can into the frame ---------- */
             let drag = null;          // the can currently being dragged
             let snapped = null;       // a can sitting in the frame while its popup is open
             let suppressClick = false;
+            let suppressClickTimer;
 
             // Stop the browser's built-in image dragging
             track.addEventListener('dragstart', function (e) { e.preventDefault(); });
@@ -663,25 +680,37 @@
                 const can = e.target.closest('.layer-can');
                 if (!can || drag || snapped) return;
                 e.preventDefault();
+                track.setPointerCapture(e.pointerId);
 
                 group.classList.add('is-paused'); // freeze the slide while dragging
 
                 const r = can.getBoundingClientRect();
-                const ghost = can.cloneNode(true);
-                ghost.classList.add('drag-ghost');
+                const ghost = document.createElement('div');
+                ghost.className = 'drag-ghost';
+                ghost.setAttribute('aria-hidden', 'true');
                 ghost.style.left = r.left + 'px';
                 ghost.style.top = r.top + 'px';
                 ghost.style.width = r.width + 'px';
                 ghost.style.height = r.height + 'px';
                 ghost.style.transition = 'none';
                 ghost.style.transform = 'translate(0px, 0px)';
+                const ghostImage = can.cloneNode(true);
+                ghostImage.classList.remove('layer');
+                ghostImage.classList.add('drag-ghost-image');
+                ghostImage.setAttribute('aria-hidden', 'true');
+                ghostImage.removeAttribute('tabindex');
+                ghostImage.removeAttribute('role');
+                ghostImage.removeAttribute('data-popup-title');
+                ghostImage.removeAttribute('data-popup-text');
+                ghostImage.alt = '';
+                ghost.appendChild(ghostImage);
                 document.body.appendChild(ghost);
                 can.style.visibility = 'hidden';
 
                 drag = { can: can, ghost: ghost, origin: r, startX: e.clientX, startY: e.clientY, moved: false };
             });
 
-            window.addEventListener('pointermove', function (e) {
+            function updateDragPosition(e) {
                 if (!drag) return;
                 const dx = e.clientX - drag.startX;
                 const dy = e.clientY - drag.startY;
@@ -690,8 +719,9 @@
                 drag.x = dx;
                 drag.y = dy;
                 mainWrap.classList.toggle('is-target', isInsideFrame(drag.ghost.getBoundingClientRect()));
-            });
+            }
 
+            window.addEventListener('pointermove', updateDragPosition);
             window.addEventListener('pointerup', endDrag);
             window.addEventListener('pointercancel', endDrag);
 
@@ -735,42 +765,74 @@
                 };
             }
 
-            // Little "bounce" on the main product when a can lands in it
-            function popMain() {
-                mainWrap.classList.remove('is-landed');
+            function wiggleMain() {
+                mainWrap.classList.remove('is-wiggling');
                 void mainWrap.offsetWidth; // restart the animation
-                mainWrap.classList.add('is-landed');
+                mainWrap.classList.add('is-wiggling');
             }
 
-            function endDrag() {
+            mainImg.addEventListener('animationend', function (event) {
+                if (event.animationName === 'main-wiggle') {
+                    mainWrap.classList.remove('is-wiggling');
+                }
+            });
+
+            function endDrag(event) {
                 if (!drag) return;
+                if (event.type === 'pointercancel') {
+                    const cancelledDrag = drag;
+                    drag = null;
+                    mainWrap.classList.remove('is-target');
+                    returnCan(cancelledDrag);
+                    return;
+                }
+
+                updateDragPosition(event);
                 const d = drag;
                 drag = null;
                 mainWrap.classList.remove('is-target');
+
                 if (d.moved) {
                     suppressClick = true;
-                    // On touch screens no click may follow the drag, so don't
-                    // let the flag swallow the user's next real tap
-                    setTimeout(function () { suppressClick = false; }, 0);
+                    clearTimeout(suppressClickTimer);
+                    suppressClickTimer = setTimeout(function () {
+                        suppressClick = false;
+                    }, 500);
                 }
 
-                // A simple tap (no drag) OR a drag that ends inside the frame:
-                // fly the can into the main product, then show its popup
-                if (!d.moved || isInsideFrame(d.ghost.getBoundingClientRect())) {
+                let reachesMain = false;
+                if (d.moved) {
+                    reachesMain = isInsideFrame(d.ghost.getBoundingClientRect()) ||
+                        isPointInsideFrame(event.clientX, event.clientY);
+                } else {
+                    reachesMain = isPointInsideFrame(d.startX, d.startY);
+
+                    if (!reachesMain) {
+                        returnCan(d);
+                        openPopup('Try again', 'Please tap directly on the main product image.', d.can);
+                        return;
+                    }
+                }
+
+                if (reachesMain) {
                     const m = mainImg.getBoundingClientRect();
                     const x = m.left + (m.width - d.origin.width) / 2 - d.origin.left;
                     const y = m.top + (m.height - d.origin.height) / 2 - d.origin.top;
                     snapped = d;
-                    moveGhost(d, x, y, 650, true, function () {
-                        popMain();
-                        // Short pause so the landing is seen before the popup
-                        setTimeout(function () {
-                            openPopup(d.can.dataset.popupTitle, d.can.dataset.popupText);
-                        }, 180);
+
+                    moveGhost(d, x, y, 800, true, function () {
+                        returnCan(d);
+                        snapped = null;
+                        wiggleMain();
                     });
                 } else {
-                    // Outside the frame: glide back, no popup
-                    moveGhost(d, 0, 0, 400, false, function () { returnCan(d); });
+                    // Return the can and explain how to complete the interaction.
+                    moveGhost(d, 0, 0, 400, false, function () {
+                        returnCan(d);
+                        openPopup('Try again', 'Please place the can inside the main product image.', d.can);
+                    });
+
+
                 }
             }
 
@@ -781,16 +843,23 @@
             }
 
             /* ---------- Popup ---------- */
-            function openPopup(title, text) {
+            function openPopup(title, text, trigger) {
                 titleEl.textContent = title || '';
                 titleEl.hidden = !title;
                 textEl.textContent = text || '';
+                popupTrigger = trigger ||
+                    (document.activeElement === document.body ? null : document.activeElement);
                 popup.classList.add('is-open');
+                popup.setAttribute('aria-hidden', 'false');
                 group.classList.add('is-paused');
+                closeButton.focus();
             }
 
             function closePopup() {
                 popup.classList.remove('is-open');
+                popup.setAttribute('aria-hidden', 'true');
+                const trigger = popupTrigger;
+                popupTrigger = null;
                 // Fly a snapped can back to its place in the slider,
                 // keeping the slider paused until it has arrived
                 if (snapped) {
@@ -798,34 +867,80 @@
                     moveGhost(d, 0, 0, 550, true, function () {
                         returnCan(d);
                         snapped = null;
+                        if (trigger && trigger.isConnected) trigger.focus();
+                        else mainImg.focus();
                     });
                 } else {
                     group.classList.remove('is-paused');
+                    if (trigger && trigger.isConnected) trigger.focus();
+                    else mainImg.focus();
                 }
             }
 
             document.addEventListener('click', function (e) {
+                if (popup.contains(e.target)) return;
+
                 // Ignore the click that follows a drag
                 if (suppressClick) {
                     suppressClick = false;
+                    clearTimeout(suppressClickTimer);
                     return;
                 }
+
+                if (popup.classList.contains('is-open')) return;
 
                 // Cans are handled in endDrag (tap or drag), so skip them here
                 if (e.target.closest('.layer-can')) return;
 
                 // Everything else with data-popup-text opens the popup normally
                 const target = e.target.closest('[data-popup-text]');
-                if (!target) return;
-                openPopup(target.dataset.popupTitle, target.dataset.popupText);
+                if (target) {
+                    openPopup(target.dataset.popupTitle, target.dataset.popupText, target);
+                    return;
+                }
+
+                const groupRect = group.getBoundingClientRect();
+                const mainRect = mainImg.getBoundingClientRect();
+                const clickedInsideGroup = e.clientX >= groupRect.left &&
+                    e.clientX <= groupRect.right &&
+                    e.clientY >= groupRect.top &&
+                    e.clientY <= groupRect.bottom;
+                const clickedInsideMain = e.clientX >= mainRect.left &&
+                    e.clientX <= mainRect.right &&
+                    e.clientY >= mainRect.top &&
+                    e.clientY <= mainRect.bottom;
+
+                if (clickedInsideGroup && !clickedInsideMain) {
+                    openPopup('Try again', 'Please click inside the main product image.');
+                }
             });
 
-            // Close on backdrop, X button, or Escape
+            closeButton.addEventListener('click', closePopup);
             popup.addEventListener('click', function (e) {
-                if (e.target === popup || e.target.closest('.popup-close')) closePopup();
+                if (e.target === popup) closePopup();
             });
+
+            // Close on Escape
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && popup.classList.contains('is-open')) closePopup();
+                if (popup.classList.contains('is-open')) {
+                    if (e.key === 'Escape') {
+                        closePopup();
+                        return;
+                    }
+
+                    if (e.key === 'Tab') {
+                        e.preventDefault();
+                        closeButton.focus();
+                    }
+                    return;
+                }
+
+                if ((e.key === 'Enter' || e.key === ' ') &&
+                    e.target.matches('[data-popup-text][role="button"]')) {
+                    e.preventDefault();
+                    const target = e.target;
+                    openPopup(target.dataset.popupTitle, target.dataset.popupText, target);
+                }
             });
         })();
     </script>
