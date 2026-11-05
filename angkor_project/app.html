@@ -460,6 +460,35 @@
                 transition-duration: 0.01ms !important;
             }
         }
+
+        /* =====================================================
+           MOBILE BACKGROUND FIX (added; original code untouched)
+           ===================================================== */
+
+        /* Stable full-screen height on phones (address bar show/hide) */
+        .underlay-fixed {
+            height: 100vh;
+            /* fallback for old browsers */
+            height: 100dvh;
+        }
+
+        @media (max-width: 600px) {
+            .underlay-banner {
+                /* show the WHOLE image instead of cropping a slice from the middle */
+                background-size: contain;
+                background-position: center center;
+                background-repeat: no-repeat;
+                background-color: #0b0b0b;
+                /* fills the empty bars above/below the image */
+            }
+
+            /*
+              Prefer a full-screen look (no bars)? Delete the "contain" rules above
+              and use this instead (shift 0%–100% to keep the temple visible):
+
+              .underlay-banner { background-position: 35% center; }
+            */
+        }
     </style>
 </head>
 
