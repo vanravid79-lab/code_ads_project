@@ -583,6 +583,18 @@
                 transform: scale(1.8);
             }
         }
+
+        /* =====================================================
+           FASTER CAN SLIDE (added; original code untouched)
+           Change --slide-faster: 1 = original speed, 2.5 = 2.5x faster
+           ===================================================== */
+        .product-group {
+            --slide-faster: 2.5;
+        }
+
+        .can-track {
+            animation-duration: calc(var(--slide-speed) / var(--slide-faster)) !important;
+        }
     </style>
 </head>
 
@@ -1228,7 +1240,7 @@
             const label = document.createElement('div');
             label.className = 'finger-label';
             label.setAttribute('aria-hidden', 'true');
-            label.textContent = 'ចុចត្រង់នេះ ដើម្បីដាក់កំប៉ុងចូលក្នុងរូបនេះ';
+            // label.textContent = 'ចុចត្រង់នេះ ដើម្បីដាក់កំប៉ុងចូលក្នុងរូបនេះ';
 
             group.appendChild(hint);
             group.appendChild(label);
