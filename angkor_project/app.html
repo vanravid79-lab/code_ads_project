@@ -489,6 +489,100 @@
               .underlay-banner { background-position: 35% center; }
             */
         }
+
+        /* =====================================================
+           FINGER HINT (added): stays on the centre of the main image
+           ===================================================== */
+        .finger-hint {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 6;
+            width: 0;
+            height: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 250ms ease;
+            will-change: transform, opacity;
+        }
+
+        .finger-hand {
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 56px;
+            line-height: 1;
+            transform: translate(-50%, -8%);
+            transform-origin: 50% 10%;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+            animation: finger-tap 1.4s ease-in-out infinite;
+        }
+
+        .finger-ring {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 44px;
+            height: 44px;
+            margin: -22px 0 0 -22px;
+            border: 3px solid rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            opacity: 0;
+            animation: finger-ring 1.4s ease-out infinite;
+        }
+
+        .finger-label {
+            position: absolute;
+            left: 50%;
+            top: -56px;
+            z-index: 6;
+            transform: translateX(-50%);
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.72);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 250ms ease;
+        }
+
+        @keyframes finger-tap {
+
+            0%,
+            100% {
+                transform: translate(-50%, -8%) scale(1);
+            }
+
+            35% {
+                transform: translate(-50%, -2%) scale(0.84);
+            }
+
+            55% {
+                transform: translate(-50%, -8%) scale(1);
+            }
+        }
+
+        @keyframes finger-ring {
+
+            0%,
+            30% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            38% {
+                opacity: 1;
+                transform: scale(0.8);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(1.8);
+            }
+        }
     </style>
 </head>
 
@@ -1107,6 +1201,191 @@
                     openPopup(target.dataset.popupTitle, target.dataset.popupText, target);
                 }
             });
+        })();
+    </script>
+    <!-- Finger hint + click-to-fit (added): no dragging, just click -->
+    <script>
+        (function () {
+            const group = document.querySelector('.product-group');
+            const popup = document.getElementById('popup');
+            if (!group || !popup) return;
+            const main = group.querySelector('.layer-main');
+            const mainWrap = group.querySelector('.main-wrap');
+            const track = group.querySelector('.can-track');
+            const popupBox = popup.querySelector('.popup-box');
+            const titleEl = popup.querySelector('.popup-title');
+            const textEl = popup.querySelector('.popup-text');
+            const popupAction = popup.querySelector('.popup-action');
+            const popupImage = popup.querySelector('.popup-product-image');
+            if (!main || !mainWrap || !track) return;
+
+            /* ---------- Finger icon: stays on the centre of the main image ---------- */
+            const hint = document.createElement('div');
+            hint.className = 'finger-hint';
+            hint.setAttribute('aria-hidden', 'true');
+            hint.innerHTML = '<div class="finger-ring"></div><div class="finger-hand">&#128070;</div>';
+
+            const label = document.createElement('div');
+            label.className = 'finger-label';
+            label.setAttribute('aria-hidden', 'true');
+            label.textContent = 'ចុចត្រង់នេះ ដើម្បីដាក់កំប៉ុងចូលក្នុងរូបនេះ';
+
+            group.appendChild(hint);
+            group.appendChild(label);
+
+            let fitting = false;
+            const startAt = performance.now() + 600;
+
+            function isPopupOpen() { return popup.classList.contains('is-open'); }
+
+            function tick(now) {
+                requestAnimationFrame(tick);
+                const hide = now < startAt || fitting || isPopupOpen();
+                const r = main.getBoundingClientRect();
+                const g = group.getBoundingClientRect();
+                if (r.width > 0) {
+                    const x = r.left + r.width / 2 - g.left;
+                    const y = r.top + r.height / 2 - g.top;
+                    hint.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)';
+                }
+                hint.style.opacity = hide ? 0 : 1;
+                label.style.opacity = hide ? 0 : 1;
+            }
+            requestAnimationFrame(tick);
+
+            /* ---------- Click to fit (no dragging) ---------- */
+            function visibleCans() {
+                const g = group.getBoundingClientRect();
+                return Array.prototype.filter.call(track.querySelectorAll('.layer-can'), function (c) {
+                    const r = c.getBoundingClientRect();
+                    const cx = r.left + r.width / 2;
+                    return r.width > 5 && cx > g.left && cx < g.right;
+                });
+            }
+
+            // The can closest to the centre of the main image
+            function nearestCan() {
+                const m = main.getBoundingClientRect();
+                const mx = m.left + m.width / 2;
+                let best = null;
+                let bestDist = Infinity;
+                visibleCans().forEach(function (c) {
+                    const r = c.getBoundingClientRect();
+                    const d = Math.abs(r.left + r.width / 2 - mx);
+                    if (d < bestDist) { bestDist = d; best = c; }
+                });
+                return best;
+            }
+
+            function openSuccessPopup(can) {
+                titleEl.textContent = 'Cheers! Perfect match!';
+                titleEl.hidden = false;
+                textEl.textContent = 'ពិសារដោយការ ទទួលខុសត្រូវ';
+                popupBox.classList.add('is-success');
+                popupImage.hidden = false;
+                popupImage.alt = can ? can.alt : main.alt;
+                popupImage.src = can ? (can.currentSrc || can.src) : (main.currentSrc || main.src);
+                popupAction.textContent = 'Continue';
+                popup.classList.add('is-open');
+                popup.setAttribute('aria-hidden', 'false');
+                group.classList.add('is-paused');
+                group.classList.add('is-popup-open');
+                popupAction.focus();
+            }
+
+            function wiggleMain() {
+                mainWrap.classList.remove('is-wiggling');
+                void mainWrap.offsetWidth;
+                mainWrap.classList.add('is-wiggling');
+            }
+
+            function fit(can) {
+                if (fitting || isPopupOpen()) return;
+                fitting = true;
+                can = can || nearestCan();
+
+                if (!can) {
+                    wiggleMain();
+                    openSuccessPopup(null);
+                    fitting = false;
+                    return;
+                }
+
+                group.classList.add('is-paused'); // freeze the slide while the can flies in
+
+                const r = can.getBoundingClientRect();
+                const m = main.getBoundingClientRect();
+                const x = m.left + (m.width - r.width) / 2 - r.left;
+                const y = m.top + (m.height - r.height) / 2 - r.top;
+
+                const ghost = document.createElement('div');
+                ghost.className = 'drag-ghost';
+                ghost.setAttribute('aria-hidden', 'true');
+                ghost.style.left = r.left + 'px';
+                ghost.style.top = r.top + 'px';
+                ghost.style.width = r.width + 'px';
+                ghost.style.height = r.height + 'px';
+                const img = can.cloneNode(true);
+                img.classList.remove('layer');
+                img.classList.add('drag-ghost-image');
+                img.setAttribute('aria-hidden', 'true');
+                img.removeAttribute('tabindex');
+                img.removeAttribute('role');
+                img.removeAttribute('data-popup-title');
+                img.removeAttribute('data-popup-text');
+                img.alt = '';
+                ghost.appendChild(img);
+                document.body.appendChild(ghost);
+                can.style.visibility = 'hidden';
+
+                const lift = Math.min(90, 30 + Math.hypot(x, y) * 0.2);
+                const anim = ghost.animate([
+                    { transform: 'translate(0px, 0px) scale(1)', easing: 'cubic-bezier(0.33, 0, 0.67, 1)' },
+                    { transform: 'translate(' + x / 2 + 'px, ' + (y / 2 - lift) + 'px) scale(1.12)', offset: 0.5, easing: 'cubic-bezier(0.33, 0, 0.2, 1)' },
+                    { transform: 'translate(' + x + 'px, ' + y + 'px) scale(1)' }
+                ], { duration: 800, easing: 'linear', fill: 'forwards' });
+
+                anim.onfinish = function () {
+                    ghost.remove();
+                    can.style.visibility = '';
+                    wiggleMain();
+                    openSuccessPopup(can);
+                    fitting = false;
+                };
+            }
+
+            // Cans: a tap fits the can, so block the original drag-and-drop start.
+            document.addEventListener('pointerdown', function (e) {
+                if (isPopupOpen() || !e.target.closest) return;
+                if (e.target.closest('.layer-can')) e.stopPropagation();
+            }, true);
+
+            // Click / tap on a can or on the main image => fit with the main image.
+            document.addEventListener('click', function (e) {
+                if (popup.contains(e.target) || isPopupOpen() || !e.target.closest) return;
+                const can = e.target.closest('.layer-can');
+                if (can) {
+                    e.stopPropagation();
+                    fit(can);
+                    return;
+                }
+                if (e.target.closest('.layer-main')) {
+                    e.stopPropagation();
+                    fit(null);
+                }
+            }, true);
+
+            // Keyboard: Enter / Space does the same
+            document.addEventListener('keydown', function (e) {
+                if (isPopupOpen() || !e.target.closest) return;
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                const can = e.target.closest('.layer-can');
+                if (can || e.target.closest('.layer-main')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    fit(can || null);
+                }
+            }, true);
         })();
     </script>
 </body>
