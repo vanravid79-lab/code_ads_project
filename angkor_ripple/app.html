@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khmer Daily News - Ripple Ad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', Arial, sans-serif;
+            margin: 0;
+            background: #f0f2f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #0056b3;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #0056b3;
+            font-size: 28px;
+        }
+
+        .post h2 {
+            color: #1a1a1a;
+            line-height: 1.4;
+            font-size: 24px;
+        }
+
+        .post p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .date-meta {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .sknteam_image {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sknteam_image img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 4px;
+        }
+
+        /* Underlay window: the page scrolls, the ripple stays fixed behind the clip */
+        .underlay-slot {
+            height: 1000px;
+            margin: 30px 0;
+            position: relative;
+            clip-path: inset(0);
+        }
+
+        .underlay-fixed {
+            position: fixed;
+            inset: 0;
+            z-index: 3;
+        }
+
+        .dx-slideshow {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .dx-slideshow canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-size: 14px;
+            background: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>សារព័ត៌មាន Khmer Daily</h1>
+        </header>
+
+        <div class="post">
+            <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+            <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+            </div>
+
+            <p>
+                <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+            </p>
+
+            <div class="underlay-slot" id="dxSlot">
+                <div class="underlay-fixed">
+                    <div class="dx-slideshow" id="dxSlideshow">
+                        <canvas id="dxCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <p>
+                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+            </p>
+
+            <p>
+                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+            </p>
+
+            <p>
+                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+            </p>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+            </div>
+        </div>
+
+        <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+    </div>
+
+    <script>
+        (() => {
+            // ================= CONFIG =================
+            const SLIDES = [
+                { src: './images/ang21.png' },
+                { src: './images/ang20.png' },
+                { src: './images/ang22.png' }
+            ];
+            const DRIVE = 'time';          // 'time' = autoplay, 'scroll' = follows page scroll
+            const HOLD_MS = 1500;          // clean image on screen (lower = switches sooner)
+            const TRANSITION_MS = 1500;    // ripple travelling across the image (lower = faster)
+            const SCROLL_LOOPS = 2;        // scroll mode: full loops while the window scrolls past
+            const ORIGIN = 'center';       // 'center' = always the middle, 'random' = a new spot each time
+            const RING_WIDTH = 0.13;       // thickness of the leading wave (share of canvas width)
+            const WAVELENGTH = 0.16;       // distance between ripples (share of canvas width)
+            const AMPLITUDE = 0.007;       // how strongly the picture is bent (share of canvas width)
+            const TRAIL = 4.0;             // how far the ripples trail behind the front (multiples of RING_WIDTH)
+            const EDGE_SOFT = 0.14;        // softness of the edge where the new image appears (higher = smoother blend)
+            const SHINE = 0.05;            // light glints on the water crests (0 = off)
+            const FIT = 'auto';            // 'auto' = whole image on desktop / fill on mobile, 'contain', 'cover'
+            const MOBILE_BP = 700;
+            const BG = [1, 1, 1];          // background colour (r,g,b 0..1) around "contain" images
+            // ==========================================
+
+            const slot = document.getElementById('dxSlot');
+            const root = document.getElementById('dxSlideshow');
+            const canvas = document.getElementById('dxCanvas');
+            const gl = canvas.getContext('webgl', { antialias: false, alpha: false });
+            if (!gl) { console.warn('WebGL not supported'); return; }
+
+            const N = SLIDES.length;
+            const CYCLE = HOLD_MS + TRANSITION_MS;
+            const mod = (i, m) => ((i % m) + m) % m;
+            const clamp01 = (t) => Math.min(1, Math.max(0, t));
+            const easeInOut = (t) => 0.5 - 0.5 * Math.cos(Math.PI * t);   // sine ease: even speed, no sudden rush in the middle
+
+            // ---------- Shaders ----------
+            const VERT = `
+                attribute vec2 aPos;
+                void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+            `;
+            const FRAG = `
+                precision highp float;
+                uniform sampler2D uA;
+                uniform sampler2D uB;
+                uniform vec4 uRectA;      // x, y, w, h of image A in canvas pixels (top-left origin)
+                uniform vec4 uRectB;
+                uniform vec2 uRes;
+                uniform vec2 uCenter;     // ripple origin, canvas pixels (top-left origin)
+                uniform float uP;         // transition progress 0..1
+                uniform float uMaxR;      // distance to the farthest corner
+                uniform float uWidth;     // leading wave thickness (px)
+                uniform float uFreq;      // radians per px
+                uniform float uAmp;       // displacement (px)
+                uniform float uTrail;     // trail length (px)
+                uniform float uSoft;      // edge softness (px)
+                uniform float uShine;
+                uniform vec3 uBg;
+
+                vec3 sampleImg(sampler2D t, vec4 r, vec2 p) {
+                    vec2 uv = (p - r.xy) / r.zw;
+                    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return uBg;
+                    return texture2D(t, uv).rgb;
+                }
+
+                void main() {
+                    vec2 px = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
+                    vec2 delta = px - uCenter;
+                    float d = length(delta);
+                    vec2 dir = d > 0.001 ? delta / d : vec2(0.0);
+
+                    // ring radius: starts outside the picture's origin, ends past the farthest corner
+                    float R = -uWidth * 3.0 + uP * (uMaxR + uWidth * 6.0);
+                    float x = d - R;                          // <0 behind the front, >0 ahead of it
+
+                    // envelope: sharp ahead of the front, long decaying trail behind
+                    float env = x < 0.0 ? exp(x / uTrail) : exp(-pow(x / (uWidth * 0.5), 2.0));
+                    float fade = 1.0 - smoothstep(0.78, 1.0, uP);
+                    fade *= smoothstep(0.0, 0.08, uP);
+
+                    float phase = x * uFreq;
+                    float wave = sin(phase) * env * fade;
+                    vec2 offset = dir * wave * uAmp;
+
+                    float mask = 1.0 - smoothstep(-uSoft, uSoft, x);   // 1 = next image
+                    vec3 a = sampleImg(uA, uRectA, px + offset);
+                    vec3 b = sampleImg(uB, uRectB, px + offset);
+                    vec3 col = mix(a, b, mask);
+
+                    // glints on the crests
+                    float glint = cos(phase) * env * fade;
+                    col += uShine * max(glint, 0.0) * 0.6 - uShine * max(-glint, 0.0) * 0.25;
+
+                    gl_FragColor = vec4(col, 1.0);
+                }
+            `;
+
+            function compile(type, src) {
+                const s = gl.createShader(type);
+                gl.shaderSource(s, src);
+                gl.compileShader(s);
+                if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+                return s;
+            }
+            const prog = gl.createProgram();
+            gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+            gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+            gl.linkProgram(prog);
+            gl.useProgram(prog);
+
+            const buf = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+            const aPos = gl.getAttribLocation(prog, 'aPos');
+            gl.enableVertexAttribArray(aPos);
+            gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+            const U = {};
+            ['uA', 'uB', 'uRectA', 'uRectB', 'uRes', 'uCenter', 'uP', 'uMaxR', 'uWidth', 'uFreq', 'uAmp', 'uTrail', 'uSoft', 'uShine', 'uBg']
+                .forEach(n => U[n] = gl.getUniformLocation(prog, n));
+
+            // ---------- Textures ----------
+            let W = 0, H = 0, dpr = 1;
+            const textures = [];
+            const rects = [];
+
+            function makeTexture(i) {
+                const t = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, t);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 1, 1, 0, gl.RGB, gl.UNSIGNED_BYTE,
+                    new Uint8Array([50 + i * 60, 50 + i * 60, 50 + i * 60]));
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                return t;
+            }
+
+            const images = SLIDES.map((s, i) => {
+                textures[i] = makeTexture(i);
+                rects[i] = [0, 0, 1, 1];
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    gl.bindTexture(gl.TEXTURE_2D, textures[i]);
+                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+                    try {
+                        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+                    } catch (e) {
+                        console.error('Could not load image into WebGL. Open the page through a local server (not file://).', e);
+                        return;
+                    }
+                    layout();
+                };
+                img.onerror = () => console.warn('Missing image: ' + s.src);
+                img.src = s.src;
+                return img;
+            });
+            const isReady = (img) => img.complete && img.naturalWidth > 0;
+
+            // Where each image sits on the canvas (same fit logic as before)
+            function layout() {
+                for (let i = 0; i < N; i++) {
+                    const img = images[i];
+                    if (!isReady(img)) { rects[i] = [0, 0, W * dpr, H * dpr]; continue; }
+                    const cw = canvas.width, ch = canvas.height;
+                    const cover = FIT === 'cover' || (FIT === 'auto' && W < MOBILE_BP);
+                    const sx = cw / img.naturalWidth, sy = ch / img.naturalHeight;
+                    const s = cover ? Math.max(sx, sy) : Math.min(sx, sy);
+                    const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+                    rects[i] = [(cw - dw) / 2, cover ? (ch - dh) / 2 : 0, dw, dh];
+                }
+            }
+
+            function resize() {
+                const r = root.getBoundingClientRect();
+                const nw = Math.max(1, Math.round(r.width));
+                const nh = Math.max(1, Math.round(r.height));
+                const nd = Math.min(window.devicePixelRatio || 1, 2);
+                if (nw === W && nh === H && nd === dpr) return;
+                W = nw; H = nh; dpr = nd;
+                canvas.width = Math.round(W * dpr);
+                canvas.height = Math.round(H * dpr);
+                gl.viewport(0, 0, canvas.width, canvas.height);
+                layout();
+            }
+
+            // ---------- Deterministic hash -> [0,1) ----------
+            function hash(a, b, c) {
+                let h = (a * 374761393 + b * 668265263 + c * 2147483647) | 0;
+                h = Math.imul(h ^ (h >>> 13), 1274126177);
+                h ^= h >>> 16;
+                return (h >>> 0) / 4294967296;
+            }
+
+            // ---------- Ripple origin (per transition) ----------
+            let clickOrigin = null;   // { cycle, x, y } in fractions of the canvas
+            function originFor(c) {
+                if (clickOrigin && clickOrigin.cycle === c) return [clickOrigin.x, clickOrigin.y];
+                if (ORIGIN === 'center') return [0.5, 0.5];
+                return [0.15 + 0.7 * hash(c, 7, 1), 0.15 + 0.7 * hash(c, 7, 2)];
+            }
+
+            // ---------- Frame ----------
+            let clock = 0;
+            function render() {
+                const c = Math.floor(clock / CYCLE);
+                const local = clock - c * CYCLE;
+                const cur = mod(c, N);
+                const next = mod(cur + 1, N);
+                const cw = canvas.width, ch = canvas.height;
+
+                const g = local < HOLD_MS ? 0 : (local - HOLD_MS) / TRANSITION_MS;
+                const p = easeInOut(clamp01(g));
+                const [ox, oy] = originFor(c);
+                const cx = ox * cw, cy = oy * ch;
+                const maxR = Math.max(
+                    Math.hypot(cx, cy), Math.hypot(cw - cx, cy),
+                    Math.hypot(cx, ch - cy), Math.hypot(cw - cx, ch - cy)
+                );
+
+                gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, textures[cur]);
+                gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, textures[next]);
+                gl.uniform1i(U.uA, 0);
+                gl.uniform1i(U.uB, 1);
+                gl.uniform4fv(U.uRectA, rects[cur]);
+                gl.uniform4fv(U.uRectB, rects[next]);
+                gl.uniform2f(U.uRes, cw, ch);
+                gl.uniform2f(U.uCenter, cx, cy);
+                gl.uniform1f(U.uP, p);
+                gl.uniform1f(U.uMaxR, maxR);
+                gl.uniform1f(U.uWidth, RING_WIDTH * cw);
+                gl.uniform1f(U.uFreq, (Math.PI * 2) / (WAVELENGTH * cw));
+                gl.uniform1f(U.uAmp, AMPLITUDE * cw);
+                gl.uniform1f(U.uTrail, TRAIL * RING_WIDTH * cw);
+                gl.uniform1f(U.uSoft, EDGE_SOFT * cw);
+                gl.uniform1f(U.uShine, SHINE);
+                gl.uniform3fv(U.uBg, BG);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            }
+
+            // ---------- Timeline ----------
+            let running = false;
+            let last = 0;
+
+            function scrollClock() {
+                const r = slot.getBoundingClientRect();
+                const vh = window.innerHeight;
+                const p = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
+                return Math.min(0.9999, p) * N * SCROLL_LOOPS * CYCLE;
+            }
+
+            function tick(now) {
+                if (!running) return;
+                if (DRIVE === 'scroll') clock = scrollClock();
+                else clock += Math.min(now - last, 50);   // cap so a background-tab pause doesn't jump
+                last = now;
+                render();
+                requestAnimationFrame(tick);
+            }
+
+            function start() {
+                if (running) return;
+                running = true;
+                last = performance.now();
+                requestAnimationFrame(tick);
+            }
+            const stop = () => { running = false; };
+
+            // Manual: trigger the next / previous ripple (optionally from a given spot)
+            function nav(dir, fx, fy) {
+                if (DRIVE === 'scroll') return;
+                const c = Math.floor(clock / CYCLE);
+                const local = clock - c * CYCLE;
+                if (local >= HOLD_MS) return;               // let a running ripple finish
+                const target = dir > 0 ? c : c - 1 + N * 100;
+                if (fx !== undefined) clickOrigin = { cycle: target, x: fx, y: fy };
+                clock = target * CYCLE + HOLD_MS;
+            }
+
+            // ---------- Controls ----------
+            canvas.addEventListener('click', (e) => {
+                nav(1);
+            });
+            document.addEventListener('keydown', (e) => {
+                if (!running) return;
+                if (e.key === 'ArrowRight') nav(1);
+                if (e.key === 'ArrowLeft') nav(-1);
+            });
+            let touchX = null;
+            canvas.addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+            canvas.addEventListener('touchend', (e) => {
+                if (touchX === null) return;
+                const dx = e.changedTouches[0].clientX - touchX;
+                if (Math.abs(dx) > 40) nav(dx < 0 ? 1 : -1);
+                touchX = null;
+            });
+
+            // ---------- Lifecycle ----------
+            new ResizeObserver(resize).observe(root);
+            window.addEventListener('resize', resize);
+            resize();
+            new IntersectionObserver(([e]) => { e.isIntersecting ? start() : stop(); }).observe(slot);
+        })();
+    </script>
+
+</body>
+
+</html>
