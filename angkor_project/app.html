@@ -91,7 +91,8 @@
         }
 
         [data-popup-text]:focus-visible,
-        .popup-close:focus-visible {
+        .popup-close:focus-visible,
+        .popup-action:focus-visible {
             outline: 3px solid var(--color-brand);
             outline-offset: 4px;
         }
@@ -172,6 +173,29 @@
 
         .product-group.is-paused .can-track {
             animation-play-state: paused;
+        }
+
+        .product-group.is-popup-open .can-track .layer-can {
+            animation: popup-can-sway 1.8s ease-in-out infinite alternate;
+            transform-origin: center bottom;
+        }
+
+        .product-group.is-popup-open .can-track .layer-can:nth-child(3n + 2) {
+            animation-delay: -0.6s;
+        }
+
+        .product-group.is-popup-open .can-track .layer-can:nth-child(3n) {
+            animation-delay: -1.2s;
+        }
+
+        @keyframes popup-can-sway {
+            from {
+                rotate: -4deg;
+            }
+
+            to {
+                rotate: 4deg;
+            }
         }
 
         @keyframes can-slide {
@@ -288,12 +312,14 @@
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
+            transition: opacity 240ms ease, visibility 0s linear 240ms;
         }
 
         .popup.is-open {
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
+            transition-delay: 0s;
         }
 
         .popup-box {
@@ -305,6 +331,70 @@
             background: var(--color-surface);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
+            opacity: 0;
+            transform: translateY(12px) scale(0.98);
+            transition: opacity 240ms ease, transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .popup.is-open .popup-box {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .popup-icon {
+            display: none;
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 12px;
+            place-items: center;
+            border-radius: 50%;
+            background: #fff3d6;
+            font-size: 30px;
+        }
+
+        .popup-box.is-success {
+            border-top: 4px solid #c68118;
+        }
+
+        .popup-box.is-success .popup-icon {
+            display: grid;
+        }
+
+        .popup-product-image {
+            display: block;
+            width: auto;
+            max-width: 100%;
+            max-height: 180px;
+            margin: 0 auto 16px;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.18));
+        }
+
+        .popup-product-image[hidden] {
+            display: none;
+        }
+
+        .popup-box.is-success .popup-product-image:not([hidden]) {
+            animation: popup-can-shake 1s ease-in-out infinite;
+            transform-origin: center bottom;
+        }
+
+        @keyframes popup-can-shake {
+
+            0%,
+            100% {
+                transform: rotate(0);
+            }
+
+            20%,
+            60% {
+                transform: rotate(-3deg) translateX(-1px);
+            }
+
+            40%,
+            80% {
+                transform: rotate(3deg) translateX(1px);
+            }
         }
 
         .popup-title {
@@ -313,9 +403,38 @@
             font-size: 20px;
         }
 
+        .popup-box.is-success .popup-title {
+            color: #9a5c08;
+        }
+
         .popup-text {
             margin: 0;
             line-height: 1.7;
+        }
+
+        .popup-action {
+            margin-top: 20px;
+            padding: 10px 24px;
+            border: 0;
+            border-radius: 6px;
+            background: var(--color-brand);
+            color: #fff;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 160ms ease, background-color 160ms ease;
+        }
+
+        .popup-action:hover {
+            transform: translateY(-1px);
+        }
+
+        .popup-action:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .popup-box.is-success .popup-action {
+            background: #a9680d;
         }
 
         .popup-close {
@@ -431,8 +550,11 @@
         tabindex="-1">
         <div class="popup-box">
             <button class="popup-close" type="button" aria-label="បិទ">&times;</button>
+            <!-- <div class="popup-icon" aria-hidden="true">🍺</div> -->
+            <img class="popup-product-image" alt="" hidden />
             <h3 class="popup-title" id="popup-title"></h3>
             <p class="popup-text"></p>
+            <button class="popup-action" type="button">Close</button>
         </div>
     </div>
 
@@ -442,6 +564,9 @@
             const titleEl = popup.querySelector('.popup-title');
             const textEl = popup.querySelector('.popup-text');
             const closeButton = popup.querySelector('.popup-close');
+            const popupBox = popup.querySelector('.popup-box');
+            const popupAction = popup.querySelector('.popup-action');
+            const popupProductImage = popup.querySelector('.popup-product-image');
             const group = document.querySelector('.product-group');
             const viewport = document.querySelector('.can-viewport');
             const track = document.querySelector('.can-track');
@@ -809,7 +934,7 @@
 
                     if (!reachesMain) {
                         returnCan(d);
-                        openPopup('Try again', 'Please tap directly on the main product image.', d.can);
+                        openPopup('Try again', 'Please tap directly on the main product image.', d.can, 'retry');
                         return;
                     }
                 }
@@ -824,12 +949,13 @@
                         returnCan(d);
                         snapped = null;
                         wiggleMain();
+                        openPopup('Cheers! Perfect match!', 'ពិសារដោយការ ទទួលខុសត្រូវ', mainImg, 'success', d.can);
                     });
                 } else {
                     // Return the can and explain how to complete the interaction.
                     moveGhost(d, 0, 0, 400, false, function () {
                         returnCan(d);
-                        openPopup('Try again', 'Please place the can inside the main product image.', d.can);
+                        openPopup('Try again', 'Please place the can inside the main product image.', d.can, 'retry');
                     });
 
 
@@ -843,21 +969,30 @@
             }
 
             /* ---------- Popup ---------- */
-            function openPopup(title, text, trigger) {
+            function openPopup(title, text, trigger, variant, productImage) {
                 titleEl.textContent = title || '';
                 titleEl.hidden = !title;
                 textEl.textContent = text || '';
+                popupBox.classList.toggle('is-success', variant === 'success');
+                popupProductImage.hidden = !productImage;
+                popupProductImage.alt = productImage ? productImage.alt : '';
+                popupProductImage.src = productImage ? productImage.currentSrc || productImage.src : '';
+                popupAction.textContent = variant === 'success'
+                    ? 'Continue'
+                    : variant === 'retry' ? 'Try again' : 'Close';
                 popupTrigger = trigger ||
                     (document.activeElement === document.body ? null : document.activeElement);
                 popup.classList.add('is-open');
                 popup.setAttribute('aria-hidden', 'false');
                 group.classList.add('is-paused');
-                closeButton.focus();
+                group.classList.add('is-popup-open');
+                popupAction.focus();
             }
 
             function closePopup() {
                 popup.classList.remove('is-open');
                 popup.setAttribute('aria-hidden', 'true');
+                group.classList.remove('is-popup-open');
                 const trigger = popupTrigger;
                 popupTrigger = null;
                 // Fly a snapped can back to its place in the slider,
@@ -911,11 +1046,12 @@
                     e.clientY <= mainRect.bottom;
 
                 if (clickedInsideGroup && !clickedInsideMain) {
-                    openPopup('Try again', 'Please click inside the main product image.');
+                    openPopup('Try again', 'Please click inside the main product image.', null, 'retry');
                 }
             });
 
             closeButton.addEventListener('click', closePopup);
+            popupAction.addEventListener('click', closePopup);
             popup.addEventListener('click', function (e) {
                 if (e.target === popup) closePopup();
             });
