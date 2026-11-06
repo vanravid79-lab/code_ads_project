@@ -226,11 +226,11 @@
             max-width: 500px;
             margin: 0 auto;
             padding: clamp(10px, 3vw, 16px);
-            color: #fff8e9;
-            background: linear-gradient(160deg, #078b48, #006b36);
-            border: 1px solid rgba(179, 255, 209, 0.38);
+            color: #ffffff;
+            background: linear-gradient(160deg, #c8102e, #8b0a14);
+            border: 1px solid rgba(255, 200, 200, 0.38);
             border-radius: 22px;
-            box-shadow: 0 18px 40px rgba(0, 24, 11, 0.4);
+            box-shadow: 0 18px 40px rgba(40, 0, 6, 0.4);
             font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
         }
 
@@ -246,7 +246,7 @@
             place-items: center;
             overflow: hidden;
             padding: 20px;
-            background: rgba(0, 35, 18, 0.78);
+            background: rgba(45, 0, 8, 0.78);
             border-radius: inherit;
         }
 
@@ -275,7 +275,7 @@
 
         .beer-puzzle-win-card h3 {
             margin: 0;
-            color: #006b36;
+            color: #b5121b;
             font-size: clamp(24px, 6vw, 32px);
         }
 
@@ -289,7 +289,7 @@
             min-height: 44px;
             padding: 10px 24px;
             color: #fff;
-            background: #007a3d;
+            background: #b5121b;
             border: 0;
             border-radius: 999px;
             cursor: pointer;
@@ -298,7 +298,7 @@
         }
 
         .beer-puzzle-win-dismiss:hover {
-            background: #005b2d;
+            background: #7a0d14;
         }
 
         .beer-puzzle-confetti {
@@ -366,7 +366,7 @@
 
         .beer-puzzle-kicker {
             margin: 0 0 2px;
-            color: #f5d27a;
+            color: #ffffff;
             font-size: 11px;
             font-weight: 800;
             letter-spacing: 0.18em;
@@ -374,13 +374,13 @@
 
         .beer-puzzle-title {
             margin: 0;
-            color: #fff8e9;
+            color: #ffffff;
             font-size: clamp(21px, 5vw, 27px);
         }
 
         .beer-puzzle-instructions {
             margin: 3px 0 0;
-            color: rgba(255, 248, 233, 0.82);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 13px;
             line-height: 1.5;
         }
@@ -401,9 +401,9 @@
             justify-content: space-between;
             gap: 6px;
             padding: 6px 4px;
-            color: #fff8e9;
-            background: rgba(0, 45, 22, 0.34);
-            border: 2px solid rgba(255, 248, 233, 0.25);
+            color: #ffffff;
+            background: rgba(60, 0, 8, 0.35);
+            border: 2px solid rgba(255, 255, 255, 0.25);
             border-radius: 10px;
             cursor: pointer;
             font: inherit;
@@ -439,7 +439,7 @@
         .beer-puzzle-status {
             min-height: 36px;
             margin: 0 0 6px;
-            color: #fff5cf;
+            color: #ffffff;
             font-size: 12px;
             line-height: 18px;
             font-weight: 700;
@@ -461,9 +461,9 @@
             width: min(100%, 360px);
             margin: 0 auto;
             padding: 3px;
-            background: #005b2d;
-            border: 2px solid rgba(0, 44, 22, 0.9);
-            box-shadow: 0 8px 18px rgba(0, 32, 13, 0.32);
+            background: #7a0d14;
+            border: 2px solid rgba(60, 0, 8, 0.9);
+            box-shadow: 0 8px 18px rgba(40, 0, 6, 0.32);
         }
 
         .beer-puzzle-slot {
@@ -518,14 +518,14 @@
         .beer-puzzle-tray {
             width: 100%;
             padding: 8px;
-            background: #f4f0e7;
+            background: rgba(60, 0, 8, 0.35);
             border-radius: 15px;
-            box-shadow: inset 0 2px 6px rgba(52, 39, 20, 0.12);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25);
         }
 
         .beer-puzzle-tray-title {
             margin: 0 0 9px;
-            color: #4a463d;
+            color: #ffffff;
             font-size: 11px;
             font-weight: 800;
             letter-spacing: 0.1em;
@@ -606,13 +606,13 @@
         }
 
         .beer-puzzle-button.secondary {
-            color: #173c26;
-            background: rgba(255, 255, 255, 0.88);
-            border: 1px solid rgba(0, 46, 22, 0.18);
+            color: #8b0a14;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(60, 0, 8, 0.18);
         }
 
         .beer-puzzle-moves {
-            color: rgba(255, 255, 255, 0.95);
+            color: #ffffff;
             font-size: 13px;
             font-weight: 700;
         }
@@ -734,7 +734,7 @@
                 height: 100vh;
                 height: 100lvh;
                 align-items: flex-start;
-                background: #005b2d;
+                background: #7a0d14;
             }
 
             /* the game itself keeps a stable, locked height at the top */
@@ -750,6 +750,21 @@
                 box-sizing: border-box;
                 max-width: 500px;
             }
+        }
+
+        /* FIX: the article rule ".post p { color: #333 }" was turning the puzzle's
+           text dark. These stronger rules keep all puzzle text white. */
+        .post .beer-puzzle p,
+        .post .beer-puzzle-instructions,
+        .post .beer-puzzle-status,
+        .post .beer-puzzle-tray-title,
+        .post .beer-puzzle-kicker {
+            color: #ffffff;
+        }
+
+        /* the light "Congratulations" card keeps its dark text */
+        .post .beer-puzzle-win-card p {
+            color: #42121a;
         }
 
         .ad-label {
@@ -1682,6 +1697,36 @@
 
             const GRID_COLUMNS = 2;
             const GRID_ROWS = 4;
+
+            // FIX: every picture uses the SAME puzzle size and FILLS it edge to edge
+            // (like the can), with no empty red space.
+            // Each picture's crop box is trimmed around its centre to this one shape.
+            // 0.5 = width is half the height (2 x 4 grid of square pieces).
+            const PUZZLE_RATIO = 0.5;
+            // 'fill'   = picture fills the whole puzzle (a little of the edges is trimmed)
+            // 'fit'    = whole picture visible, empty space around thin pictures
+            const PUZZLE_FIT = 'fit'; // whole can/bottle visible, nothing cut off
+
+            function getCrop(index) {
+                const [x, y, w, h] = puzzleImages[index].crop;
+                const wider = w / h > PUZZLE_RATIO;
+                if (PUZZLE_FIT === 'fill') {
+                    if (wider) {
+                        // trim left + right
+                        const newW = h * PUZZLE_RATIO;
+                        return [x + (w - newW) / 2, y, newW, h];
+                    }
+                    // trim top + bottom
+                    const newH = w / PUZZLE_RATIO;
+                    return [x, y + (h - newH) / 2, w, newH];
+                }
+                if (wider) {
+                    const newH = w / PUZZLE_RATIO;
+                    return [x, y - (newH - h) / 2, w, newH];
+                }
+                const newW = h * PUZZLE_RATIO;
+                return [x - (newW - w) / 2, y, newW, h];
+            }
             const TILE_COUNT = GRID_COLUMNS * GRID_ROWS;
             const STARTER_PIECES = [2, 5];
             const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -1710,7 +1755,7 @@
                 const image = choiceImages[selectedImage];
                 if (!image.naturalWidth || !image.naturalHeight) return;
 
-                const crop = puzzleImages[selectedImage].crop;
+                const crop = getCrop(selectedImage); // same size, fills the puzzle
                 const aspectRatio = crop[2] / crop[3];
                 const maxWidth = Math.min(360, board.parentElement.clientWidth);
                 const maxHeight = Math.min(320, window.innerHeight * 0.44);
@@ -1793,7 +1838,7 @@
 
             function createPieceImage(pieceIndex, isPlaced, isGuide) {
                 const sourceImage = choiceImages[selectedImage];
-                const crop = puzzleImages[selectedImage].crop;
+                const crop = getCrop(selectedImage); // same size, fills the puzzle
                 const aspectRatio = crop[2] / crop[3];
                 const cellHeight = 100 / (aspectRatio * GRID_ROWS / GRID_COLUMNS);
                 const imageScale = GRID_COLUMNS * 100 / crop[2];
@@ -1819,8 +1864,8 @@
                 defs.appendChild(clip);
                 svg.appendChild(defs);
                 pieceBase.setAttribute('d', path);
-                pieceBase.setAttribute('fill', '#005b2d');
-                pieceBase.setAttribute('stroke', '#183a28');
+                pieceBase.setAttribute('fill', '#7a0d14');
+                pieceBase.setAttribute('stroke', '#3d0509');
                 pieceBase.setAttribute('stroke-width', '1.5');
                 pieceBase.setAttribute('stroke-linejoin', 'round');
                 svg.appendChild(pieceBase);
@@ -1834,7 +1879,7 @@
                 svg.appendChild(image);
                 outline.setAttribute('d', path);
                 outline.setAttribute('fill', 'none');
-                outline.setAttribute('stroke', '#183a28');
+                outline.setAttribute('stroke', '#3d0509');
                 outline.setAttribute('stroke-width', '1.5');
                 outline.setAttribute('stroke-linejoin', 'round');
                 svg.appendChild(outline);
