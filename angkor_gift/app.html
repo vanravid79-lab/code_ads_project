@@ -987,6 +987,82 @@
             }
         }
 
+        /* FIX: tap hint — a finger that taps the grid gifts to show users what to do */
+        .tap-hint {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 6;
+            font-size: 38px;
+            line-height: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: left 0.6s cubic-bezier(0.45, 0.05, 0.55, 0.95),
+                top 0.6s cubic-bezier(0.45, 0.05, 0.55, 0.95),
+                opacity 0.3s ease;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+        }
+
+        .tap-hint.show {
+            opacity: 1;
+        }
+
+        .tap-hint .finger {
+            display: inline-block;
+            animation: fingerTap 1.1s ease-in-out infinite;
+        }
+
+        /* golden ripple where the fingertip touches */
+        .tap-hint .tap-ring {
+            position: absolute;
+            left: 2px;
+            top: -10px;
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ffd54a;
+            border-radius: 50%;
+            box-sizing: border-box;
+            animation: tapRing 1.1s ease-out infinite;
+        }
+
+        @keyframes fingerTap {
+
+            0%,
+            100% {
+                transform: translateY(10px) scale(1);
+            }
+
+            50% {
+                transform: translateY(0) scale(0.88);
+            }
+        }
+
+        @keyframes tapRing {
+            0%,
+            40% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(0.4);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.6);
+                opacity: 0;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .tap-hint .finger,
+            .tap-hint .tap-ring {
+                animation: none;
+            }
+        }
+
         .ad-label {
             position: absolute;
             top: 5px;
@@ -1036,508 +1112,561 @@
             </p>
 
             <div class="threeCans">
-                <img src="./images/ang-can3.png">
-            </div>
+                <img src="./images/ang-can3.png" ></div>
 
-            <div class="underlay-slot">
-                <div class="underlay-fixed-content">
-                    <div class="underlay-banner">
-                        <div class="underlay-banner-reveal"></div>
+                <div class="underlay-slot">
+                    <div class="underlay-fixed-content">
+                        <div class="underlay-banner">
+                            <div class="underlay-banner-reveal"></div>
 
-                        <div class="underlay-gifts">
+                            <div class="underlay-gifts">
 
-                            <div class="underlay-gift">
-                                <img style="margin-top: -0.3rem;" src="./images/ang-gift1.png" alt="">
+                                <div class="underlay-gift">
+                                    <img style="margin-top: -0.3rem;" src="./images/ang-gift1.png" alt="">
+                                </div>
+
+                                <div class="underlay-gift">
+                                    <img src="./images/ang-gift2.png" alt="">
+                                </div>
+
+                                <div class="underlay-gift">
+                                    <img style="margin-top: -0.3rem;" src="./images/ang-gift3.png" alt="">
+                                </div>
+
                             </div>
 
-                            <div class="underlay-gift">
-                                <img src="./images/ang-gift2.png" alt="">
-                            </div>
-
-                            <div class="underlay-gift">
-                                <img style="margin-top: -0.3rem;" src="./images/ang-gift3.png" alt="">
-                            </div>
-
+                            <div class="underlay-center-grid"></div>
                         </div>
-
-                        <div class="underlay-center-grid"></div>
                     </div>
+
+                    <div class="angkorText">
+                        <img style="width: 50%;margin-top: 1rem;" src="./images/img_1.png">
+                    </div>
+
                 </div>
 
-                <div class="angkorText">
-                    <img style="width: 50%;margin-top: 1rem;" src="./images/img_1.png">
+                <p>
+                    លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                    ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                    និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                    និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+                </p>
+
+                <p>
+                    ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+                    និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                    កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+                </p>
+
+                <p>
+                    គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                    ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                    និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+                </p>
+
+                <div class="sknteam_image">
+                    <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
                 </div>
-
             </div>
 
-            <p>
-                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
-                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
-                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
-                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
-            </p>
+            <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+        </div>
 
-            <p>
-                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
-                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
-                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
-            </p>
+        <img src="./images/Gemini_Generated_Image_y1jf8uy1jf8uy1jf-removebg-preview.png">
 
-            <p>
-                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
-                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
-                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
-            </p>
-
-            <div class="sknteam_image">
-                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
+        <!-- FIX: reward popup (title, gift with reward inside, chances) -->
+        <div class="reward-popup" id="rewardPopup">
+            <div class="reward-popup-box">
+                <button class="reward-popup-close" id="rewardClose" aria-label="Close">&times;</button>
+                <div class="reward-popup-title" id="rewardTitle"></div>
+                <div class="reward-popup-gift">
+                    <img class="reward-popup-img"
+                        src="./images/Gemini_Generated_Image_y1jf8uy1jf8uy1jf-removebg-preview.png" alt="">
+                    <div class="reward-popup-inside" id="rewardValue"></div>
+                </div>
+                <div class="reward-popup-note" id="rewardNote"></div>
             </div>
         </div>
 
-        <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
-    </div>
+        <div class="canPrice">
 
-    <img src="./images/Gemini_Generated_Image_y1jf8uy1jf8uy1jf-removebg-preview.png">
-
-    <!-- FIX: reward popup (title, gift with reward inside, chances) -->
-    <div class="reward-popup" id="rewardPopup">
-        <div class="reward-popup-box">
-            <button class="reward-popup-close" id="rewardClose" aria-label="Close">&times;</button>
-            <div class="reward-popup-title" id="rewardTitle"></div>
-            <div class="reward-popup-gift">
-                <img class="reward-popup-img"
-                    src="./images/Gemini_Generated_Image_y1jf8uy1jf8uy1jf-removebg-preview.png" alt="">
-                <div class="reward-popup-inside" id="rewardValue"></div>
+            <div>
+                <img src="./images/img_3.png">
             </div>
-            <div class="reward-popup-note" id="rewardNote"></div>
-        </div>
-    </div>
 
-    <div class="canPrice">
+            <div>
+                <img src="./images/img_4.png">
+            </div>
 
-        <div>
-            <img src="./images/img_3.png">
-        </div>
+            <div>
+                <img src="./images/img_5.png">
+            </div>
 
-        <div>
-            <img src="./images/img_4.png">
-        </div>
+            <div>
+                <img src="./images/img_6.png">
+            </div>
 
-        <div>
-            <img src="./images/img_5.png">
-        </div>
+            <div>
+                <img src="./images/img_7.png">
+            </div>
 
-        <div>
-            <img src="./images/img_6.png">
         </div>
 
-        <div>
-            <img src="./images/img_7.png">
-        </div>
+        <script>
+            // FIX: move the angkorText image into the gifts row so it shows right below the 3 gifts
+            const angkorText = document.querySelector('.angkorText');
+            if (angkorText) {
+                document.querySelector('.underlay-gifts').appendChild(angkorText);
+            }
 
-    </div>
+            // FIX: move the threeCans image to the bottom of the gift banner
+            const threeCans = document.querySelector('.threeCans');
+            if (threeCans) {
+                document.querySelector('.underlay-banner').appendChild(threeCans);
+            }
 
-    <script>
-        // FIX: move the angkorText image into the gifts row so it shows right below the 3 gifts
-        const angkorText = document.querySelector('.angkorText');
-        if (angkorText) {
-            document.querySelector('.underlay-gifts').appendChild(angkorText);
-        }
+            // Build 3 x 3 image grid (loop 9 times)
+            const centerGrid = document.querySelector('.underlay-center-grid');
+            for (let i = 0; i < 9; i++) {
+                const img = document.createElement('img');
+                img.src = './images/4f5ff5accbc1df520119d85c1b05bbc4-removebg-preview.png';
+                img.alt = '';
+                // Different delay for each image so they float out of sync
+                // Negative delay: every image is already mid-scale on page load (no jump)
+                img.style.animationDelay = (-i * 0.25) + 's';
+                centerGrid.appendChild(img);
+            }
 
-        // FIX: move the threeCans image to the bottom of the gift banner
-        const threeCans = document.querySelector('.threeCans');
-        if (threeCans) {
-            document.querySelector('.underlay-banner').appendChild(threeCans);
-        }
+            // FIX: click any grid image -> only that clicked image becomes the Gemini image
+            const SWAP_IMG = './images/Gemini_Generated_Image_y1jf8uy1jf8uy1jf-removebg-preview.png';
+            new Image().src = SWAP_IMG; // preload so the swap is instant
 
-        // Build 3 x 3 image grid (loop 9 times)
-        const centerGrid = document.querySelector('.underlay-center-grid');
-        for (let i = 0; i < 9; i++) {
-            const img = document.createElement('img');
-            img.src = './images/4f5ff5accbc1df520119d85c1b05bbc4-removebg-preview.png';
-            img.alt = '';
-            // Different delay for each image so they float out of sync
-            // Negative delay: every image is already mid-scale on page load (no jump)
-            img.style.animationDelay = (-i * 0.25) + 's';
-            centerGrid.appendChild(img);
-        }
+            // FIX: rewards = beer cans (from your .canPrice images) + beer merch
+            // Can images are read from <div class="canPrice"> — add/remove <img> there to change them
+            const CAN_IMAGES = [...document.querySelectorAll('.canPrice img')].map((img) => img.getAttribute('src'));
+            const CAN_AMOUNTS = [1, 5, 10]; // how many cans can be won
 
-        // FIX: click any grid image -> only that clicked image becomes the Gemini image
-        const SWAP_IMG = './images/Gemini_Generated_Image_y1jf8uy1jf8uy1jf-removebg-preview.png';
-        new Image().src = SWAP_IMG; // preload so the swap is instant
+            // Merch rewards (icon + name) — edit freely
+            const MERCH = [
+                { icon: '👕', label: 'T-Shirt' },
+                { icon: '🧢', label: 'Cap' },
+                { icon: '🍺', label: 'Beer Glass' },
+                { icon: '🎒', label: 'Cooler Bag' },
+                { icon: '☂️', label: 'Umbrella' },
+            ];
 
-        // FIX: rewards = beer cans (from your .canPrice images) + beer merch
-        // Can images are read from <div class="canPrice"> — add/remove <img> there to change them
-        const CAN_IMAGES = [...document.querySelectorAll('.canPrice img')].map((img) => img.getAttribute('src'));
-        const CAN_AMOUNTS = [1, 5, 10]; // how many cans can be won
-
-        // Merch rewards (icon + name) — edit freely
-        const MERCH = [
-            { icon: '👕', label: 'T-Shirt' },
-            { icon: '🧢', label: 'Cap' },
-            { icon: '🍺', label: 'Beer Glass' },
-            { icon: '🎒', label: 'Cooler Bag' },
-            { icon: '☂️', label: 'Umbrella' },
-        ];
-
-        const REWARDS = [];
-        CAN_IMAGES.forEach((src) => {
-            CAN_AMOUNTS.forEach((n) => {
-                REWARDS.push({ img: src, label: '× ' + n + (n === 1 ? ' Can' : ' Cans') });
+            const REWARDS = [];
+            CAN_IMAGES.forEach((src) => {
+                CAN_AMOUNTS.forEach((n) => {
+                    REWARDS.push({ img: src, label: '× ' + n + (n === 1 ? ' Can' : ' Cans') });
+                });
             });
-        });
-        MERCH.forEach((m) => REWARDS.push(m));
+            MERCH.forEach((m) => REWARDS.push(m));
 
-        // ================================================================
-        // FIX: 3-CHANCE GIFT GAME
-        // - User can open 3 gifts.
-        // - Normal game: 1 of the 3 picks wins a random reward.
-        // - SPECIAL game (SPECIAL_CHANCE %): 2 of the 3 picks win.
-        //   Wins are drawn LIVE on every click (secure random), so they can
-        //   land on any pick: 1st, 2nd or 3rd.
-        // - The other picks show "Thank You".
-        // - After 3 picks, clicking a new gift shows an alert.
-        // - Clicking a gift that is already open just shows its result again (free).
-        // ================================================================
-        const MAX_CHANCES = 3;
-        const SPECIAL_CHANCE = 20; // % of players who get the special game with 2 wins
-        let isOpening = false; // blocks extra clicks while a gift is shaking
+            // ================================================================
+            // FIX: 3-CHANCE GIFT GAME
+            // - User can open 3 gifts.
+            // - Normal game: 1 of the 3 picks wins a random reward.
+            // - SPECIAL game (SPECIAL_CHANCE %): 2 of the 3 picks win.
+            //   Wins are drawn LIVE on every click (secure random), so they can
+            //   land on any pick: 1st, 2nd or 3rd.
+            // - The other picks show "Thank You".
+            // - After 3 picks, clicking a new gift shows an alert.
+            // - Clicking a gift that is already open just shows its result again (free).
+            // ================================================================
+            const MAX_CHANCES = 3;
+            const SPECIAL_CHANCE = 20; // % of players who get the special game with 2 wins
+            let isOpening = false; // blocks extra clicks while a gift is shaking
 
-        // Secure random integer from 0 to n-1 (better than Math.random)
-        function randomInt(n) {
-            const buf = new Uint32Array(1);
-            (window.crypto || window.msCrypto).getRandomValues(buf);
-            return buf[0] % n;
-        }
-        const THANK_YOU = { icon: '🙏', label: 'Thank You' };
+            // Secure random integer from 0 to n-1 (better than Math.random)
+            function randomInt(n) {
+                const buf = new Uint32Array(1);
+                (window.crypto || window.msCrypto).getRandomValues(buf);
+                return buf[0] % n;
+            }
+            const THANK_YOU = { icon: '🙏', label: 'Thank You' };
 
-        let picksUsed = 0;
-        const wonPrizes = []; // REWARDS indexes the user has won
+            let picksUsed = 0;
+            const wonPrizes = []; // REWARDS indexes the user has won
 
-        // Decide once per game: 1 win (normal) or 2 wins (special)
-        const TOTAL_WINS = randomInt(100) < SPECIAL_CHANCE ? 2 : 1;
+            // Decide once per game: 1 win (normal) or 2 wins (special)
+            const TOTAL_WINS = randomInt(100) < SPECIAL_CHANCE ? 2 : 1;
 
-        const giftBanner = document.querySelector('.underlay-banner');
-        const rewardPopup = document.getElementById('rewardPopup');
-        const rewardTitle = document.getElementById('rewardTitle');
-        const rewardValue = document.getElementById('rewardValue');
-        const rewardNote = document.getElementById('rewardNote');
-        const rewardClose = document.getElementById('rewardClose');
+            const giftBanner = document.querySelector('.underlay-banner');
+            const rewardPopup = document.getElementById('rewardPopup');
+            const rewardTitle = document.getElementById('rewardTitle');
+            const rewardValue = document.getElementById('rewardValue');
+            const rewardNote = document.getElementById('rewardNote');
+            const rewardClose = document.getElementById('rewardClose');
 
-        // Result key: a REWARDS index as string, or 'thanks'
-        function getResult(key) {
-            return key === 'thanks' ? THANK_YOU : REWARDS[key];
-        }
+            // Result key: a REWARDS index as string, or 'thanks'
+            function getResult(key) {
+                return key === 'thanks' ? THANK_YOU : REWARDS[key];
+            }
 
-        // Build the reward markup (can image or icon + label)
-        function rewardHTML(r) {
-            const visual = r.img
-                ? '<img src="' + r.img + '" alt="">'
-                : '<span class="reward-icon">' + r.icon + '</span>';
-            return '<span class="reward-item">' + visual + '<span class="reward-label">' + r.label + '</span></span>';
-        }
+            // Build the reward markup (can image or icon + label)
+            function rewardHTML(r) {
+                const visual = r.img
+                    ? '<img src="' + r.img + '" alt="">'
+                    : '<span class="reward-icon">' + r.icon + '</span>';
+                return '<span class="reward-item">' + visual + '<span class="reward-label">' + r.label + '</span></span>';
+            }
 
-        // --- Chance counter (pill with 3 dots at the bottom of the banner) ---
-        const chanceBar = document.createElement('div');
-        chanceBar.className = 'chance-bar';
-        chanceBar.innerHTML = '<span>ឱកាស · Chances</span>';
-        const chanceDots = [];
-        for (let i = 0; i < MAX_CHANCES; i++) {
-            const dot = document.createElement('span');
-            dot.className = 'chance-dot is-active';
-            chanceBar.appendChild(dot);
-            chanceDots.push(dot);
-        }
-        // Chances pill removed from the page (chances still work; the popup shows how many are left).
-        // To show it again, uncomment the next line:
-        // giftBanner.appendChild(chanceBar);
+            // --- Chance counter (pill with 3 dots at the bottom of the banner) ---
+            const chanceBar = document.createElement('div');
+            chanceBar.className = 'chance-bar';
+            chanceBar.innerHTML = '<span>ឱកាស · Chances</span>';
+            const chanceDots = [];
+            for (let i = 0; i < MAX_CHANCES; i++) {
+                const dot = document.createElement('span');
+                dot.className = 'chance-dot is-active';
+                chanceBar.appendChild(dot);
+                chanceDots.push(dot);
+            }
+            // Chances pill removed from the page (chances still work; the popup shows how many are left).
+            // To show it again, uncomment the next line:
+            // giftBanner.appendChild(chanceBar);
 
-        function updateChanceBar() {
-            const left = MAX_CHANCES - picksUsed;
-            chanceDots.forEach((dot, i) => {
-                const active = i < left;
-                if (dot.classList.contains('is-active') && !active) {
-                    dot.classList.add('just-used');
-                    setTimeout(() => dot.classList.remove('just-used'), 300);
+            function updateChanceBar() {
+                const left = MAX_CHANCES - picksUsed;
+                chanceDots.forEach((dot, i) => {
+                    const active = i < left;
+                    if (dot.classList.contains('is-active') && !active) {
+                        dot.classList.add('just-used');
+                        setTimeout(() => dot.classList.remove('just-used'), 300);
+                    }
+                    dot.classList.toggle('is-active', active);
+                });
+            }
+
+            // --- Popup ---
+            function showResult(key) {
+                const isWin = key !== 'thanks';
+                const left = MAX_CHANCES - picksUsed;
+
+                const isBonus = isWin && wonPrizes.indexOf(key) === 1; // the 2nd win
+                if (isBonus) {
+                    rewardTitle.innerHTML = '<span class="t-km">សំណាងទ្វេដង!</span><span class="t-en">Lucky · 2nd reward</span>';
+                } else if (isWin) {
+                    rewardTitle.innerHTML = '<span class="t-km">អបអរសាទរ!</span><span class="t-en">Congratulations</span>';
+                } else {
+                    rewardTitle.innerHTML = '<span class="t-km">សូមអរគុណ!</span><span class="t-en">Thank you · Try again</span>';
                 }
-                dot.classList.toggle('is-active', active);
+                rewardValue.innerHTML = rewardHTML(getResult(key));
+
+                if (left > 0) {
+                    rewardNote.innerHTML = 'នៅសល់ឱកាស ' + left + ' ដង' +
+                        '<span class="t-en">' + left + (left === 1 ? ' chance' : ' chances') + ' left</span>';
+                } else {
+                    rewardNote.innerHTML = 'អ្នកបានប្រើឱកាសទាំងអស់' +
+                        '<span class="t-en">All chances used</span>';
+                }
+
+                rewardPopup.classList.toggle('is-thanks', !isWin);
+                rewardPopup.classList.add('show');
+            }
+
+            function closeReward() {
+                rewardPopup.classList.remove('show');
+            }
+
+            rewardClose.addEventListener('click', closeReward);
+            rewardPopup.addEventListener('click', (e) => {
+                if (e.target === rewardPopup) closeReward(); // click dark background to close
             });
-        }
 
-        // --- Popup ---
-        function showResult(key) {
-            const isWin = key !== 'thanks';
-            const left = MAX_CHANCES - picksUsed;
-
-            const isBonus = isWin && wonPrizes.indexOf(key) === 1; // the 2nd win
-            if (isBonus) {
-                rewardTitle.innerHTML = '<span class="t-km">សំណាងទ្វេដង!</span><span class="t-en">Lucky · 2nd reward</span>';
-            } else if (isWin) {
-                rewardTitle.innerHTML = '<span class="t-km">អបអរសាទរ!</span><span class="t-en">Congratulations</span>';
-            } else {
-                rewardTitle.innerHTML = '<span class="t-km">សូមអរគុណ!</span><span class="t-en">Thank you · Try again</span>';
-            }
-            rewardValue.innerHTML = rewardHTML(getResult(key));
-
-            if (left > 0) {
-                rewardNote.innerHTML = 'នៅសល់ឱកាស ' + left + ' ដង' +
-                    '<span class="t-en">' + left + (left === 1 ? ' chance' : ' chances') + ' left</span>';
-            } else {
-                rewardNote.innerHTML = 'អ្នកបានប្រើឱកាសទាំងអស់' +
-                    '<span class="t-en">All chances used</span>';
+            function alertNoChances() {
+                alert(
+                    'អ្នកបានប្រើឱកាសទាំង ' + MAX_CHANCES + ' ដងរួចហើយ។\n' +
+                    'You have used all ' + MAX_CHANCES + ' chances.\n\n' +
+                    (wonPrizes.length > 1 ? 'Your rewards: ' : 'Your reward: ') +
+                    wonPrizes.map((k) => REWARDS[k].label).join(' + ')
+                );
             }
 
-            rewardPopup.classList.toggle('is-thanks', !isWin);
-            rewardPopup.classList.add('show');
-        }
+            // --- Open one gift (grid or top) ---
+            function openGift(img, isGrid) {
+                if (isOpening) return;
 
-        function closeReward() {
-            rewardPopup.classList.remove('show');
-        }
+                // Already opened: show its result again, does not use a chance
+                if (img.dataset.result) {
+                    showResult(img.dataset.result);
+                    return;
+                }
 
-        rewardClose.addEventListener('click', closeReward);
-        rewardPopup.addEventListener('click', (e) => {
-            if (e.target === rewardPopup) closeReward(); // click dark background to close
-        });
+                // No chances left
+                if (picksUsed >= MAX_CHANCES) {
+                    alertNoChances();
+                    return;
+                }
 
-        function alertNoChances() {
-            alert(
-                'អ្នកបានប្រើឱកាសទាំង ' + MAX_CHANCES + ' ដងរួចហើយ។\n' +
-                'You have used all ' + MAX_CHANCES + ' chances.\n\n' +
-                (wonPrizes.length > 1 ? 'Your rewards: ' : 'Your reward: ') +
-                wonPrizes.map((k) => REWARDS[k].label).join(' + ')
-            );
-        }
+                picksUsed++;
+                hideHint(); // user found the gifts: stop the finger hint
 
-        // --- Open one gift (grid or top) ---
-        function openGift(img, isGrid) {
-            if (isOpening) return;
+                // Live random draw: chance to win now = wins still to give / picks left
+                // (including this one). Wins land on random picks, and the player
+                // always ends with exactly TOTAL_WINS rewards (1, or 2 if special).
+                let key;
+                const picksLeftInclThis = MAX_CHANCES - picksUsed + 1;
+                const winsLeft = TOTAL_WINS - wonPrizes.length;
+                if (winsLeft > 0 && randomInt(picksLeftInclThis) < winsLeft) {
+                    key = String(randomInt(REWARDS.length));
+                    wonPrizes.push(key);
+                } else {
+                    key = 'thanks';
+                }
 
-            // Already opened: show its result again, does not use a chance
-            if (img.dataset.result) {
-                showResult(img.dataset.result);
-                return;
+                // Suspense: shake the gift, then open it
+                isOpening = true;
+                img.classList.add('is-opening');
+                setTimeout(() => {
+                    img.classList.remove('is-opening');
+                    isOpening = false;
+                    revealGift(img, isGrid, key);
+                }, 700);
             }
 
-            // No chances left
-            if (picksUsed >= MAX_CHANCES) {
-                alertNoChances();
-                return;
+            function revealGift(img, isGrid, key) {
+
+                img.dataset.result = key;
+                img.src = SWAP_IMG;
+
+                let holder;
+                if (isGrid) {
+                    // Wrap the opened grid gift so the result can sit on top of it
+                    holder = document.createElement('div');
+                    holder.className = 'grid-opened';
+                    img.replaceWith(holder);
+                    holder.appendChild(img);
+                } else {
+                    holder = img.parentElement; // .underlay-gift
+                    holder.classList.add('gift-opened');
+                }
+                holder.classList.add(key === 'thanks' ? 'is-thanks' : 'is-win');
+
+                const label = document.createElement('span');
+                label.className = 'grid-reward';
+                label.innerHTML = rewardHTML(getResult(key));
+                holder.appendChild(label);
+
+                updateChanceBar();
+                if (picksUsed >= MAX_CHANCES) giftBanner.classList.add('game-over');
+
+                showResult(key);
             }
 
-            picksUsed++;
+            centerGrid.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'IMG') return;
+                openGift(e.target, true);
+            });
 
-            // Live random draw: chance to win now = wins still to give / picks left
-            // (including this one). Wins land on random picks, and the player
-            // always ends with exactly TOTAL_WINS rewards (1, or 2 if special).
-            let key;
-            const picksLeftInclThis = MAX_CHANCES - picksUsed + 1;
-            const winsLeft = TOTAL_WINS - wonPrizes.length;
-            if (winsLeft > 0 && randomInt(picksLeftInclThis) < winsLeft) {
-                key = String(randomInt(REWARDS.length));
-                wonPrizes.push(key);
-            } else {
-                key = 'thanks';
+            document.querySelectorAll('.underlay-gift img').forEach((img) => {
+                img.addEventListener('click', () => openGift(img, false));
+            });
+
+            // ================================================================
+            // FIX: TAP HINT — a finger moves between the 9 grid gifts and taps,
+            // telling users to click a gift. Disappears after their first pick.
+            // ================================================================
+            const tapHint = document.createElement('div');
+            tapHint.className = 'tap-hint';
+            tapHint.innerHTML = '<span class="tap-ring"></span><span class="finger">👆</span>';
+            giftBanner.appendChild(tapHint);
+
+            let hintTimer = null;
+            let hintPlaced = false;
+
+            function moveHint() {
+                if (picksUsed > 0) return hideHint();
+                if (rewardPopup.classList.contains('show')) return;
+
+                const gifts = [...centerGrid.querySelectorAll('img:not([data-result])')];
+                if (!gifts.length) return hideHint();
+
+                const g = gifts[randomInt(gifts.length)];
+                const b = giftBanner.getBoundingClientRect();
+                const r = g.getBoundingClientRect();
+                if (!r.width) return; // banner not on screen yet
+
+                const x = (r.left - b.left + r.width / 2 - 17) + 'px'; // 17px = fingertip offset
+                const y = (r.top - b.top + r.height / 2 - 4) + 'px';
+
+                if (!hintPlaced) {
+                    // first time: jump straight to the gift, no slide from the corner
+                    tapHint.style.transition = 'none';
+                    tapHint.style.left = x;
+                    tapHint.style.top = y;
+                    void tapHint.offsetWidth;
+                    tapHint.style.transition = '';
+                    hintPlaced = true;
+                } else {
+                    tapHint.style.left = x;
+                    tapHint.style.top = y;
+                }
+                tapHint.classList.add('show');
             }
 
-            // Suspense: shake the gift, then open it
-            isOpening = true;
-            img.classList.add('is-opening');
+            function hideHint() {
+                tapHint.classList.remove('show');
+                clearInterval(hintTimer);
+            }
+
+            const HINT_EVERY = 2400; // ms between moves to another gift
             setTimeout(() => {
-                img.classList.remove('is-opening');
-                isOpening = false;
-                revealGift(img, isGrid, key);
-            }, 700);
-        }
+                moveHint();
+                hintTimer = setInterval(moveHint, HINT_EVERY);
+            }, 1200);
 
-        function revealGift(img, isGrid, key) {
+            // FIX: Christmas effects (snowfall + golden twinkles)
+            const xmasBanner = document.querySelector('.underlay-banner');
 
-            img.dataset.result = key;
-            img.src = SWAP_IMG;
+            const sparkleLayer = document.createElement('div');
+            sparkleLayer.className = 'xmas-layer xmas-sparkles';
 
-            let holder;
-            if (isGrid) {
-                // Wrap the opened grid gift so the result can sit on top of it
-                holder = document.createElement('div');
-                holder.className = 'grid-opened';
-                img.replaceWith(holder);
-                holder.appendChild(img);
-            } else {
-                holder = img.parentElement; // .underlay-gift
-                holder.classList.add('gift-opened');
+            const snowLayer = document.createElement('div');
+            snowLayer.className = 'xmas-layer xmas-snow';
+
+            xmasBanner.append(sparkleLayer, snowLayer);
+
+            // Snowflakes: mix of soft dots and ❄ shapes
+            const SNOW_COUNT = 90; // more = heavier snow (was 40)
+            for (let i = 0; i < SNOW_COUNT; i++) {
+                const flake = document.createElement('span');
+                const isFlake = Math.random() < 0.35;
+                flake.className = 'snowflake';
+                flake.textContent = isFlake ? '❄' : '•';
+                flake.style.left = (Math.random() * 100) + '%';
+                flake.style.fontSize = (isFlake ? 12 + Math.random() * 10 : 10 + Math.random() * 12) + 'px';
+                flake.style.opacity = (0.5 + Math.random() * 0.5).toFixed(2);
+                flake.style.animationDuration = (6 + Math.random() * 8) + 's';
+                // Negative delay: snow is already falling when the page loads
+                flake.style.animationDelay = (-Math.random() * 14) + 's';
+                snowLayer.appendChild(flake);
             }
-            holder.classList.add(key === 'thanks' ? 'is-thanks' : 'is-win');
 
-            const label = document.createElement('span');
-            label.className = 'grid-reward';
-            label.innerHTML = rewardHTML(getResult(key));
-            holder.appendChild(label);
+            // Golden twinkling stars scattered on the background
+            const SPARKLE_COUNT = 14;
+            for (let i = 0; i < SPARKLE_COUNT; i++) {
+                const s = document.createElement('span');
+                s.className = 'sparkle';
+                s.textContent = '✦';
+                s.style.left = (5 + Math.random() * 90) + '%';
+                s.style.top = (5 + Math.random() * 90) + '%';
+                s.style.fontSize = (10 + Math.random() * 12) + 'px';
+                s.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+                s.style.animationDelay = (-Math.random() * 3) + 's';
+                sparkleLayer.appendChild(s);
+            }
 
-            updateChanceBar();
-            if (picksUsed >= MAX_CHANCES) giftBanner.classList.add('game-over');
+            // Manual drag/swipe control for underlay banner (VERTICAL)
+            const underlayBanner = document.querySelector('.underlay-banner');
+            const revealLayer = document.querySelector('.underlay-banner-reveal');
+            let isDragging = false;
+            let startY = 0;
+            let currentPosition = 50; // Start at middle
 
-            showResult(key);
-        }
+            // Mouse events
+            underlayBanner.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startY = e.clientY;
+                // Remove transition while dragging for smooth response
+                underlayBanner.style.transition = 'none';
+            });
 
-        centerGrid.addEventListener('click', (e) => {
-            if (e.target.tagName !== 'IMG') return;
-            openGift(e.target, true);
-        });
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
 
-        document.querySelectorAll('.underlay-gift img').forEach((img) => {
-            img.addEventListener('click', () => openGift(img, false));
-        });
+                const rect = underlayBanner.getBoundingClientRect();
+                const deltaY = e.clientY - startY;
+                const bannerHeight = rect.height;
 
-        // FIX: Christmas effects (snowfall + golden twinkles)
-        const xmasBanner = document.querySelector('.underlay-banner');
+                // Calculate position: swipe up = line goes up, swipe down = line goes down
+                currentPosition = Math.max(0, Math.min(100, 50 + (deltaY / bannerHeight) * 100));
 
-        const sparkleLayer = document.createElement('div');
-        sparkleLayer.className = 'xmas-layer xmas-sparkles';
+                // Update pseudo-elements position with CSS variable
+                underlayBanner.style.setProperty('--slider-position', currentPosition + '%');
 
-        const snowLayer = document.createElement('div');
-        snowLayer.className = 'xmas-layer xmas-snow';
+                // Update reveal layer (inverted: swipe down shows first image, swipe up shows second image)
+                revealLayer.style.clipPath = `inset(${currentPosition}% 0 0 0)`;
+            });
 
-        xmasBanner.append(sparkleLayer, snowLayer);
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                // Restore transition after dragging
+                underlayBanner.style.transition = '';
+            });
 
-        // Snowflakes: mix of soft dots and ❄ shapes
-        const SNOW_COUNT = 90; // more = heavier snow (was 40)
-        for (let i = 0; i < SNOW_COUNT; i++) {
-            const flake = document.createElement('span');
-            const isFlake = Math.random() < 0.35;
-            flake.className = 'snowflake';
-            flake.textContent = isFlake ? '❄' : '•';
-            flake.style.left = (Math.random() * 100) + '%';
-            flake.style.fontSize = (isFlake ? 12 + Math.random() * 10 : 10 + Math.random() * 12) + 'px';
-            flake.style.opacity = (0.5 + Math.random() * 0.5).toFixed(2);
-            flake.style.animationDuration = (6 + Math.random() * 8) + 's';
-            // Negative delay: snow is already falling when the page loads
-            flake.style.animationDelay = (-Math.random() * 14) + 's';
-            snowLayer.appendChild(flake);
-        }
+            // Touch events for mobile
+            underlayBanner.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                startY = e.touches[0].clientY;
+                // Remove transition while dragging for smooth response
+                underlayBanner.style.transition = 'none';
+            });
 
-        // Golden twinkling stars scattered on the background
-        const SPARKLE_COUNT = 14;
-        for (let i = 0; i < SPARKLE_COUNT; i++) {
-            const s = document.createElement('span');
-            s.className = 'sparkle';
-            s.textContent = '✦';
-            s.style.left = (5 + Math.random() * 90) + '%';
-            s.style.top = (5 + Math.random() * 90) + '%';
-            s.style.fontSize = (10 + Math.random() * 12) + 'px';
-            s.style.animationDuration = (1.5 + Math.random() * 2) + 's';
-            s.style.animationDelay = (-Math.random() * 3) + 's';
-            sparkleLayer.appendChild(s);
-        }
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
 
-        // Manual drag/swipe control for underlay banner (VERTICAL)
-        const underlayBanner = document.querySelector('.underlay-banner');
-        const revealLayer = document.querySelector('.underlay-banner-reveal');
-        let isDragging = false;
-        let startY = 0;
-        let currentPosition = 50; // Start at middle
+                const rect = underlayBanner.getBoundingClientRect();
+                const deltaY = e.touches[0].clientY - startY;
+                const bannerHeight = rect.height;
 
-        // Mouse events
-        underlayBanner.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startY = e.clientY;
-            // Remove transition while dragging for smooth response
-            underlayBanner.style.transition = 'none';
-        });
+                // Calculate position: swipe up = line goes up, swipe down = line goes down
+                currentPosition = Math.max(0, Math.min(100, 50 + (deltaY / bannerHeight) * 100));
 
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
+                // Update pseudo-elements position with CSS variable
+                underlayBanner.style.setProperty('--slider-position', currentPosition + '%');
 
-            const rect = underlayBanner.getBoundingClientRect();
-            const deltaY = e.clientY - startY;
-            const bannerHeight = rect.height;
+                // Update reveal layer (inverted: swipe down shows first image, swipe up shows second image)
+                revealLayer.style.clipPath = `inset(${currentPosition}% 0 0 0)`;
+            });
 
-            // Calculate position: swipe up = line goes up, swipe down = line goes down
-            currentPosition = Math.max(0, Math.min(100, 50 + (deltaY / bannerHeight) * 100));
+            document.addEventListener('touchend', () => {
+                isDragging = false;
+                // Restore transition after dragging
+                underlayBanner.style.transition = '';
+            });
 
-            // Update pseudo-elements position with CSS variable
-            underlayBanner.style.setProperty('--slider-position', currentPosition + '%');
+            // Update pseudo-element positions using CSS variables
+            underlayBanner.style.setProperty('--slider-position', '50%'); // Start in middle
+            revealLayer.style.clipPath = 'inset(50% 0 0 0)'; // Show 50% of reveal layer initially
 
-            // Update reveal layer (inverted: swipe down shows first image, swipe up shows second image)
-            revealLayer.style.clipPath = `inset(${currentPosition}% 0 0 0)`;
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            // Restore transition after dragging
-            underlayBanner.style.transition = '';
-        });
-
-        // Touch events for mobile
-        underlayBanner.addEventListener('touchstart', (e) => {
-            isDragging = true;
-            startY = e.touches[0].clientY;
-            // Remove transition while dragging for smooth response
-            underlayBanner.style.transition = 'none';
-        });
-
-        document.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-
-            const rect = underlayBanner.getBoundingClientRect();
-            const deltaY = e.touches[0].clientY - startY;
-            const bannerHeight = rect.height;
-
-            // Calculate position: swipe up = line goes up, swipe down = line goes down
-            currentPosition = Math.max(0, Math.min(100, 50 + (deltaY / bannerHeight) * 100));
-
-            // Update pseudo-elements position with CSS variable
-            underlayBanner.style.setProperty('--slider-position', currentPosition + '%');
-
-            // Update reveal layer (inverted: swipe down shows first image, swipe up shows second image)
-            revealLayer.style.clipPath = `inset(${currentPosition}% 0 0 0)`;
-        });
-
-        document.addEventListener('touchend', () => {
-            isDragging = false;
-            // Restore transition after dragging
-            underlayBanner.style.transition = '';
-        });
-
-        // Update pseudo-element positions using CSS variables
-        underlayBanner.style.setProperty('--slider-position', '50%'); // Start in middle
-        revealLayer.style.clipPath = 'inset(50% 0 0 0)'; // Show 50% of reveal layer initially
-
-        // Create a style rule for dynamic positioning of pseudo-elements
-        const style = document.createElement('style');
-        style.textContent = `
+            // Create a style rule for dynamic positioning of pseudo-elements
+            const style = document.createElement('style');
+            style.textContent = `
         .underlay-banner::before,
         .underlay-banner::after {
             top: var(--slider-position, 50%) !important;
         }
         `;
-        document.head.appendChild(style);
+            document.head.appendChild(style);
 
-        // ================================================================
-        // FIX: BACKGROUND MUSIC — plays automatically, no button
-        // 1) Try to play as soon as the page loads.
-        // 2) If the browser blocks it (most do until the user interacts),
-        //    it starts on the user's first tap / click / key press.
-        // ================================================================
-        const bgMusic = document.getElementById('bgMusic');
-        bgMusic.volume = 0.5; // 0 = silent, 1 = full volume
+            // ================================================================
+            // FIX: BACKGROUND MUSIC — plays automatically, no button
+            // 1) Try to play as soon as the page loads.
+            // 2) If the browser blocks it (most do until the user interacts),
+            //    it starts on the user's first tap / click / key press.
+            // ================================================================
+            const bgMusic = document.getElementById('bgMusic');
+            bgMusic.volume = 0.5; // 0 = silent, 1 = full volume
 
-        const UNLOCK_EVENTS = ['pointerdown', 'touchend', 'click', 'keydown'];
+            const UNLOCK_EVENTS = ['pointerdown', 'touchend', 'click', 'keydown'];
 
-        function removeUnlock() {
-            UNLOCK_EVENTS.forEach((ev) => document.removeEventListener(ev, tryPlayMusic, true));
-        }
+            function removeUnlock() {
+                UNLOCK_EVENTS.forEach((ev) => document.removeEventListener(ev, tryPlayMusic, true));
+            }
 
-        function tryPlayMusic() {
-            if (!bgMusic.paused) return;
-            bgMusic.play()
-                .then(removeUnlock)     // playing: stop listening
-                .catch(() => { });      // still blocked: wait for the next interaction
-        }
+            function tryPlayMusic() {
+                if (!bgMusic.paused) return;
+                bgMusic.play()
+                    .then(removeUnlock)     // playing: stop listening
+                    .catch(() => { });      // still blocked: wait for the next interaction
+            }
 
-        UNLOCK_EVENTS.forEach((ev) => document.addEventListener(ev, tryPlayMusic, true));
-        tryPlayMusic(); // autoplay attempt on page load
+            UNLOCK_EVENTS.forEach((ev) => document.addEventListener(ev, tryPlayMusic, true));
+            tryPlayMusic(); // autoplay attempt on page load
 
-    </script>
+        </script>
 
 </body>
 
