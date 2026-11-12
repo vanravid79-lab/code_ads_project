@@ -767,6 +767,93 @@
             color: #42121a;
         }
 
+        /* FIX: the article rule ".post h2" made the puzzle title dark - keep it white */
+        .post .beer-puzzle-title {
+            color: #ffffff;
+        }
+
+        /* FIX: fit the whole puzzle on one phone screen */
+        /* FIX: show only the pictures, the status line, the board and the pieces.
+           Title and the Moves / Shuffle / Picture guide bar are hidden. */
+        .beer-puzzle-header,
+        .beer-puzzle-controls {
+            display: none;
+        }
+
+        .beer-puzzle-pieces {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            /* 3 pieces per row, 2 rows */
+            min-height: 0;
+            gap: 6px;
+        }
+
+        @media (max-width: 767px) {
+            .beer-puzzle {
+                padding: 10px 10px 12px;
+            }
+
+            .beer-puzzle-header {
+                margin-bottom: 6px;
+            }
+
+            .beer-puzzle-kicker {
+                display: none;
+                /* "CHOOSE A PICTURE" - the picture buttons already say it */
+            }
+
+            .beer-puzzle-title {
+                font-size: 20px;
+            }
+
+            .beer-puzzle-choices {
+                margin-bottom: 6px;
+            }
+
+            .beer-puzzle-choice {
+                min-height: 54px;
+            }
+
+            .beer-puzzle-choice img {
+                height: 32px;
+            }
+
+            .beer-puzzle-status {
+                min-height: 0;
+                margin-bottom: 6px;
+                font-size: 11px;
+                line-height: 15px;
+            }
+
+            .beer-puzzle-workspace {
+                gap: 8px;
+            }
+
+            .beer-puzzle-tray {
+                padding: 6px;
+            }
+
+            .beer-puzzle-tray-title {
+                margin-bottom: 5px;
+                font-size: 10px;
+            }
+
+            .beer-puzzle-pieces {
+                gap: 4px;
+                min-height: 0;
+            }
+
+            .beer-puzzle-controls {
+                gap: 8px;
+                margin-top: 8px;
+            }
+
+            .beer-puzzle-button {
+                min-height: 38px;
+                padding: 7px 12px;
+                font-size: 12px;
+            }
+        }
+
         .ad-label {
             position: absolute;
             top: 5px;
@@ -821,10 +908,6 @@
                                 <header class="beer-puzzle-header">
                                     <p class="beer-puzzle-kicker">CHOOSE A PICTURE</p>
                                     <h2 class="beer-puzzle-title" id="beer-puzzle-title">Picture Puzzle</h2>
-                                    <p class="beer-puzzle-instructions">Drag each piece into the matching gap to rebuild
-                                        the beer picture,
-                                        or tap a piece and then its matching gap. Use the picture guide if you need
-                                        help.</p>
                                 </header>
 
                                 <div class="beer-puzzle-win" data-puzzle-win role="dialog" aria-modal="true"
@@ -1698,35 +1781,72 @@
             const GRID_COLUMNS = 2;
             const GRID_ROWS = 4;
 
-            // FIX: every picture uses the SAME puzzle size and FILLS it edge to edge
-            // (like the can), with no empty red space.
-            // Each picture's crop box is trimmed around its centre to this one shape.
-            // 0.5 = width is half the height (2 x 4 grid of square pieces).
-            const PUZZLE_RATIO = 0.5;
-            // 'fill'   = picture fills the whole puzzle (a little of the edges is trimmed)
-            // 'fit'    = whole picture visible, empty space around thin pictures
-            const PUZZLE_FIT = 'fit'; // whole can/bottle visible, nothing cut off
+            // ================================================================
+            // FIX: EVERY PUZZLE LOOKS THE SAME AND EVERY PIECE IS FULL OF PICTURE
+            // - The puzzle FRAME is the same size for every picture (PUZZLE_RATIO).
+            // - Inside it, the 2 x 4 grid takes the exact shape of the bottle/can,
+            //   so all 8 pieces are covered by the picture: no empty red pieces,
+            //   nothing cut off.
+            // - Crops are measured automatically from each PNG's transparent
+            //   edges, so a wrong hand-typed crop can no longer leave gaps.
+            // ================================================================
+            const PUZZLE_RATIO = 0.5; // frame shape: width is half the height
+            const autoCrops = {};
+
+            // Find the box around the visible (non-transparent) pixels of a picture
+            function measureCrop(index) {
+                if (index in autoCrops) return autoCrops[index];
+                const img = choiceImages[index];
+                let result = null;
+                try {
+                    const w = img.naturalWidth, h = img.naturalHeight;
+                    const c = document.createElement('canvas');
+                    c.width = w; c.height = h;
+                    const g = c.getContext('2d', { willReadFrequently: true });
+                    g.drawImage(img, 0, 0);
+                    const data = g.getImageData(0, 0, w, h).data;
+                    let minX = w, minY = h, maxX = -1, maxY = -1;
+                    for (let y = 0; y < h; y++) {
+                        for (let x = 0; x < w; x++) {
+                            if (data[(y * w + x) * 4 + 3] > 20) {
+                                if (x < minX) minX = x;
+                                if (x > maxX) maxX = x;
+                                if (y < minY) minY = y;
+                                if (y > maxY) maxY = y;
+                            }
+                        }
+                    }
+                    if (maxX > minX && maxY > minY) {
+                        result = [minX, minY, maxX - minX + 1, maxY - minY + 1];
+                    }
+                } catch (e) {
+                    // the browser blocked reading pixels (e.g. opened as file://)
+                    result = null;
+                }
+                autoCrops[index] = result;
+                return result;
+            }
+
+            // FIX: ONE puzzle size for every picture, no zoom.
+            // The bottle/can is placed whole inside the same-size puzzle (like a photo
+            // in a frame) with a little space around it. Nothing is enlarged or cut.
+            const PUZZLE_PADDING = 0.04; // 4% breathing space around the product
 
             function getCrop(index) {
-                const [x, y, w, h] = puzzleImages[index].crop;
-                const wider = w / h > PUZZLE_RATIO;
-                if (PUZZLE_FIT === 'fill') {
-                    if (wider) {
-                        // trim left + right
-                        const newW = h * PUZZLE_RATIO;
-                        return [x + (w - newW) / 2, y, newW, h];
-                    }
-                    // trim top + bottom
-                    const newH = w / PUZZLE_RATIO;
-                    return [x, y + (h - newH) / 2, w, newH];
-                }
-                if (wider) {
+                // measured crop when possible, otherwise the crop typed in puzzleImages
+                let [x, y, w, h] = measureCrop(index) || puzzleImages[index].crop;
+                // small even padding so the product never touches the edge
+                const pad = Math.max(w, h) * PUZZLE_PADDING;
+                x -= pad; y -= pad; w += pad * 2; h += pad * 2;
+                // grow the box (never shrink it) to the one puzzle shape
+                if (w / h > PUZZLE_RATIO) {
                     const newH = w / PUZZLE_RATIO;
                     return [x, y - (newH - h) / 2, w, newH];
                 }
                 const newW = h * PUZZLE_RATIO;
                 return [x - (newW - w) / 2, y, newW, h];
             }
+
             const TILE_COUNT = GRID_COLUMNS * GRID_ROWS;
             const STARTER_PIECES = [2, 5];
             const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -1751,16 +1871,47 @@
                 winDismissButton.focus();
             }
 
+            // FIX: board size and tray size depend on each other, so fit a few times
             function fitPuzzleBoard() {
+                for (let i = 0; i < 4; i++) fitPuzzleBoardOnce();
+            }
+
+            function fitPuzzleBoardOnce() {
                 const image = choiceImages[selectedImage];
                 if (!image.naturalWidth || !image.naturalHeight) return;
 
-                const crop = getCrop(selectedImage); // same size, fills the puzzle
+                const crop = getCrop(selectedImage);
                 const aspectRatio = crop[2] / crop[3];
                 const maxWidth = Math.min(360, board.parentElement.clientWidth);
-                const maxHeight = Math.min(320, window.innerHeight * 0.44);
-                board.style.width = Math.min(maxWidth, maxHeight * aspectRatio) + 'px';
-                board.style.aspectRatio = String(aspectRatio);
+                const usedMargins = (parseFloat(board.style.marginTop) || 0) +
+                    (parseFloat(board.style.marginBottom) || 0);
+
+                // FIX: size the board from the space that is really left on screen,
+                // so the whole game (title, pictures, board, pieces, buttons) fits
+                // one phone screen with no cut-off.
+                const puzzleBox = board.closest('.beer-puzzle');
+                const screenBox = board.closest('.underlay-banner');
+                let maxHeight = Math.min(320, window.innerHeight * 0.44);
+                if (puzzleBox && screenBox && screenBox.clientHeight) {
+                    const otherParts = puzzleBox.offsetHeight - board.offsetHeight - usedMargins;
+                    const free = screenBox.clientHeight - otherParts - 16;
+                    maxHeight = Math.max(150, Math.min(420, free));
+                }
+                // FIX: pieces in the tray must be EXACTLY the same size as the spaces on
+                // the board (no shrinking in the tray, no "zoom" when dropped).
+                // So the board is only as wide as 3 full-size pieces fit in a tray row.
+                const PIECES_PER_ROW = 3;
+                const trayGapPx = 6;
+                const pieceCell = 100 / (PUZZLE_RATIO * GRID_ROWS / GRID_COLUMNS);
+                const pieceOuter = (100 + Math.min(100, pieceCell) * 0.18 * 2) / 100;
+                const trayLimit = GRID_COLUMNS *
+                    (tray.clientWidth - trayGapPx * (PIECES_PER_ROW - 1)) / (PIECES_PER_ROW * pieceOuter);
+
+                // the board is exactly the same size for every picture
+                board.style.width = Math.min(maxWidth, maxHeight * PUZZLE_RATIO, trayLimit) + 'px';
+                board.style.aspectRatio = String(PUZZLE_RATIO);
+                board.style.marginTop = '';
+                board.style.marginBottom = '';
                 const cellHeight = 100 / (aspectRatio * GRID_ROWS / GRID_COLUMNS);
                 const margin = Math.min(100, cellHeight) * 0.18;
                 const boardStyle = window.getComputedStyle(board);
@@ -1768,6 +1919,8 @@
                     parseFloat(boardStyle.paddingLeft) + parseFloat(boardStyle.paddingRight);
                 const cellWidth = (board.clientWidth - boardHorizontalPadding) / GRID_COLUMNS;
                 const outerPieceScale = (100 + margin * 2) / 100;
+                // FIX: all loose pieces fit in ONE row, so the tray stays short
+                // tray pieces = exactly the board piece size
                 tray.style.setProperty('--puzzle-piece-width', (cellWidth * outerPieceScale) + 'px');
                 tray.style.setProperty('--piece-ratio',
                     String((100 + margin * 2) / (cellHeight + margin * 2)));
@@ -2143,6 +2296,8 @@
                 });
             });
             window.addEventListener('resize', fitPuzzleBoard);
+            // FIX: second pass once fonts/images settle, so the fit is exact
+            window.addEventListener('load', () => { fitPuzzleBoard(); requestAnimationFrame(fitPuzzleBoard); });
             window.addEventListener('pointermove', moveDraggedPiece);
             window.addEventListener('pointerup', dropDraggedPiece);
             window.addEventListener('pointercancel', cancelDragging);

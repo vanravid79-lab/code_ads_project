@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <title>Khmer Daily News - Glass Lens Ad</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Load ad images early so the animation starts smoothly -->
+    <link rel="preload" as="image" href="./assets/bg-tiger2.png">
+    <link rel="preload" as="image" href="./assets/tiger-left.png">
+    <link rel="preload" as="image" href="./assets/tiger-right.png">
+    <link rel="preload" as="image" href="./assets/pngegg%20(8).png">
+    <link rel="preload" as="image" href="./assets/pngegg%20(7).png">
+    <link rel="preload" as="image" href="./assets/pngegg%20(6).png">
+
+    <style>
+        :root {
+            --page-w: 800px;
+            --ad-bg: #000;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Kantumruy Pro', Arial, sans-serif;
+            margin: 0;
+            background: #f0f2f5;
+        }
+
+        /* Main container (no transform/filter here, or position:fixed breaks) */
+        .container {
+            max-width: var(--page-w);
+            width: 100%;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #0056b3;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #0056b3;
+            font-size: 28px;
+        }
+
+        .post {
+            padding: 0 20px;
+        }
+
+        .post h2 {
+            color: #1a1a1a;
+            line-height: 1.4;
+            font-size: 24px;
+        }
+
+        .post p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .date-meta {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .sknteam_image {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sknteam_image img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 4px;
+        }
+
+        /*
+           UNDERLAY SLOT
+           clip-path: inset(0) clips everything inside it, including the
+           position:fixed child below. The browser does this on the
+           compositor, so it stays perfectly in sync with scrolling
+           (no JS, no lag, no jitter on iOS/Android).
+
+           The negative margins let the slot span the full article width
+           (cancels .post padding).
+        */
+        .underlay-slot {
+            position: relative;
+            height: 1000px;
+            margin: 30px -20px;
+            overflow: hidden;
+            /* fallback for old browsers */
+            overflow: clip;
+            /* clips WITHOUT breaking sticky */
+            clip-path: inset(0);
+            -webkit-clip-path: inset(0);
+            background: var(--ad-bg) url("./assets/bg-tiger2.png") center bottom / cover no-repeat;
+        }
+
+        /*
+           STICKY TRACK (replaces position:fixed — no more jumping on phones)
+           The track reaches one screen above and one screen below the slot,
+           so the sticky ad layer stays glued to the top of the screen
+           the whole time the slot is visible. Same "window" effect,
+           but the browser scrolls it natively = perfectly smooth.
+        */
+        .underlay-track {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -100vh;
+            /* underlay: ad stays still behind the page */
+            top: -100svh;
+            bottom: -100vh;
+            bottom: -100svh;
+        }
+
+        /* Ad layer: sticks to the top of the screen, only seen through the slot */
+        .underlay-fixed {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100svh;
+            /* = the VISIBLE screen (toolbar showing), so the image is never
+               zoomed or hidden behind Safari's toolbar. Fixed size = no jump. */
+            pointer-events: none;
+            container-type: size;
+            /* lets the food use cqw/cqh = % of the ad, not the whole screen */
+        }
+
+        /* Background layer */
+        .underlay-fixed .ad-bg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* show the whole image */
+            object-position: center top;
+            /* keep the logo at the top always visible */
+        }
+
+        /* Overlay image pinned to the bottom of the ad */
+        .underlay-fixed .ad-bottom {
+            position: absolute;
+            left: -2rem;
+            bottom: -2rem;
+            width: 75%;
+            max-width: 640px;
+            height: auto;
+            display: block;
+            z-index: 1;
+            transform-origin: 50% 100%;
+            /* Sharper rendering while moving */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: high-quality;
+            -webkit-font-smoothing: antialiased;
+            outline: 1px solid transparent;
+            /* smooths rotated edges */
+            /* Make the hands stand out from the icy background */
+            filter: contrast(1.12) saturate(1.15) brightness(1.03) drop-shadow(0 6px 14px rgba(0, 40, 90, 0.45));
+            /* pivot at the hand/wrist */
+            /* hidden off-screen until the ad comes into view */
+            transform: translate(-110%, 0);
+            opacity: 0;
+            transition: opacity .3s ease;
+        }
+
+        .underlay-slot.is-ready .ad-bottom {
+            opacity: 1;
+        }
+
+        /* Right-side overlay: same size, pinned bottom-right */
+        .underlay-fixed .ad-bottom-right {
+            left: auto;
+            right: -3rem;
+            z-index: 2;
+            transform: translate(110%, 0);
+        }
+
+        /* ===== CHEERS ANIMATION =====
+           1. Hands slide in from the sides and clink
+           2. Then keep clinking (ជល់) in a smooth loop
+           Timing is set per keyframe so each move flows into the next.
+        */
+
+        /* Promote to GPU layer BEFORE moving (avoids first-frame stutter).
+           Only rotate/translate are animated, so this stays sharp. */
+        .underlay-slot.is-ready .ad-bottom {
+            will-change: transform;
+        }
+
+        .underlay-slot.is-playing .ad-bottom {
+            animation:
+                cheersLeft 1.8s linear forwards,
+                clinkLeft 2.6s linear 1.8s infinite;
+        }
+
+        .underlay-slot.is-playing .ad-bottom-right {
+            animation:
+                cheersRight 1.8s linear forwards,
+                clinkRight 2.6s linear 1.8s infinite;
+        }
+
+        /* Entrance: glide in -> clink -> ease back to start pose */
+        @keyframes cheersLeft {
+            0% {
+                transform: translate(-110%, 0) rotate(-12deg);
+                animation-timing-function: cubic-bezier(.33, .1, .45, 1);
+            }
+
+            55% {
+                transform: translate(4%, -1%) rotate(6deg);
+                /* clink */
+                animation-timing-function: cubic-bezier(.3, 0, .3, 1);
+            }
+
+            100% {
+                transform: translate(-6%, 0) rotate(-6deg);
+                /* rest */
+            }
+        }
+
+        @keyframes cheersRight {
+            0% {
+                transform: translate(110%, 0) rotate(12deg);
+                animation-timing-function: cubic-bezier(.33, .1, .45, 1);
+            }
+
+            55% {
+                transform: translate(-4%, -1%) rotate(-6deg);
+                animation-timing-function: cubic-bezier(.3, 0, .3, 1);
+            }
+
+            100% {
+                transform: translate(6%, 0) rotate(6deg);
+            }
+        }
+
+        /* ជល់ loop: speed up into the hit, small recoil, glide back out */
+        @keyframes clinkLeft {
+            0% {
+                transform: translate(-6%, 0) rotate(-6deg);
+                animation-timing-function: cubic-bezier(.45, 0, .8, .6);
+                /* accelerate in */
+            }
+
+            40% {
+                transform: translate(5%, -1%) rotate(7deg);
+                /* HIT */
+                animation-timing-function: cubic-bezier(.2, .7, .4, 1);
+                /* recoil */
+            }
+
+            50% {
+                transform: translate(3%, -1%) rotate(4.5deg);
+                animation-timing-function: cubic-bezier(.45, 0, .55, 1);
+            }
+
+            100% {
+                transform: translate(-6%, 0) rotate(-6deg);
+            }
+        }
+
+        @keyframes clinkRight {
+            0% {
+                transform: translate(6%, 0) rotate(6deg);
+                animation-timing-function: cubic-bezier(.45, 0, .8, .6);
+            }
+
+            40% {
+                transform: translate(-5%, -1%) rotate(-7deg);
+                animation-timing-function: cubic-bezier(.2, .7, .4, 1);
+            }
+
+            50% {
+                transform: translate(-3%, -1%) rotate(-4.5deg);
+                animation-timing-function: cubic-bezier(.45, 0, .55, 1);
+            }
+
+            100% {
+                transform: translate(6%, 0) rotate(6deg);
+            }
+        }
+
+        /* ===== FOOD BURST (pops out every time the bottles ជល់) =====
+           Synced with the clink: same durations as cheers/clink above.
+           Each food flies out in its own direction (--x, --y, --r).
+        */
+        .food-burst {
+            position: absolute;
+            left: 50%;
+            top: var(--clink-y, 48%);
+            /* height where the bottles hit — adjust */
+            width: 0;
+            height: 0;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .food-burst .food {
+            position: absolute;
+            left: 0;
+            top: 0;
+            --size: clamp(90px, 30cqw, 170px);
+            /* food size — adjust */
+            width: var(--size);
+            height: var(--size);
+            margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(34px, 10vw, 60px);
+            line-height: 1;
+            opacity: 0;
+            transform: translate(0, 0) scale(.2);
+            filter: drop-shadow(0 4px 8px rgba(0, 30, 70, .45));
+        }
+
+        .food-burst .food img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* white flash at the moment of impact */
+        .food-burst .flash {
+            position: absolute;
+            left: -60px;
+            top: -60px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, .95) 0%, rgba(255, 255, 255, .5) 30%, rgba(255, 255, 255, 0) 70%);
+            opacity: 0;
+            transform: scale(.2);
+        }
+
+        /* 3 food sets take turns: 1 set per clink.
+           Clink #1 (entrance) -> set-1, #2 -> set-2, #3 -> set-3, #4 -> set-1 ...
+           One full cycle = 3 clinks = 3 x 2.6s = 7.8s */
+        .food-set {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .underlay-slot.is-playing .food-set .food {
+            animation: foodCycle 7.8s linear infinite;
+            animation-delay: calc(var(--start) + var(--delay, 0s));
+        }
+
+        .food-set.set-2 {
+            --start: 1.8s;
+        }
+
+        /* 2nd clink */
+        .food-set.set-3 {
+            --start: 4.4s;
+        }
+
+        /* 3rd clink */
+
+        .underlay-slot.is-playing .food-set.set-1 .food {
+            animation:
+                foodFirst 1.8s linear forwards,
+                /* 1st clink (entrance) */
+                foodCycle 7.8s linear infinite;
+            /* 4th, 7th ... clink */
+            animation-delay: var(--delay, 0s), calc(7s + var(--delay, 0s));
+        }
+
+        .underlay-slot.is-playing .food-burst .flash {
+            animation:
+                flashFirst 1.8s linear forwards,
+                flashLoop 2.6s linear 1.8s infinite;
+        }
+
+        /* first clink happens at 55% of the 1.8s entrance */
+        @keyframes foodFirst {
+
+            0%,
+            54% {
+                opacity: 0;
+                transform: translate(0, 0) scale(.2) rotate(0deg);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translate(calc(var(--x) * .45), calc(var(--y) * .45)) scale(1.15) rotate(calc(var(--r) * .4));
+                animation-timing-function: cubic-bezier(.2, .7, .4, 1);
+            }
+
+            85% {
+                opacity: 1;
+                transform: translate(var(--x), var(--y)) scale(1) rotate(var(--r));
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(var(--x), calc(var(--y) + 30px)) scale(.9) rotate(var(--r));
+            }
+        }
+
+        /* one clink inside the 7.8s cycle: hit at 13.3% (= 40% of 2.6s),
+           then hidden during the other 2 clinks */
+        @keyframes foodCycle {
+
+            0%,
+            13% {
+                opacity: 0;
+                transform: translate(0, 0) scale(.2) rotate(0deg);
+            }
+
+            14.7% {
+                opacity: 1;
+                transform: translate(calc(var(--x) * .45), calc(var(--y) * .45)) scale(1.15) rotate(calc(var(--r) * .4));
+                animation-timing-function: cubic-bezier(.2, .7, .4, 1);
+            }
+
+            24% {
+                opacity: 1;
+                transform: translate(var(--x), var(--y)) scale(1) rotate(var(--r));
+            }
+
+            30%,
+            100% {
+                opacity: 0;
+                transform: translate(var(--x), calc(var(--y) + 30px)) scale(.9) rotate(var(--r));
+            }
+        }
+
+        @keyframes flashFirst {
+
+            0%,
+            54% {
+                opacity: 0;
+                transform: scale(.2);
+            }
+
+            57% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            70%,
+            100% {
+                opacity: 0;
+                transform: scale(1.6);
+            }
+        }
+
+        @keyframes flashLoop {
+
+            0%,
+            39% {
+                opacity: 0;
+                transform: scale(.2);
+            }
+
+            41% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            52%,
+            100% {
+                opacity: 0;
+                transform: scale(1.6);
+            }
+        }
+
+        /* ===== AD TEXT (Tiger Beer + BBQ) ===== */
+        .ad-text {
+            position: absolute;
+            left: 50%;
+            top: var(--text-y, 11%);
+            /* height of the text — adjust */
+            width: 92%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 3;
+            pointer-events: none;
+            font-family: 'Kantumruy Pro', Arial, sans-serif;
+        }
+
+        .ad-text .t-small,
+        .ad-text .t-main,
+        .ad-text .t-sub {
+            display: block;
+            opacity: 0;
+        }
+
+        .ad-text .t-small {
+            font-size: clamp(12px, 3.6cqw, 18px);
+            font-weight: 700;
+            letter-spacing: .35em;
+            color: #fff;
+            text-shadow: 0 2px 6px rgba(0, 40, 100, .6);
+        }
+
+        .ad-text .t-main {
+            margin-top: .15em;
+            font-size: clamp(30px, 10cqw, 58px);
+            font-weight: 700;
+            line-height: 1.25;
+            color: #fff;
+            text-shadow:
+                0 0 2px #0b2c6e,
+                0 3px 0 #0b2c6e,
+                0 6px 18px rgba(0, 30, 80, .55);
+        }
+
+        .ad-text .t-main b {
+            color: #f7a21b;
+            /* Tiger orange */
+        }
+
+        .ad-text .t-sub {
+            display: inline-block;
+            margin-top: .5em;
+            padding: .35em 1em;
+            border-radius: 999px;
+            background: rgba(11, 44, 110, .85);
+            color: #fff;
+            font-size: clamp(13px, 4cqw, 20px);
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(0, 30, 80, .35);
+        }
+
+        .ad-legal {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 10px;
+            z-index: 5;
+            text-align: center;
+            font-size: clamp(10px, 2.8cqw, 13px);
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, .7);
+            pointer-events: none;
+            font-family: 'Kantumruy Pro', Arial, sans-serif;
+        }
+
+        /* Entrance: text drops in right after the first clink (≈1s) */
+        .underlay-slot.is-playing .ad-text .t-small {
+            animation: textIn .6s cubic-bezier(.2, .8, .3, 1) .9s forwards;
+        }
+
+        .underlay-slot.is-playing .ad-text .t-main {
+            animation:
+                textPop .7s cubic-bezier(.2, 1.4, .4, 1) 1s forwards,
+                textBeat 2.6s linear 1.8s infinite;
+            /* bumps on every clink */
+        }
+
+        .underlay-slot.is-playing .ad-text .t-sub {
+            animation: textIn .6s cubic-bezier(.2, .8, .3, 1) 1.25s forwards;
+        }
+
+        @keyframes textIn {
+            from {
+                opacity: 0;
+                transform: translateY(-14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes textPop {
+            from {
+                opacity: 0;
+                transform: scale(.6);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* small "boom" on each clink (hit is at 40% of the loop) */
+        @keyframes textBeat {
+
+            0%,
+            39% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            43% {
+                opacity: 1;
+                transform: scale(1.08);
+            }
+
+            55%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .underlay-fixed .ad-bottom,
+            .underlay-slot.is-playing .ad-bottom {
+                animation: none;
+                transform: none;
+                opacity: 1;
+            }
+
+            .food-burst {
+                display: none;
+            }
+
+            .ad-text span,
+            .underlay-slot.is-playing .ad-text span {
+                animation: none;
+                opacity: 1;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-size: 14px;
+            background: #fff;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 23px;
+            }
+
+            .post {
+                padding: 0 12px;
+            }
+
+            .post h2 {
+                font-size: 20px;
+            }
+
+            .underlay-slot {
+                margin: 30px -12px;
+            }
+
+            /* Mobile: fill the whole screen, no bars */
+            .underlay-fixed {
+                width: 100%;
+                height: 100vh;
+                height: 100svh;
+            }
+
+            .underlay-fixed .ad-bg {
+                object-fit: cover;
+                object-position: center top;
+                /* crop only the bottom, never the logo */
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>សារព័ត៌មាន Khmer Daily</h1>
+        </header>
+
+        <div class="post">
+
+            <div class="date-meta">
+                ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦
+            </div>
+
+            <h2>
+                ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប
+                ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី
+            </h2>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image">
+            </div>
+
+            <p>
+                <strong>ខេត្តសៀមរាប៖</strong>
+                អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។
+                ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ
+                និងអន្តរជាតិ។
+            </p>
+
+            <p>
+                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។
+                នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+            </p>
+
+            <!-- Advertisement slot: the fixed ad lives INSIDE it now -->
+            <div class="underlay-slot" id="dxSlot">
+                <div class="underlay-track">
+                    <div class="underlay-fixed" id="dxAd">
+                        <img class="ad-bg" decoding="async" src="./assets/bg-tiger2.png" alt="Tiger Advertisement">
+                        <img class="ad-bottom" decoding="async" src="./assets/tiger-left.png" alt="">
+                        <img class="ad-bottom ad-bottom-right" decoding="async" src="./assets/tiger-right.png" alt="">
+
+                        <!-- Ad text -->
+                        <div class="ad-text">
+                            <span class="t-small">ICE COLD • GREAT FOOD</span>
+                            <span class="t-main">ជល់មួយ ជាមួយ <b>Tiger</b>!</span>
+                            <span class="t-sub">បៀរត្រជាក់ៗ ឆ្ងាញ់ជាមួយគ្រប់មុខម្ហូប</span>
+                        </div>
+                        <div class="ad-legal">សូមផឹកដោយការទទួលខុសត្រូវ • មិនលក់ជូនអ្នកមានអាយុក្រោម ១៨ ឆ្នាំ</div>
+
+                        <!-- Food that pops out on each clink — a different food every time -->
+                        <div class="food-burst" aria-hidden="true">
+                            <span class="flash"></span>
+
+                            <!-- 1st clink -->
+                            <div class="food-set set-1">
+                                <div class="food" style="--x:-32cqw; --y: -8cqh; --r:-18deg;"><img
+                                        src="./assets/pngegg%20(8).png" alt=""></div>
+                                <div class="food" style="--x:  0cqw; --y:-12cqh; --r:  6deg; --delay:.05s;"><img
+                                        src="./assets/pngegg%20(8).png" alt=""></div>
+                                <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
+                                        src="./assets/pngegg%20(8).png" alt=""></div>
+                            </div>
+
+                            <!-- 2nd clink -->
+                            <div class="food-set set-2">
+                                <div class="food" style="--x:-32cqw; --y: -8cqh; --r:-18deg;"><img
+                                        src="./assets/pngegg%20(7).png" alt=""></div>
+                                <div class="food" style="--x:  0cqw; --y:-12cqh; --r:  6deg; --delay:.05s;"><img
+                                        src="./assets/pngegg%20(7).png" alt=""></div>
+                                <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
+                                        src="./assets/pngegg%20(7).png" alt=""></div>
+                            </div>
+
+                            <!-- 3rd clink -->
+                            <div class="food-set set-3">
+                                <div class="food" style="--x:-32cqw; --y: -8cqh; --r:-18deg;"><img
+                                        src="./assets/pngegg%20(6).png" alt=""></div>
+                                <div class="food" style="--x:  0cqw; --y:-12cqh; --r:  6deg; --delay:.05s;"><img
+                                        src="./assets/pngegg%20(6).png" alt=""></div>
+                                <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
+                                        src="./assets/pngegg%20(6).png" alt=""></div>
+                            </div>
+                        </div>
+                    </div><!-- /underlay-fixed -->
+                </div><!-- /underlay-track -->
+            </div>
+
+            <p>
+                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច
+                ដើម្បីការពារសន្តិសុខ និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។
+                អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+            </p>
+
+            <p>
+                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+            </p>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Khmer Daily News">
+            </div>
+
+        </div>
+
+        <footer>
+            រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News
+        </footer>
+
+    </div>
+
+    <script>
+        // Smooth start: wait until the ad images are fully loaded AND decoded,
+        // then play the animation whenever the ad slot comes into view.
+        (function () {
+            var slot = document.getElementById("dxSlot");
+            var imgs = slot.querySelectorAll("img");
+
+            function ready(img) {
+                var p = img.complete ? Promise.resolve()
+                    : new Promise(function (r) { img.onload = img.onerror = r; });
+                return p.then(function () {
+                    return img.decode ? img.decode().catch(function () { }) : null;
+                });
+            }
+
+            function play() {
+                if (slot.classList.contains("is-playing")) return;
+                // two frames: let the browser set up the layer first, then move
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        slot.classList.add("is-playing");
+                    });
+                });
+            }
+
+            Promise.all(Array.prototype.map.call(imgs, ready)).then(function () {
+                slot.classList.add("is-ready");
+
+                if (!("IntersectionObserver" in window)) { play(); return; }
+
+                new IntersectionObserver(function (entries) {
+                    entries.forEach(function (e) {
+                        if (e.isIntersecting) play();
+                        else slot.classList.remove("is-playing"); // replay next time
+                    });
+                }, { threshold: 0.3 }).observe(slot);
+            });
+        })();
+    </script>
+
+</body>
+
+</html>

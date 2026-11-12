@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khmer Daily News - Glass Lens Ad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --page-w: 800px;
+            /* used by .container AND the fixed ad layer - keep them in sync */
+        }
+
+        body {
+            font-family: 'Kantumruy Pro', Arial, sans-serif;
+            margin: 0;
+            background: #f0f2f5;
+        }
+
+        .container {
+            max-width: var(--page-w);
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #0056b3;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #0056b3;
+            font-size: 28px;
+        }
+
+        .post h2 {
+            color: #1a1a1a;
+            line-height: 1.4;
+            font-size: 24px;
+        }
+
+        .post p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .date-meta {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .sknteam_image {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sknteam_image img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 4px;
+        }
+
+        /* Underlay window: the page scrolls, the ad stays fixed behind the clip */
+        .underlay-slot {
+            height: 1000px;
+            margin: 30px 0;
+            position: relative;
+            clip-path: inset(0);
+        }
+
+        /* Fixed layer is only as wide as the page column (not the whole screen),
+           and uses the LARGE viewport height so the mobile address bar showing/hiding
+           doesn't resize the canvas mid-scroll (that was a source of jank). */
+        .underlay-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            width: 100%;
+            max-width: var(--page-w);
+            height: 100vh;
+            height: 100lvh;
+            z-index: 3;
+        }
+
+        .dx-slideshow {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .dx-slideshow canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: pointer;
+            touch-action: pan-y;
+            /* let the page scroll vertically, we handle horizontal swipes */
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-size: 14px;
+            background: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>សារព័ត៌មាន Khmer Daily</h1>
+        </header>
+
+        <div class="post">
+            <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
+
+            <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
+            </div>
+
+            <p>
+                <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
+            </p>
+
+            <div class="underlay-slot" id="dxSlot">
+                <div class="underlay-fixed">
+                    <div class="dx-slideshow" id="dxSlideshow">
+                        <canvas id="dxCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <p>
+                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+            </p>
+
+            <p>
+                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
+                និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+            </p>
+
+            <p>
+                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+            </p>
+
+            <div class="sknteam_image">
+                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Khmer Daily News" />
+            </div>
+        </div>
+
+        <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+    </div>
+
+    <script>
+        (() => {
+            // ================= CONFIG =================
+            const SLIDES = [
+                { src: './assets/abc11.png' },
+                { src: './assets/abc20.png' },
+                { src: './assets/abc22.png' }
+            ];
+            const DRIVE = 'time';          // 'time' = autoplay, 'scroll' = follows page scroll
+            const HOLD_MS = 1600;          // how long each image stays fully visible
+            const TRANS_MS = 650;          // crossfade length; the glass "kick" peaks in the middle of it
+            const SCROLL_LOOPS = 2;        // scroll mode: full loops while the window scrolls past
+            // --- glass lens ---
+            const LENS_X = 0.5;            // lens centre, share of canvas width
+            const LENS_Y = 0.42;           // lens centre, share of canvas height
+            const LENS_RADIUS = 0.5;       // 1.0 = glass reaches every corner, lower = smaller circle
+            const RINGS = 4;               // number of glass rings across the lens
+            const OFFSET = 0.28;           // 0 = concentric rings, higher = each ring shifts up (nested look)
+            const STRENGTH = 0.022;        // how hard each ring bends the picture (share of short side)
+            const MAGNIFY = 0.04;          // overall zoom inside the lens
+            const WOBBLE = 0.15;           // liquid wobble along the rings (0 = perfect circles)
+            const DRIFT = 0.18;            // rings per second drifting outward (0 = still)
+            const KICK = 1.0;              // extra distortion in the middle of a transition
+            const SHINE = 0.06;            // light/dark edge on each glass step (0 = off)
+            const FIT = 'cover';           // 'cover' | 'contain' | 'auto' (contain on desktop, cover on mobile)
+            const MOBILE_BP = 700;
+            const BG = [1, 1, 1];          // background colour (r,g,b 0..1) around "contain" images
+            const MAX_DPR = 1.5;           // render resolution cap - the shader runs per pixel, 2x costs ~1.8x more
+            // ==========================================
+
+            const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const wobbleAmt = REDUCED ? WOBBLE * 0.3 : WOBBLE;
+            const driftAmt = REDUCED ? 0 : DRIFT;
+
+            const slot = document.getElementById('dxSlot');
+            const root = document.getElementById('dxSlideshow');
+            const canvas = document.getElementById('dxCanvas');
+            const gl = canvas.getContext('webgl', { antialias: false, alpha: false });
+            if (!gl) { console.warn('WebGL not supported'); return; }
+
+            const N = SLIDES.length;
+            const mod = (i, m) => ((i % m) + m) % m;
+            const clamp01 = (v) => Math.min(1, Math.max(0, v));
+            const smooth = (t) => t * t * (3 - 2 * t);
+            const lerp = (a, b, t) => a + (b - a) * t;
+
+            // ---------- Shaders ----------
+            const VERT = `
+                attribute vec2 aPos;
+                void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+            `;
+            const FRAG = `
+                #ifdef GL_FRAGMENT_PRECISION_HIGH
+                precision highp float;
+                #else
+                precision mediump float;
+                #endif
+
+                uniform sampler2D uA;     // current image
+                uniform sampler2D uB;     // next image (crossfade target)
+                uniform vec4 uRectA;      // x, y, w, h of image A in canvas pixels (top-left origin)
+                uniform vec4 uRectB;
+                uniform float uMix;       // 0 = A, 1 = B
+                uniform vec2 uRes;
+                uniform vec2 uCenter;     // lens centre, canvas pixels (top-left origin)
+                uniform float uRadius;    // lens radius, px
+                uniform float uRings;
+                uniform float uOffset;
+                uniform float uStrength;  // px
+                uniform float uMag;
+                uniform float uWobble;
+                uniform float uTime;      // seconds
+                uniform float uDrift;
+                uniform float uKick;      // 0..1, peaks mid-transition
+                uniform float uKickAmt;
+                uniform float uShine;
+                uniform vec3 uBg;
+
+                // branch-free sampling: no texture reads inside divergent if/return
+                vec3 sampleImg(sampler2D tex, vec4 rect, vec2 p) {
+                    vec2 uv = (p - rect.xy) / rect.zw;
+                    vec3 c = texture2D(tex, clamp(uv, 0.0, 1.0)).rgb;
+                    vec2 inb = step(vec2(0.0), uv) * step(uv, vec2(1.0));
+                    return mix(uBg, c, inb.x * inb.y);
+                }
+
+                void main() {
+                    vec2 px = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
+                    vec2 delta = px - uCenter;
+                    float d = length(delta);
+                    vec2 dir = d > 0.001 ? delta / d : vec2(0.0);
+                    float ang = atan(delta.y, delta.x);
+
+                    // eccentric distance: bigger rings sit higher, like a stack of glass discs
+                    float rn = (d + uOffset * delta.y) / uRadius;
+
+                    // liquid wobble along each ring
+                    float wob = uWobble * 0.06 * (sin(ang * 3.0 + uTime * 0.9) + 0.6 * sin(ang * 7.0 - uTime * 1.3) + 0.25 * sin(ang * 19.0 + rn * 9.0 + uTime * 2.1));
+                    rn += wob * (1.0 + uKick);
+
+                    float inside = 1.0 - smoothstep(0.985, 1.0, rn);
+
+                    // ring bands drifting outward
+                    float u = rn * uRings - uTime * uDrift;
+                    float f = fract(u);
+                    float saw = f - 0.5;
+                    float band = floor(u);
+                    float jitter = 0.75 + 0.5 * fract(sin(band * 12.9898) * 43758.5453);
+
+                    float k = 1.0 + uKick * uKickAmt;
+                    float s = uStrength * jitter * k;
+                    vec2 offset = -dir * saw * s;
+
+                    vec2 zoom = -delta * uMag * (1.0 - clamp(rn, 0.0, 1.0) * 0.6) * k;
+
+                    vec2 p = px + (offset + zoom) * inside;
+
+                    vec3 col = sampleImg(uA, uRectA, p);
+                    if (uMix > 0.001) col = mix(col, sampleImg(uB, uRectB, p), uMix);
+
+                    float lip = smoothstep(0.90, 1.0, f) * (1.0 - smoothstep(0.0, 0.04, f));
+                    lip = max(lip, 1.0 - smoothstep(0.0, 0.05, f));
+                    col += uShine * inside * (lip * 0.9 - saw * 0.35);
+
+                    float rim = exp(-pow((rn - 1.0) * 60.0, 2.0));
+                    col += uShine * 0.6 * rim;
+
+                    gl_FragColor = vec4(col, 1.0);
+                }
+            `;
+
+            function compile(type, src) {
+                const s = gl.createShader(type);
+                gl.shaderSource(s, src);
+                gl.compileShader(s);
+                if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+                return s;
+            }
+            const prog = gl.createProgram();
+            gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+            gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+            gl.linkProgram(prog);
+            if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(prog)); return; }
+            gl.useProgram(prog);
+
+            const buf = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+            const aPos = gl.getAttribLocation(prog, 'aPos');
+            gl.enableVertexAttribArray(aPos);
+            gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+            const U = {};
+            ['uA', 'uB', 'uRectA', 'uRectB', 'uMix', 'uRes', 'uCenter', 'uRadius', 'uRings', 'uOffset',
+                'uStrength', 'uMag', 'uWobble', 'uTime', 'uDrift', 'uKick', 'uKickAmt', 'uShine', 'uBg']
+                .forEach(n => U[n] = gl.getUniformLocation(prog, n));
+
+            // constant uniforms: set once, not every frame
+            gl.uniform1i(U.uA, 0);
+            gl.uniform1i(U.uB, 1);
+            gl.uniform1f(U.uRings, RINGS);
+            gl.uniform1f(U.uOffset, OFFSET);
+            gl.uniform1f(U.uMag, MAGNIFY);
+            gl.uniform1f(U.uWobble, wobbleAmt);
+            gl.uniform1f(U.uDrift, driftAmt);
+            gl.uniform1f(U.uKickAmt, KICK);
+            gl.uniform1f(U.uShine, SHINE);
+            gl.uniform3fv(U.uBg, BG);
+
+            // ---------- Textures ----------
+            let W = 0, H = 0, dpr = 1;
+            const textures = [];
+            const rects = [];
+            const texSize = [];
+            const maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+            const scratch = document.createElement('canvas');
+            const sctx = scratch.getContext('2d');
+            const bgByte = BG.map(v => Math.round(v * 255));
+
+            function makeTexture() {
+                const t = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, t);
+                // placeholder = background colour, so nothing flashes grey before the image loads
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 1, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, new Uint8Array(bgByte));
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                return t;
+            }
+
+            const isReady = (img) => img.complete && img.naturalWidth > 0;
+
+            const images = SLIDES.map((s, i) => {
+                textures[i] = makeTexture();
+                rects[i] = [0, 0, 1, 1];
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    // decode off the main thread before the GPU upload
+                    const ready = img.decode ? img.decode().catch(() => { }) : Promise.resolve();
+                    ready.then(() => { layout(false); if (!running) render(frameState()); });
+                };
+                img.onerror = () => console.warn('Missing image: ' + s.src);
+                img.src = s.src;
+                return img;
+            });
+
+            // Upload the image pre-scaled to the size it is actually drawn at.
+            // A big image squeezed into a smaller canvas without mipmaps shimmers/aliases
+            // when the glass moves; pre-scaling with the 2D canvas removes that.
+            function upload(i) {
+                const img = images[i], r = rects[i];
+                if (!isReady(img)) return;
+                const tw = Math.max(1, Math.min(img.naturalWidth, Math.ceil(r[2]), maxTex));
+                const th = Math.max(1, Math.min(img.naturalHeight, Math.ceil(r[3]), maxTex));
+                if (texSize[i] && texSize[i][0] === tw && texSize[i][1] === th) return;
+                gl.bindTexture(gl.TEXTURE_2D, textures[i]);
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+                try {
+                    if (tw === img.naturalWidth && th === img.naturalHeight) {
+                        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+                    } else {
+                        scratch.width = tw;
+                        scratch.height = th;
+                        sctx.imageSmoothingEnabled = true;
+                        sctx.imageSmoothingQuality = 'high';
+                        sctx.drawImage(img, 0, 0, tw, th);
+                        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, scratch);
+                    }
+                    texSize[i] = [tw, th];
+                } catch (e) {
+                    console.error('Could not load image into WebGL. Open the page through a local server (not file://).', e);
+                }
+            }
+
+            let uploadTimer = 0;
+            function uploadAll() {
+                for (let i = 0; i < N; i++) upload(i);
+                if (!running) render(frameState());
+            }
+
+            function layout(deferUpload) {
+                const cw = canvas.width, ch = canvas.height;
+                const cover = FIT === 'cover' || (FIT === 'auto' && W < MOBILE_BP);
+                for (let i = 0; i < N; i++) {
+                    const img = images[i];
+                    if (!isReady(img)) { rects[i] = [0, 0, cw, ch]; continue; }
+                    const sx = cw / img.naturalWidth, sy = ch / img.naturalHeight;
+                    const s = cover ? Math.max(sx, sy) : Math.min(sx, sy);
+                    const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+                    rects[i] = [(cw - dw) / 2, cover ? (ch - dh) / 2 : 0, dw, dh];
+                }
+                // during a window drag, wait until it settles before re-uploading textures
+                clearTimeout(uploadTimer);
+                if (deferUpload) uploadTimer = setTimeout(uploadAll, 150);
+                else uploadAll();
+            }
+
+            function resize() {
+                const r = root.getBoundingClientRect();
+                const nw = Math.max(1, Math.round(r.width));
+                const nh = Math.max(1, Math.round(r.height));
+                const nd = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+                if (nw === W && nh === H && nd === dpr) return;
+                W = nw; H = nh; dpr = nd;
+                canvas.width = Math.round(W * dpr);
+                canvas.height = Math.round(H * dpr);
+                gl.viewport(0, 0, canvas.width, canvas.height);
+                layout(true);
+                if (!running) render(frameState());   // resizing clears the canvas - redraw right away
+            }
+
+            // ---------- Timeline ----------
+            let time = 0;          // ms, runs only while the ad is visible
+            let cur = 0, next = 0;
+            let holdStart = 0;
+            let transStart = -1;   // -1 = not transitioning
+
+            function startTransition(to) {
+                if (transStart >= 0) return;
+                next = mod(to, N);
+                if (next === cur) return;
+                transStart = time;
+            }
+
+            function scrollPos() {
+                const r = slot.getBoundingClientRect();
+                const vh = window.innerHeight;
+                const p = clamp01((vh - r.top) / (vh + r.height));
+                return Math.min(0.9999, p) * N * SCROLL_LOOPS;   // position measured in slides
+            }
+
+            // returns which two images to blend and how far the transition is (t: 0..1)
+            function frameState() {
+                if (DRIVE === 'scroll') {
+                    const pos = scrollPos();
+                    const i = Math.floor(pos), f = pos - i;
+                    const tf = Math.min(0.9, TRANS_MS / (HOLD_MS + TRANS_MS));
+                    return { a: mod(i, N), b: mod(i + 1, N), t: clamp01((f - (1 - tf)) / tf) };
+                }
+                if (!isReady(images[cur])) holdStart = time;      // don't start the clock before the first image shows
+                if (transStart < 0 && time - holdStart >= HOLD_MS) startTransition(cur + 1);
+                if (transStart >= 0) {
+                    const t = (time - transStart) / TRANS_MS;
+                    if (t < 1) return { a: cur, b: next, t };
+                    cur = next;
+                    transStart = -1;
+                    holdStart = time;
+                }
+                return { a: cur, b: cur, t: 0 };
+            }
+
+            function lensFor(r, cw, ch) {
+                const vx0 = Math.max(0, r[0]), vx1 = Math.min(cw, r[0] + r[2]);
+                const vy0 = Math.max(0, r[1]), vy1 = Math.min(ch, r[1] + r[3]);
+                const cx = vx0 + LENS_X * (vx1 - vx0);
+                const cy = vy0 + LENS_Y * (vy1 - vy0);
+                const farthest = Math.max(
+                    Math.hypot(cx - vx0, cy - vy0), Math.hypot(vx1 - cx, cy - vy0),
+                    Math.hypot(cx - vx0, vy1 - cy), Math.hypot(vx1 - cx, vy1 - cy)
+                );
+                return {
+                    cx, cy,
+                    radius: LENS_RADIUS * farthest * (1 + OFFSET),
+                    ref: Math.min(vx1 - vx0, vy1 - vy0)
+                };
+            }
+
+            // ---------- Frame ----------
+            function render(st) {
+                const cw = canvas.width, ch = canvas.height;
+                const mix = smooth(st.t);
+                const kick = Math.pow(Math.sin(Math.PI * st.t), 2);   // 0 -> 1 -> 0, eases in AND out
+
+                // lens follows the image smoothly when the two images have different shapes
+                const la = lensFor(rects[st.a], cw, ch);
+                const lb = lensFor(rects[st.b], cw, ch);
+
+                gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, textures[st.a]);
+                gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, textures[st.b]);
+                gl.uniform4fv(U.uRectA, rects[st.a]);
+                gl.uniform4fv(U.uRectB, rects[st.b]);
+                gl.uniform1f(U.uMix, mix);
+                gl.uniform2f(U.uRes, cw, ch);
+                gl.uniform2f(U.uCenter, lerp(la.cx, lb.cx, mix), lerp(la.cy, lb.cy, mix));
+                gl.uniform1f(U.uRadius, lerp(la.radius, lb.radius, mix));
+                gl.uniform1f(U.uStrength, STRENGTH * lerp(la.ref, lb.ref, mix));
+                gl.uniform1f(U.uTime, time / 1000);
+                gl.uniform1f(U.uKick, kick);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            }
+
+            // ---------- Loop ----------
+            let running = false;
+            let last = 0;
+            let rafId = 0;
+
+            function tick(now) {
+                if (!running) return;
+                time += Math.min(now - last, 50);   // cap so a background-tab pause doesn't jump
+                last = now;
+                render(frameState());
+                rafId = requestAnimationFrame(tick);
+            }
+
+            function start() {
+                if (running) return;
+                running = true;
+                last = performance.now();
+                rafId = requestAnimationFrame(tick);
+            }
+            function stop() {
+                running = false;
+                cancelAnimationFrame(rafId);   // prevents two loops running after a quick stop/start
+            }
+
+            // Manual: go to the next / previous image (plays the same smooth transition)
+            function nav(dir) {
+                if (DRIVE === 'scroll' || transStart >= 0) return;
+                startTransition(cur + dir);
+            }
+
+            // ---------- Controls ----------
+            canvas.addEventListener('click', () => nav(1));
+            document.addEventListener('keydown', (e) => {
+                if (!running) return;
+                if (e.key === 'ArrowRight') nav(1);
+                if (e.key === 'ArrowLeft') nav(-1);
+            });
+            let touchX = null, touchY = null;
+            canvas.addEventListener('touchstart', (e) => {
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+            }, { passive: true });
+            canvas.addEventListener('touchend', (e) => {
+                if (touchX === null) return;
+                const dx = e.changedTouches[0].clientX - touchX;
+                const dy = e.changedTouches[0].clientY - touchY;
+                // only a mostly-horizontal swipe changes slide; vertical = page scroll
+                if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) nav(dx < 0 ? 1 : -1);
+                touchX = touchY = null;
+            });
+
+            // ---------- Lifecycle ----------
+            new ResizeObserver(resize).observe(root);
+            window.addEventListener('resize', resize);
+
+
+            resize();
+            // start a little before the ad scrolls into view, so the first frame is already drawn
+            new IntersectionObserver(([e]) => { e.isIntersecting ? start() : stop(); }, { rootMargin: '200px 0px' })
+                .observe(slot);
+        })();
+    </script>
+
+</body>
+
+</html>

@@ -588,6 +588,8 @@
             // ---------- Lifecycle ----------
             new ResizeObserver(resize).observe(root);
             window.addEventListener('resize', resize);
+
+
             resize();
             // start a little before the ad scrolls into view, so the first frame is already drawn
             new IntersectionObserver(([e]) => { e.isIntersecting ? start() : stop(); }, { rootMargin: '200px 0px' })
