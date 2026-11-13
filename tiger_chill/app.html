@@ -18,6 +18,7 @@
     <link rel="preload" as="image" href="./assets/pngegg%20(8).png">
     <link rel="preload" as="image" href="./assets/pngegg%20(7).png">
     <link rel="preload" as="image" href="./assets/pngegg%20(6).png">
+    <link rel="preload" as="image" href="./assets/pngegg%20(9).png">
 
     <style>
         :root {
@@ -353,9 +354,17 @@
             transform: scale(.2);
         }
 
-        /* 3 food sets take turns: 1 set per clink.
-           Clink #1 (entrance) -> set-1, #2 -> set-2, #3 -> set-3, #4 -> set-1 ...
-           One full cycle = 3 clinks = 3 x 2.6s = 7.8s */
+        /* 4 food sets take turns: 1 set per clink.
+           Clink #1 (entrance) -> set-1, #2 -> set-2, #3 -> set-3, #4 -> set-4,
+           #5 -> set-1 ...
+           One full cycle = 4 clinks = 4 x 2.6s = 10.4s
+
+           To add another set later (N sets in total):
+             - cycle duration        = N x 2.6s
+             - new set's --start     = 1.8s + (N - 2) x 2.6s
+             - set-1 second delay    = 1.8s + (N - 1) x 2.6s
+             - foodCycle percentages = 13 / 14.7 / 24 / 30 multiplied by 3 / N
+        */
         .food-set {
             position: absolute;
             left: 0;
@@ -363,7 +372,7 @@
         }
 
         .underlay-slot.is-playing .food-set .food {
-            animation: foodCycle 7.8s linear infinite;
+            animation: foodCycle 10.4s linear infinite;
             animation-delay: calc(var(--start) + var(--delay, 0s));
         }
 
@@ -377,14 +386,19 @@
         }
 
         /* 3rd clink */
+        .food-set.set-4 {
+            --start: 7s;
+        }
+
+        /* 4th clink */
 
         .underlay-slot.is-playing .food-set.set-1 .food {
             animation:
                 foodFirst 1.8s linear forwards,
                 /* 1st clink (entrance) */
-                foodCycle 7.8s linear infinite;
-            /* 4th, 7th ... clink */
-            animation-delay: var(--delay, 0s), calc(7s + var(--delay, 0s));
+                foodCycle 10.4s linear infinite;
+            /* 5th, 9th ... clink */
+            animation-delay: var(--delay, 0s), calc(9.6s + var(--delay, 0s));
         }
 
         .underlay-slot.is-playing .food-burst .flash {
@@ -419,28 +433,28 @@
             }
         }
 
-        /* one clink inside the 7.8s cycle: hit at 13.3% (= 40% of 2.6s),
-           then hidden during the other 2 clinks */
+        /* one clink inside the 10.4s cycle: hit at 10% (= 40% of 2.6s),
+           then hidden during the other 3 clinks */
         @keyframes foodCycle {
 
             0%,
-            13% {
+            9.75% {
                 opacity: 0;
                 transform: translate(0, 0) scale(.2) rotate(0deg);
             }
 
-            14.7% {
+            11% {
                 opacity: 1;
                 transform: translate(calc(var(--x) * .45), calc(var(--y) * .45)) scale(1.15) rotate(calc(var(--r) * .4));
                 animation-timing-function: cubic-bezier(.2, .7, .4, 1);
             }
 
-            24% {
+            18% {
                 opacity: 1;
                 transform: translate(var(--x), var(--y)) scale(1) rotate(var(--r));
             }
 
-            30%,
+            22.5%,
             100% {
                 opacity: 0;
                 transform: translate(var(--x), calc(var(--y) + 30px)) scale(.9) rotate(var(--r));
@@ -772,6 +786,17 @@
                                 <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
                                         src="./assets/pngegg%20(6).png" alt=""></div>
                             </div>
+
+                            <!-- 4th clink -->
+                            <div class="food-set set-4">
+                                <div class="food" style="--x:-32cqw; --y: -8cqh; --r:-18deg;"><img
+                                        src="./assets/pngegg%20(9).png" alt=""></div>
+                                <div class="food" style="--x:  0cqw; --y:-12cqh; --r:  6deg; --delay:.05s;"><img
+                                        src="./assets/pngegg%20(9).png" alt=""></div>
+                                <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
+                                        src="./assets/pngegg%20(9).png" alt=""></div>
+                            </div>
+
                         </div>
                     </div><!-- /underlay-fixed -->
                 </div><!-- /underlay-track -->
@@ -841,6 +866,7 @@
             });
         })();
     </script>
+
 </body>
 
 </html>
