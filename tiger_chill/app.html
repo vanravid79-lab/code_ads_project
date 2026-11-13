@@ -12,13 +12,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 
     <!-- Load ad images early so the animation starts smoothly -->
-    <link rel="preload" as="image" href="./assets/bg-tiger2.png">
-    <link rel="preload" as="image" href="./assets/tiger-left.png">
-    <link rel="preload" as="image" href="./assets/tiger-right.png">
-    <link rel="preload" as="image" href="./assets/pngegg%20(8).png">
-    <link rel="preload" as="image" href="./assets/pngegg%20(7).png">
-    <link rel="preload" as="image" href="./assets/pngegg%20(6).png">
-    <link rel="preload" as="image" href="./assets/pngegg%20(9).png">
+    <!-- Only the 3 images the ad needs first. The food images are NOT preloaded
+         any more, so they don't compete with these for bandwidth. -->
+    <link rel="preload" as="image" fetchpriority="high" href="./assets/bg-tiger2.png">
+    <link rel="preload" as="image" fetchpriority="high" href="./assets/tiger-left.png">
+    <link rel="preload" as="image" fetchpriority="high" href="./assets/tiger-right.png">
 
     <style>
         :root {
@@ -41,7 +39,8 @@
             max-width: var(--page-w);
             width: 100%;
             margin: 0 auto;
-            background: #fff;
+            /* transparent: the ad sits BEHIND the page and shows through the slot */
+            background: transparent;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
             position: relative;
         }
@@ -50,6 +49,7 @@
             text-align: center;
             padding: 20px 0;
             border-bottom: 3px solid #0056b3;
+            background: #fff;
         }
 
         header h1 {
@@ -58,8 +58,15 @@
             font-size: 28px;
         }
 
-        .post {
-            padding: 0 20px;
+        /* The article is split in two white parts, one above and one below the ad window */
+        .post-part {
+            display: flow-root;
+            padding: 0 20px 15px;
+            background: #fff;
+        }
+
+        .underlay-slot+.post-part {
+            padding-top: 14px;
         }
 
         .post h2 {
@@ -92,59 +99,47 @@
         }
 
         /*
-           UNDERLAY SLOT
-           clip-path: inset(0) clips everything inside it, including the
-           position:fixed child below. The browser does this on the
-           compositor, so it stays perfectly in sync with scrolling
-           (no JS, no lag, no jitter on iOS/Android).
-
-           The negative margins let the slot span the full article width
-           (cancels .post padding).
+           UNDERLAY (ad BEHIND the page)
+           The ad layer is fixed to the screen behind the whole page and is
+           already drawn and animating before the reader gets to it.
+           .underlay-slot is just an empty, see-through gap in the article:
+           when it scrolls past, the reader looks through it at the ad.
+           Nothing has to be drawn at that moment, so there is no wait.
         */
         .underlay-slot {
-            position: relative;
             height: 1000px;
-            margin: 30px -20px;
-            overflow: hidden;
-            /* fallback for old browsers */
-            overflow: clip;
-            /* clips WITHOUT breaking sticky */
-            clip-path: inset(0);
-            -webkit-clip-path: inset(0);
-            background: var(--ad-bg) url("./assets/bg-tiger2.png") center bottom / cover no-repeat;
         }
 
-        /*
-           STICKY TRACK (replaces position:fixed — no more jumping on phones)
-           The track reaches one screen above and one screen below the slot,
-           so the sticky ad layer stays glued to the top of the screen
-           the whole time the slot is visible. Same "window" effect,
-           but the browser scrolls it natively = perfectly smooth.
-        */
-        .underlay-track {
-            position: absolute;
+        .underlay-fixed {
+            position: fixed;
+            top: 0;
             left: 0;
             right: 0;
-            top: -100vh;
-            /* underlay: ad stays still behind the page */
-            top: -100svh;
-            bottom: -100vh;
-            bottom: -100svh;
-        }
-
-        /* Ad layer: sticks to the top of the screen, only seen through the slot */
-        .underlay-fixed {
-            position: -webkit-sticky;
-            position: sticky;
-            top: 0;
+            margin: 0 auto;
             width: 100%;
+            max-width: var(--page-w);
             height: 100vh;
-            height: 100svh;
-            /* = the VISIBLE screen (toolbar showing), so the image is never
-               zoomed or hidden behind Safari's toolbar. Fixed size = no jump. */
+            height: 100lvh;
+            z-index: -1;
+            /* behind the article */
+            overflow: hidden;
+            background: var(--ad-bg);
             pointer-events: none;
             container-type: size;
             /* lets the food use cqw/cqh = % of the ad, not the whole screen */
+        }
+
+        /* Background, bottles and text appear TOGETHER, only once the
+           background and both bottle images are loaded (never one by one) */
+        .underlay-fixed:not(.is-ready)>* {
+            visibility: hidden;
+        }
+
+        /* Invisible ONLY while the page is pulled past its top/bottom edge
+           (iPhone bounce), so the ad never peeks out behind the header or
+           footer. opacity (not visibility) keeps it drawn and ready. */
+        .underlay-fixed.is-edge {
+            opacity: 0;
         }
 
         /* Background layer */
@@ -169,23 +164,18 @@
             display: block;
             z-index: 1;
             transform-origin: 50% 100%;
-            /* Sharper rendering while moving */
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: high-quality;
+            /* image-rendering override removed: in Safari it switched off
+               smoothing, which makes scaled, rotating images look jagged */
             -webkit-font-smoothing: antialiased;
             outline: 1px solid transparent;
             /* smooths rotated edges */
             /* Make the hands stand out from the icy background */
-            filter: contrast(1.12) saturate(1.15) brightness(1.03) drop-shadow(0 6px 14px rgba(0, 40, 90, 0.45));
+            /* Filter removed: it made the first draw of the ad slow on phones.
+               To get the look back, bake it into the PNG itself, or restore:
+               filter: contrast(1.12) saturate(1.15) brightness(1.03) drop-shadow(0 6px 14px rgba(0, 40, 90, 0.45)); */
             /* pivot at the hand/wrist */
-            /* hidden off-screen until the ad comes into view */
-            transform: translate(-110%, 0);
-            opacity: 0;
-            transition: opacity .3s ease;
-        }
-
-        .underlay-slot.is-ready .ad-bottom {
-            opacity: 1;
+            /* ALWAYS visible, already in place (no slide-in, nothing hidden) */
+            transform: translate(-6%, 0) rotate(-6deg);
         }
 
         /* Right-side overlay: same size, pinned bottom-right */
@@ -193,7 +183,7 @@
             left: auto;
             right: -3rem;
             z-index: 2;
-            transform: translate(110%, 0);
+            transform: translate(6%, 0) rotate(6deg);
         }
 
         /* ===== CHEERS ANIMATION =====
@@ -204,20 +194,16 @@
 
         /* Promote to GPU layer BEFORE moving (avoids first-frame stutter).
            Only rotate/translate are animated, so this stays sharp. */
-        .underlay-slot.is-ready .ad-bottom {
+        .underlay-fixed.is-ready .ad-bottom {
             will-change: transform;
         }
 
-        .underlay-slot.is-playing .ad-bottom {
-            animation:
-                cheersLeft 1.8s linear forwards,
-                clinkLeft 2.6s linear 1.8s infinite;
+        .underlay-fixed.is-playing .ad-bottom {
+            animation: clinkLeft 2.6s linear infinite;
         }
 
-        .underlay-slot.is-playing .ad-bottom-right {
-            animation:
-                cheersRight 1.8s linear forwards,
-                clinkRight 2.6s linear 1.8s infinite;
+        .underlay-fixed.is-playing .ad-bottom-right {
+            animation: clinkRight 2.6s linear infinite;
         }
 
         /* Entrance: glide in -> clink -> ease back to start pose */
@@ -332,7 +318,7 @@
             line-height: 1;
             opacity: 0;
             transform: translate(0, 0) scale(.2);
-            filter: drop-shadow(0 4px 8px rgba(0, 30, 70, .45));
+            /* drop-shadow filter removed (12 filtered images = slow first draw) */
         }
 
         .food-burst .food img {
@@ -371,40 +357,37 @@
             top: 0;
         }
 
-        .underlay-slot.is-playing .food-set .food {
+        .underlay-fixed.is-playing .food-set .food {
             animation: foodCycle 10.4s linear infinite;
             animation-delay: calc(var(--start) + var(--delay, 0s));
         }
 
+        /* No entrance any more: the loop starts at once, one set per clink.
+           To add a 5th set: cycle = 5 x 2.6s, its --start = 10.4s, and the
+           foodCycle percentages x 4/5. */
+        .food-set.set-1 {
+            --start: 0s;
+        }
+
+        /* 1st clink */
         .food-set.set-2 {
-            --start: 1.8s;
+            --start: 2.6s;
         }
 
         /* 2nd clink */
         .food-set.set-3 {
-            --start: 4.4s;
+            --start: 5.2s;
         }
 
         /* 3rd clink */
         .food-set.set-4 {
-            --start: 7s;
+            --start: 7.8s;
         }
 
         /* 4th clink */
 
-        .underlay-slot.is-playing .food-set.set-1 .food {
-            animation:
-                foodFirst 1.8s linear forwards,
-                /* 1st clink (entrance) */
-                foodCycle 10.4s linear infinite;
-            /* 5th, 9th ... clink */
-            animation-delay: var(--delay, 0s), calc(9.6s + var(--delay, 0s));
-        }
-
-        .underlay-slot.is-playing .food-burst .flash {
-            animation:
-                flashFirst 1.8s linear forwards,
-                flashLoop 2.6s linear 1.8s infinite;
+        .underlay-fixed.is-playing .food-burst .flash {
+            animation: flashLoop 2.6s linear infinite;
         }
 
         /* first clink happens at 55% of the 1.8s entrance */
@@ -519,7 +502,7 @@
         .ad-text .t-main,
         .ad-text .t-sub {
             display: block;
-            opacity: 0;
+            /* always visible — never waits for the animation */
         }
 
         .ad-text .t-small {
@@ -564,6 +547,8 @@
             left: 0;
             right: 0;
             bottom: 10px;
+            /* keep the legal line above the mobile toolbar (layer is 100lvh tall) */
+            bottom: calc(10px + 100lvh - 100svh);
             z-index: 5;
             text-align: center;
             font-size: clamp(10px, 2.8cqw, 13px);
@@ -574,19 +559,9 @@
         }
 
         /* Entrance: text drops in right after the first clink (≈1s) */
-        .underlay-slot.is-playing .ad-text .t-small {
-            animation: textIn .6s cubic-bezier(.2, .8, .3, 1) .9s forwards;
-        }
-
-        .underlay-slot.is-playing .ad-text .t-main {
-            animation:
-                textPop .7s cubic-bezier(.2, 1.4, .4, 1) 1s forwards,
-                textBeat 2.6s linear 1.8s infinite;
+        .underlay-fixed.is-playing .ad-text .t-main {
+            animation: textBeat 2.6s linear infinite;
             /* bumps on every clink */
-        }
-
-        .underlay-slot.is-playing .ad-text .t-sub {
-            animation: textIn .6s cubic-bezier(.2, .8, .3, 1) 1.25s forwards;
         }
 
         @keyframes textIn {
@@ -637,7 +612,7 @@
         @media (prefers-reduced-motion: reduce) {
 
             .underlay-fixed .ad-bottom,
-            .underlay-slot.is-playing .ad-bottom {
+            .underlay-fixed.is-playing .ad-bottom {
                 animation: none;
                 transform: none;
                 opacity: 1;
@@ -648,7 +623,7 @@
             }
 
             .ad-text span,
-            .underlay-slot.is-playing .ad-text span {
+            .underlay-fixed.is-playing .ad-text span {
                 animation: none;
                 opacity: 1;
             }
@@ -668,25 +643,16 @@
                 font-size: 23px;
             }
 
-            .post {
-                padding: 0 12px;
+            .post-part {
+                padding-left: 12px;
+                padding-right: 12px;
             }
 
             .post h2 {
                 font-size: 20px;
             }
 
-            .underlay-slot {
-                margin: 30px -12px;
-            }
-
             /* Mobile: fill the whole screen, no bars */
-            .underlay-fixed {
-                width: 100%;
-                height: 100vh;
-                height: 100svh;
-            }
-
             .underlay-fixed .ad-bg {
                 object-fit: cover;
                 object-position: center top;
@@ -698,6 +664,68 @@
 
 <body>
 
+    <!-- THE AD: fixed behind the whole page, seen through #dxSlot -->
+    <div class="underlay-fixed" id="dxAd">
+        <img class="ad-bg" decoding="async" src="./assets/bg-tiger2.png" alt="Tiger Advertisement">
+        <img class="ad-bottom" fetchpriority="high" decoding="async" src="./assets/tiger-left.png" alt="">
+        <img class="ad-bottom ad-bottom-right" fetchpriority="high" decoding="async" src="./assets/tiger-right.png"
+            alt="">
+
+        <!-- Ad text -->
+        <div class="ad-text">
+            <span class="t-small">ICE COLD • GREAT FOOD</span>
+            <span class="t-main">ជល់មួយ ជាមួយ <b>Tiger</b>!</span>
+            <span class="t-sub">បៀរត្រជាក់ៗ ឆ្ងាញ់ជាមួយគ្រប់មុខម្ហូប</span>
+        </div>
+        <div class="ad-legal">សូមផឹកដោយការទទួលខុសត្រូវ • មិនលក់ជូនអ្នកមានអាយុក្រោម ១៨ ឆ្នាំ</div>
+
+        <!-- Food that pops out on each clink — a different food every time -->
+        <div class="food-burst" aria-hidden="true">
+            <span class="flash"></span>
+
+            <!-- 1st clink -->
+            <div class="food-set set-1">
+                <div class="food" style="--x:-32cqw; --y: -8cqh; --r:-18deg;"><img src="./assets/pngegg%20(8).png"
+                        alt=""></div>
+                <div class="food" style="--x:  0cqw; --y:-12cqh; --r:  6deg; --delay:.05s;"><img
+                        src="./assets/pngegg%20(8).png" alt=""></div>
+                <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
+                        src="./assets/pngegg%20(8).png" alt=""></div>
+            </div>
+
+            <!-- 2nd clink -->
+            <div class="food-set set-2">
+                <div class="food" style="--x:-32cqw; --y: -8cqh; --r:-18deg;"><img src="./assets/pngegg%20(7).png"
+                        alt=""></div>
+                <div class="food" style="--x:  0cqw; --y:-12cqh; --r:  6deg; --delay:.05s;"><img
+                        src="./assets/pngegg%20(7).png" alt=""></div>
+                <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
+                        src="./assets/pngegg%20(7).png" alt=""></div>
+            </div>
+
+            <!-- 3rd clink -->
+            <div class="food-set set-3">
+                <div class="food" style="--x:-32cqw; --y: -8cqh; --r:-18deg;"><img src="./assets/pngegg%20(6).png"
+                        alt=""></div>
+                <div class="food" style="--x:  0cqw; --y:-12cqh; --r:  6deg; --delay:.05s;"><img
+                        src="./assets/pngegg%20(6).png" alt=""></div>
+                <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
+                        src="./assets/pngegg%20(6).png" alt=""></div>
+            </div>
+
+            <!-- 4th clink -->
+            <div class="food-set set-4">
+                <div class="food" style="--x:-32cqw; --y: -8cqh; --r:-18deg;"><img src="./assets/pngegg%20(9).png"
+                        alt=""></div>
+                <div class="food" style="--x:  0cqw; --y:-12cqh; --r:  6deg; --delay:.05s;"><img
+                        src="./assets/pngegg%20(9).png" alt=""></div>
+                <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
+                        src="./assets/pngegg%20(9).png" alt=""></div>
+            </div>
+
+        </div>
+    </div><!-- /underlay-fixed -->
+
     <div class="container">
 
         <header>
@@ -705,119 +733,65 @@
         </header>
 
         <div class="post">
+            <div class="post-part">
 
-            <div class="date-meta">
-                ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦
-            </div>
+                <div class="date-meta">
+                    ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦
+                </div>
 
-            <h2>
-                ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប
-                ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី
-            </h2>
+                <h2>
+                    ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប
+                    ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី
+                </h2>
 
-            <div class="sknteam_image">
-                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image">
-            </div>
+                <div class="sknteam_image">
+                    <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image">
+                </div>
 
-            <p>
-                <strong>ខេត្តសៀមរាប៖</strong>
-                អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
-                ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
-                "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។
-                ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
-                ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ
-                និងអន្តរជាតិ។
-            </p>
+                <p>
+                    <strong>ខេត្តសៀមរាប៖</strong>
+                    អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+                    ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
+                    "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។
+                    ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+                    ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ
+                    និងអន្តរជាតិ។
+                </p>
 
-            <p>
-                លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
-                ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
-                និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។
-                នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
-                និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
-            </p>
+                <p>
+                    លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
+                    ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
+                    និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។
+                    នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+                    និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
+                </p>
 
-            <!-- Advertisement slot: the fixed ad lives INSIDE it now -->
-            <div class="underlay-slot" id="dxSlot">
-                <div class="underlay-track">
-                    <div class="underlay-fixed" id="dxAd">
-                        <img class="ad-bg" decoding="async" src="./assets/bg-tiger2.png" alt="Tiger Advertisement">
-                        <img class="ad-bottom" decoding="async" src="./assets/tiger-left.png" alt="">
-                        <img class="ad-bottom ad-bottom-right" decoding="async" src="./assets/tiger-right.png" alt="">
+            </div><!-- /post-part -->
 
-                        <!-- Ad text -->
-                        <div class="ad-text">
-                            <span class="t-small">ICE COLD • GREAT FOOD</span>
-                            <span class="t-main">ជល់មួយ ជាមួយ <b>Tiger</b>!</span>
-                            <span class="t-sub">បៀរត្រជាក់ៗ ឆ្ងាញ់ជាមួយគ្រប់មុខម្ហូប</span>
-                        </div>
-                        <div class="ad-legal">សូមផឹកដោយការទទួលខុសត្រូវ • មិនលក់ជូនអ្នកមានអាយុក្រោម ១៨ ឆ្នាំ</div>
+            <!-- Advertisement slot: an empty window. The ad itself is the
+                 .underlay-fixed layer at the top of <body>, behind the page. -->
+            <div class="underlay-slot" id="dxSlot"></div>
 
-                        <!-- Food that pops out on each clink — a different food every time -->
-                        <div class="food-burst" aria-hidden="true">
-                            <span class="flash"></span>
+            <div class="post-part">
 
-                            <!-- 1st clink -->
-                            <div class="food-set set-1">
-                                <div class="food" style="--x:-32cqw; --y: -8cqh; --r:-18deg;"><img
-                                        src="./assets/pngegg%20(8).png" alt=""></div>
-                                <div class="food" style="--x:  0cqw; --y:-12cqh; --r:  6deg; --delay:.05s;"><img
-                                        src="./assets/pngegg%20(8).png" alt=""></div>
-                                <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
-                                        src="./assets/pngegg%20(8).png" alt=""></div>
-                            </div>
+                <p>
+                    ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច
+                    ដើម្បីការពារសន្តិសុខ និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។
+                    អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+                    កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
+                </p>
 
-                            <!-- 2nd clink -->
-                            <div class="food-set set-2">
-                                <div class="food" style="--x:-32cqw; --y: -8cqh; --r:-18deg;"><img
-                                        src="./assets/pngegg%20(7).png" alt=""></div>
-                                <div class="food" style="--x:  0cqw; --y:-12cqh; --r:  6deg; --delay:.05s;"><img
-                                        src="./assets/pngegg%20(7).png" alt=""></div>
-                                <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
-                                        src="./assets/pngegg%20(7).png" alt=""></div>
-                            </div>
+                <p>
+                    គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
+                    ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
+                    និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
+                </p>
 
-                            <!-- 3rd clink -->
-                            <div class="food-set set-3">
-                                <div class="food" style="--x:-32cqw; --y: -8cqh; --r:-18deg;"><img
-                                        src="./assets/pngegg%20(6).png" alt=""></div>
-                                <div class="food" style="--x:  0cqw; --y:-12cqh; --r:  6deg; --delay:.05s;"><img
-                                        src="./assets/pngegg%20(6).png" alt=""></div>
-                                <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
-                                        src="./assets/pngegg%20(6).png" alt=""></div>
-                            </div>
+                <div class="sknteam_image">
+                    <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Khmer Daily News">
+                </div>
 
-                            <!-- 4th clink -->
-                            <div class="food-set set-4">
-                                <div class="food" style="--x:-32cqw; --y: -8cqh; --r:-18deg;"><img
-                                        src="./assets/pngegg%20(9).png" alt=""></div>
-                                <div class="food" style="--x:  0cqw; --y:-12cqh; --r:  6deg; --delay:.05s;"><img
-                                        src="./assets/pngegg%20(9).png" alt=""></div>
-                                <div class="food" style="--x: 32cqw; --y: -6cqh; --r: 18deg; --delay:.1s;"><img
-                                        src="./assets/pngegg%20(9).png" alt=""></div>
-                            </div>
-
-                        </div>
-                    </div><!-- /underlay-fixed -->
-                </div><!-- /underlay-track -->
-            </div>
-
-            <p>
-                ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច
-                ដើម្បីការពារសន្តិសុខ និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។
-                អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
-                កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
-            </p>
-
-            <p>
-                គួរបញ្ជាក់ផងដែរថា ព្រឹត្តិការណ៍អង្គរសង្ក្រាន្តមិនត្រឹមតែជាការសប្បាយរីករាយប៉ុណ្ណោះទេ
-                ប៉ុន្តែវាក៏ជាការរួមចំណែកយ៉ាងសំខាន់ក្នុងការថែរក្សា
-                និងលើកកម្ពស់មរតកវប្បធម៌ដូនតាខ្មែរឲ្យកាន់តែល្បីល្បាញលើឆាកអន្តរជាតិ។
-            </p>
-
-            <div class="sknteam_image">
-                <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Khmer Daily News">
-            </div>
+            </div><!-- /post-part -->
 
         </div>
 
@@ -828,11 +802,9 @@
     </div>
 
     <script>
-        // Smooth start: wait until the ad images are fully loaded AND decoded,
-        // then play the animation whenever the ad slot comes into view.
         (function () {
-            var slot = document.getElementById("dxSlot");
-            var imgs = slot.querySelectorAll("img");
+            var slot = document.getElementById("dxSlot"); // the window in the article
+            var ad = document.getElementById("dxAd");     // the ad layer behind the page
 
             function ready(img) {
                 var p = img.complete ? Promise.resolve()
@@ -842,28 +814,105 @@
                 });
             }
 
-            function play() {
-                if (slot.classList.contains("is-playing")) return;
-                // two frames: let the browser set up the layer first, then move
-                requestAnimationFrame(function () {
-                    requestAnimationFrame(function () {
-                        slot.classList.add("is-playing");
-                    });
-                });
+            /* ---- AUTO-SHRINK oversized images -------------------------------
+               A phone has to move every bottle and food image 60 times a
+               second. If the PNG files are much bigger than they are shown
+               (e.g. a 3000px file shown 150px wide) the animation stutters.
+               This makes a small copy of each image, at exactly the size it
+               is shown on this screen, and uses that copy instead.
+               Best fix is still to resize the files themselves - then this
+               code simply does nothing. */
+            var copies = {}; // "file|width" -> Promise of a blob: URL (or null)
+
+            function need(img) { // how many pixels wide this screen really needs
+                var nw = img.naturalWidth, nh = img.naturalHeight;
+                if (!nw || !nh || !img.offsetWidth) return 0;
+                var dpr = Math.min(window.devicePixelRatio || 1, 3);
+                var scale = Math.max(img.offsetWidth / nw, img.offsetHeight / nh) * dpr;
+                return scale < 0.7 ? Math.ceil(nw * scale) : 0; // 0 = already small enough
             }
 
-            Promise.all(Array.prototype.map.call(imgs, ready)).then(function () {
-                slot.classList.add("is-ready");
-
-                if (!("IntersectionObserver" in window)) { play(); return; }
-
-                new IntersectionObserver(function (entries) {
-                    entries.forEach(function (e) {
-                        if (e.isIntersecting) play();
-                        else slot.classList.remove("is-playing"); // replay next time
+            function shrink(img) {
+                if (!img.dataset.orig) img.dataset.orig = img.getAttribute("src");
+                return ready(img).then(function () {
+                    var w = need(img);
+                    if (!w) return;
+                    var h = Math.ceil(w * img.naturalHeight / img.naturalWidth);
+                    var key = img.dataset.orig + "|" + w;
+                    if (!copies[key]) {
+                        copies[key] = new Promise(function (res) {
+                            try {
+                                var c = document.createElement("canvas");
+                                c.width = w; c.height = h;
+                                var g = c.getContext("2d");
+                                g.imageSmoothingQuality = "high";
+                                g.drawImage(img, 0, 0, w, h);
+                                c.toBlob(function (b) { res(b ? URL.createObjectURL(b) : null); }, "image/png");
+                            } catch (e) { res(null); } // not allowed here: keep the original
+                        });
+                    }
+                    return copies[key].then(function (url) {
+                        if (!url) return;
+                        img.dataset.w = w;
+                        img.src = url;
+                        return ready(img);
                     });
-                }, { threshold: 0.3 }).observe(slot);
+                }).catch(function () { });
+            }
+
+            // Show background + bottles + text together, once the 3 main
+            // images are loaded (and shrunk). This starts at page load, long
+            // before the reader scrolls down to the ad.
+            var main = ad.querySelectorAll(".ad-bg, .ad-bottom");
+            Promise.all(Array.prototype.map.call(main, shrink)).then(function () {
+                ad.classList.add("is-ready");
             });
+
+            // food images: prepare them early too, but nothing waits for them
+            var food = ad.querySelectorAll(".food img");
+            Array.prototype.forEach.call(food, shrink);
+
+            // If the screen gets bigger (rotate / resize), go back to the
+            // original file and make a new copy at the new size.
+            var rt;
+            window.addEventListener("resize", function () {
+                clearTimeout(rt);
+                rt = setTimeout(function () {
+                    Array.prototype.forEach.call(ad.querySelectorAll("img"), function (img) {
+                        if (!img.dataset.w) return;
+                        var dpr = Math.min(window.devicePixelRatio || 1, 3);
+                        if (img.offsetWidth * dpr > img.dataset.w * 1.25) {
+                            img.removeAttribute("data-w");
+                            img.src = img.dataset.orig;
+                            shrink(img);
+                        }
+                    });
+                }, 300);
+            });
+
+            // Hide the ad only while the page is pulled PAST its top or bottom
+            // edge (bounce). At rest - even at the very top - it stays drawn,
+            // so it is ready the moment the reader starts scrolling.
+            function edge() {
+                var y = window.pageYOffset;
+                var max = document.documentElement.scrollHeight - window.innerHeight;
+                var r = slot.getBoundingClientRect();
+                var seen = r.bottom > 0 && r.top < window.innerHeight; // window on screen?
+                ad.classList.toggle("is-edge", !seen && (y < 0 || y > max));
+            }
+            window.addEventListener("scroll", edge, { passive: true });
+            window.addEventListener("resize", edge);
+            edge();
+
+            // Run the animation while the window is on screen or within one
+            // screen of it, so it is already moving when the reader arrives.
+            if (!("IntersectionObserver" in window)) { ad.classList.add("is-playing"); return; }
+
+            new IntersectionObserver(function (entries) {
+                entries.forEach(function (e) {
+                    ad.classList.toggle("is-playing", e.isIntersecting);
+                });
+            }, { rootMargin: "100% 0px", threshold: 0 }).observe(slot);
         })();
     </script>
 
