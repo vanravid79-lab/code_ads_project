@@ -1,11 +1,17 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="km">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Khmer Daily News - Demo</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Kantumruy Pro', 'Arial', sans-serif;
       margin: 0;
@@ -13,6 +19,7 @@
       background-color: #f0f2f5;
     }
 
+    /* Website container */
     .container {
       max-width: 800px;
       margin: 20px auto;
@@ -55,14 +62,6 @@
       margin-bottom: 15px;
     }
 
-    footer {
-      text-align: center;
-      padding: 20px 0;
-      border-top: 1px solid #ddd;
-      color: #777;
-      font-size: 14px;
-    }
-
     .sknteam_image {
       text-align: center;
       margin: 20px 0;
@@ -74,20 +73,43 @@
       border-radius: 4px;
     }
 
-    /* Ad Styles retained from your original template */
+    footer {
+      text-align: center;
+      padding: 20px 0;
+      border-top: 1px solid #ddd;
+      color: #777;
+      font-size: 14px;
+    }
+
+    /* =================================
+           UNDERLAY ADVERTISEMENT
+           DESIGN SIZE: 640 x 1280
+        ================================= */
+
     .thestresstnews-container {
       width: 100%;
-      position: absolute;
-      z-index: 100;
-      left: 0;
+      max-width: 640px;
+      aspect-ratio: 640 / 1280;
+
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+
+      z-index: 1000;
+      overflow: hidden;
+      pointer-events: none;
     }
 
     .thestresstnews-bg {
-      background-image: url(https://sknteam.com/media/ai_cambodia.jpeg);
-      background-size: cover;
-      background-position: center;
       width: 100%;
-      height: 350px;
+      height: 100%;
+
+      background-image: url("https://sknteam.com/media/ai_cambodia.jpeg");
+
+      background-size: 100% 100%;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
     .thestresstnews-install-button {
@@ -100,44 +122,216 @@
       text-align: center;
       font-weight: 600;
     }
+
+    /* =================================
+           GOLDEN PARTY POPPER ANIMATION
+        ================================= */
+
+    #gold-confetti {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+
+      z-index: 99999;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    /* Party popper */
+    .party-popper {
+      position: absolute;
+
+      left: calc(50% - 22px);
+      top: 70%;
+
+      width: 44px;
+      height: 85px;
+
+      background: linear-gradient(90deg,
+          #9b6415,
+          #ffe69a,
+          #c68b20,
+          #fff2b0,
+          #a66a12);
+
+      clip-path: polygon(0 0,
+          100% 0,
+          50% 100%);
+
+      transform: rotate(35deg);
+      transform-origin: center top;
+
+      animation: popperLaunch 0.7s ease-out forwards;
+    }
+
+    @keyframes popperLaunch {
+      0% {
+        opacity: 0;
+        transform: rotate(35deg) scale(0.3);
+      }
+
+      100% {
+        opacity: 1;
+        transform: rotate(35deg) scale(1);
+      }
+    }
+
+    /* Confetti pieces */
+    .confetti-piece {
+      position: absolute;
+
+      left: 50%;
+      top: 72%;
+
+      width: 9px;
+      height: 15px;
+
+      background: linear-gradient(135deg,
+          #fff5bb,
+          #d99a20,
+          #ffdf72);
+
+      opacity: 0;
+
+      animation: goldBurst 3.5s ease-out forwards;
+    }
+
+    /* Golden ribbons */
+    .confetti-piece.ribbon {
+      width: 5px;
+      height: 45px;
+
+      border-radius: 50%;
+
+      background: linear-gradient(90deg,
+          #c68b20,
+          #fff0a0,
+          #d99a20);
+    }
+
+    /* Golden stars */
+    .confetti-piece.star {
+      width: auto;
+      height: auto;
+
+      background: none;
+
+      color: #f5c542;
+      font-size: 20px;
+    }
+
+    @keyframes goldBurst {
+
+      0% {
+        opacity: 0;
+
+        transform:
+          translate(0, 0) rotate(0deg);
+      }
+
+      15% {
+        opacity: 1;
+      }
+
+      45% {
+        opacity: 1;
+
+        transform:
+          translate(var(--x), var(--up)) rotate(180deg);
+      }
+
+      100% {
+        opacity: 0;
+
+        transform:
+          translate(var(--x), var(--fall)) rotate(720deg);
+      }
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 640px) {
+
+      .container {
+        margin: 0;
+        padding: 15px;
+      }
+
+      header h1 {
+        font-size: 24px;
+      }
+
+      .post h2 {
+        font-size: 21px;
+      }
+
+      .thestresstnews-container {
+        width: 100%;
+      }
+    }
+
+    /* Respect reduced motion settings */
+    @media (prefers-reduced-motion: reduce) {
+
+      .party-popper,
+      .confetti-piece {
+        animation: none;
+        display: none;
+      }
+    }
   </style>
 </head>
 
 <body>
+
+  <!-- WEBSITE CONTENT -->
   <div class="container">
+
     <header>
       <h1>សារព័ត៌មាន Khmer Daily</h1>
     </header>
 
     <div class="post">
-      <div class="date-meta">ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦</div>
 
-      <h2>ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី</h2>
+      <div class="date-meta">
+        ថ្ងៃព្រហស្បតិ៍ ទី៩ ខែមេសា ឆ្នាំ២០២៦
+      </div>
+
+      <h2>
+        ត្រៀមរៀបចំព្រឹត្តិការណ៍ "អង្គរសង្ក្រាន្ត" ដ៏ធំសម្បើមនៅខេត្តសៀមរាប
+        ដើម្បីអបអរសាទរបុណ្យចូលឆ្នាំថ្មី
+      </h2>
 
       <div class="sknteam_image">
         <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="News Image" />
       </div>
 
       <p>
-        <strong>ខេត្តសៀមរាប៖</strong> អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
+        <strong>ខេត្តសៀមរាប៖</strong>
+        អាជ្ញាធរខេត្តសៀមរាបបានប្រកាសថា
         ត្រៀមខ្លួនរួចជាស្រេចក្នុងការរៀបចំព្រឹត្តិការណ៍
-        "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។ ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
+        "អង្គរសង្ក្រាន្ត" ឆ្នាំ២០២៦ ខាងមុខនេះ។
+        ព្រឹត្តិការណ៍នេះនឹងនាំមកនូវការបង្ហាញវប្បធម៌ខ្មែរដ៏សម្បូរបែប
         ល្បែងប្រជាប្រិយ និងការប្រគំតន្ត្រីខ្នាតធំដើម្បីទទួលស្វាគមន៍ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ។
       </p>
 
       <p>
         លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
         ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
-        និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
+        និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។
+        នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
         និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
       </p>
 
+      <!-- UNDERLAY AD SCRIPT -->
       <script src="https://sknteam.com/ad-scripts/underlay_master.js" data-ad-src="./index.html"
-        data-click-url="https://carlsbergstore.my.canva.site/angkorbeerweb"></script>
+        data-click-url="https://carlsbergstore.my.canva.site/angkorbeerweb" data-width="640" data-height="1280">
+        </script>
 
       <p>
-        ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
-        និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
+        ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច
+        ដើម្បីការពារសន្តិសុខ និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។
+        អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
         កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
       </p>
 
@@ -150,10 +344,87 @@
       <div class="sknteam_image">
         <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
       </div>
+
     </div>
 
-    <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
+    <footer>
+      រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News
+    </footer>
+
   </div>
+
+
+  <!-- =================================
+         GOLDEN CONFETTI ANIMATION
+    ================================== -->
+
+  <div id="gold-confetti">
+    <div class="party-popper"></div>
+  </div>
+
+
+  <!-- =================================
+         CONFETTI JAVASCRIPT
+    ================================== -->
+
+  <script>
+
+    window.addEventListener("load", function () {
+
+      const container = document.getElementById("gold-confetti");
+
+      if (!container) return;
+
+      // Create 45 golden confetti pieces
+      for (let i = 0; i < 45; i++) {
+
+        const piece = document.createElement("span");
+
+        piece.className = "confetti-piece";
+
+        // Different confetti styles
+        if (i % 3 === 0) {
+          piece.classList.add("ribbon");
+        }
+
+        if (i % 7 === 0) {
+          piece.classList.add("star");
+          piece.textContent = "★";
+        }
+
+        // Random movement
+        const x = (Math.random() - 0.5) * 600;
+
+        const up = -(Math.random() * 350 + 100);
+
+        const fall = Math.random() * 650 + 150;
+
+        // Apply animation variables
+        piece.style.setProperty("--x", x + "px");
+
+        piece.style.setProperty("--up", up + "px");
+
+        piece.style.setProperty("--fall", fall + "px");
+
+        // Random animation delay
+        piece.style.animationDelay =
+          (Math.random() * 0.6) + "s";
+
+        container.appendChild(piece);
+
+      }
+
+      // Remove animation after 5 seconds
+      setTimeout(function () {
+
+        container.remove();
+
+      }, 5000);
+
+    });
+
+  </script>
+
 </body>
 
 </html>
