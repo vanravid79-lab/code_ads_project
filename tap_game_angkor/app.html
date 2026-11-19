@@ -8,24 +8,19 @@
     <style>
         /* ==========================================================================
    Khmer Daily News – Underlay Catch Mini Game
-   Paste this inside the <style> tag. Nothing in the HTML or JS changes.
    ========================================================================== */
-
 
         /* ==========================================================================
    1. Root & Base
    ========================================================================== */
 
         :root {
-            /* Stable window height for the mobile underlay.
-       JS overwrites this with a fixed pixel value so the address bar
-       showing/hiding while scrolling never resizes the game. */
             --app-h: 100vh;
         }
 
-        @supports (height: 100svh) {
+        @supports (height: 100dvh) {
             :root {
-                --app-h: 100svh;
+                --app-h: 100dvh;
             }
         }
 
@@ -35,14 +30,12 @@
             padding: 0;
             -webkit-text-size-adjust: 100%;
             overflow-x: clip;
-            /* stop sideways overflow without creating a scroll container */
         }
 
         body {
             font-family: 'Kantumruy Pro', 'Arial', sans-serif;
             background-color: #f0f2f5;
         }
-
 
         /* ==========================================================================
    2. Page Layout
@@ -78,7 +71,6 @@
             border-top: 1px solid #ddd;
         }
 
-
         /* ==========================================================================
    3. Article Content
    ========================================================================== */
@@ -112,16 +104,8 @@
             border-radius: 4px;
         }
 
-
         /* ==========================================================================
    4. Scroll-Reveal Underlay Window
-   --------------------------------------------------------------------------
-   .underlay-slot          Takes up space in the article.
-   .underlay-clip          Absolute box clipped with `clip` (reliable on
-                           iOS/Android, unlike clip-path which makes fixed
-                           children flicker).
-   .underlay-fixed-content Fixed to the viewport, so the game stays still
-                           while the article scrolls over it like a window.
    ========================================================================== */
 
         .underlay-slot {
@@ -150,9 +134,8 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            /* hidden until JS confirms the slot is on screen, so the game
-       can never float over the text below */
             visibility: hidden;
+            background: #1a4a6e url('./images/beach.jpg') center / cover no-repeat;
         }
 
         .underlay-banner {
@@ -166,8 +149,8 @@
             overflow: hidden;
             pointer-events: auto;
             background-repeat: no-repeat;
-            background-position: center top;
-            background-size: contain;
+            background-position: center;
+            background-size: cover;
         }
 
         .ad-label {
@@ -182,7 +165,6 @@
             border-radius: 3px;
         }
 
-
         /* ==========================================================================
    5. Catch Game – Container & Canvas
    ========================================================================== */
@@ -192,10 +174,9 @@
             height: min(640px, 82vh);
             max-width: calc(100% - 24px);
             aspect-ratio: 1 / 2;
-            /* 640 x 1280 */
             overflow: hidden;
             font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
-            background: #7f101b;
+            background: #1a4a6e url('./images/beach.jpg') center / cover no-repeat;
             border-radius: 22px;
             box-shadow:
                 0 0 0 3px #ffffff,
@@ -210,14 +191,12 @@
             width: 100%;
             height: 100%;
             cursor: pointer;
-            /* vertical swipes scroll the page, horizontal drag moves the bucket */
             touch-action: pan-y;
             user-select: none;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
         }
-
 
         /* ==========================================================================
    6. Beer Collection Panel
@@ -375,7 +354,6 @@
             }
         }
 
-
         /* ========================================================================== 
    7. Game Overlay (start / game over)
    ========================================================================== */
@@ -450,7 +428,6 @@
             opacity: 0.85;
         }
 
-
         /* ==========================================================================
    8. Animations
    ========================================================================== */
@@ -474,12 +451,10 @@
             }
         }
 
-
         /* ==========================================================================
-   9. Responsive
+   9. Responsive (Mobile: full-screen underlay)
    ========================================================================== */
 
-        /* ---------- Small phones ---------- */
         @media (max-width: 380px) {
             .beer-collection {
                 top: 58px;
@@ -501,38 +476,35 @@
             }
         }
 
-        /* ---------- Mobile: full-screen underlay ---------- */
         @media (max-width: 767px) {
             .post {
                 padding: 0 16px;
             }
 
-            /* Full-bleed window. Taller than one screen: the game fills the whole
-       screen for half a screen of scrolling before the article covers it again. */
             .underlay-slot {
                 height: calc(var(--app-h) * 1.5);
                 margin: 0 -16px;
             }
 
-            /* The layer always covers the largest possible screen height, so no white
-       can show below it when the browser bar hides or shows. Any extra space
-       is filled with the game's floor color. */
             .underlay-fixed-content {
-                align-items: flex-start;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
                 height: 100vh;
                 height: 100lvh;
-                background: #7f101b;
+                height: 100dvh;
+                background: #1a4a6e url('./images/beach.jpg') center / cover no-repeat;
             }
 
-            /* The game itself keeps a stable, locked height at the top. */
             .underlay-banner {
-                flex: 0 0 auto;
-                height: var(--app-h);
+                flex: 1 1 100%;
+                width: 100%;
+                height: 100%;
                 background-position: center;
                 background-size: cover;
             }
 
-            /* Full screen on mobile: fills the whole width and height. */
             .catch-game {
                 width: 100%;
                 height: 100%;
@@ -542,6 +514,7 @@
                 aspect-ratio: auto;
                 border-radius: 0;
                 box-shadow: none;
+                background: #1a4a6e url('./images/beach.jpg') center / cover no-repeat;
             }
         }
     </style>
@@ -577,28 +550,28 @@
 
                             <div class="catch-game">
                                 <canvas class="catch-canvas" role="application" tabindex="0"
-                                    aria-label="Catch Angkor beer bottles in the basket. Avoid bombs. Ice slows the basket"></canvas>
+                                    aria-label="Catch Anchor beer bottles in the basket. Avoid bombs. Ice slows the basket"></canvas>
 
                                 <section class="beer-collection" aria-label="Live beer collection">
                                     <div class="beer-collection-heading">
-                                        <span>BEER COLLECTION</span>
+                                        <span>ANCHOR BEER COLLECTION</span>
                                         <span class="beer-collection-total">TOTAL <span data-beer-total>0</span></span>
                                         <span class="beer-collection-live">LIVE</span>
                                     </div>
                                     <div class="beer-collection-items" role="list" aria-live="polite">
                                         <div class="beer-collection-card" role="listitem" data-beer-card="0">
-                                            <img src="./images/Group%201.png" alt="" />
-                                            <span class="beer-collection-name">Group 1</span>
+                                            <img src="./images/Group%201.png" alt="Anchor Beer 1" />
+                                            <span class="beer-collection-name">Anchor Beer 1</span>
                                             <strong class="beer-collection-count" data-beer-count>0</strong>
                                         </div>
                                         <div class="beer-collection-card" role="listitem" data-beer-card="1">
-                                            <img src="./images/Group%202.png" alt="" />
-                                            <span class="beer-collection-name">Group 2</span>
+                                            <img src="./images/Group%202.png" alt="Anchor Beer 2" />
+                                            <span class="beer-collection-name">Anchor Beer 2</span>
                                             <strong class="beer-collection-count" data-beer-count>0</strong>
                                         </div>
                                         <div class="beer-collection-card" role="listitem" data-beer-card="2">
-                                            <img src="./images/Group%203.png" alt="" />
-                                            <span class="beer-collection-name">Group 3</span>
+                                            <img src="./images/Group%203.png" alt="Anchor Beer 3" />
+                                            <span class="beer-collection-name">Anchor Beer 3</span>
                                             <strong class="beer-collection-count" data-beer-count>0</strong>
                                         </div>
                                     </div>
@@ -607,8 +580,8 @@
                                 <div class="catch-overlay">
                                     <div class="catch-finger" aria-hidden="true">👆</div>
                                     <div class="catch-title">TAP TO PLAY</div>
-                                    <div class="catch-sub catch-sub-text">Drag to move the basket. Catch Angkor beer,
-                                        avoid the deadly cans. Ice slows you and costs 10 points!</div>
+                                    <div class="catch-sub catch-sub-text">Drag to move the basket. Catch Anchor beer,
+                                        avoid the bad cans (-1 heart). Ice slows you and costs 10 points!</div>
                                 </div>
                             </div>
                         </div>
@@ -617,20 +590,16 @@
             </div>
 
             <p>
-
                 លោកអភិបាលខេត្តបានបញ្ជាក់ថា ការរៀបចំនៅឆ្នាំនេះនឹងមានភាពខុសប្លែកពីឆ្នាំមុនៗ
                 ដោយមានការបន្ថែមនូវតំបន់កម្សាន្តថ្មីៗ
                 និងការតាំងពិព័រណ៍ផលិតផលក្នុងស្រុកមកពីគ្រប់ខេត្តក្រុង។ នេះគឺជាឱកាសដ៏ល្អក្នុងការបង្ហាញពីសន្តិភាព
                 និងការរីកចម្រើននៃវិស័យទេសចរណ៍នៅក្នុងតំបន់សៀមរាបអង្គរ។
-
             </p>
 
             <p>
-
                 ទន្ទឹមនឹងនេះដែរ កម្លាំងសមត្ថកិច្ចគ្រប់លំដាប់ថ្នាក់បានត្រៀមលក្ខណៈរួចជាស្រេច ដើម្បីការពារសន្តិសុខ
                 និងសណ្តាប់ធ្នាប់ជូនបងប្អូនប្រជាពលរដ្ឋ។ អាជ្ញាធរក៏បានអំពាវនាវដល់ម្ចាស់អាជីវកម្មសេវាកម្មទេសចរណ៍ទាំងអស់
                 កុំឲ្យមានការដំឡើងថ្លៃហួសហេតុក្នុងអំឡុងពេលបុណ្យប្រពៃណីជាតិនេះ។
-
             </p>
 
             <p>
@@ -643,6 +612,7 @@
                 <img src="https://sknteam.com/media/ai_cambodia.jpeg" alt="Footer Logo" />
             </div>
         </div>
+
         <footer>រក្សាសិទ្ធិគ្រប់យ៉ាង &copy; 2026 Khmer Daily News</footer>
 
     </div>
@@ -662,10 +632,13 @@
             const beerTotalElement = document.querySelector('[data-beer-total]');
 
             const MAX_LIVES = 3;
+            let heartLostTimer = 0; // timer for heart damage animation
+
+            // Sea / ocean themed bottle palette
             const BEER_VARIANTS = [
-                { glass: '#8d3c12', shine: '#f4ad52', label: '#c82832' },
-                { glass: '#48261e', shine: '#bd7650', label: '#d8b454' },
-                { glass: '#9b501b', shine: '#ffd17a', label: '#e8e3d3' }
+                { glass: '#0c4d75', shine: '#7ad7f5', label: '#0a335c' },
+                { glass: '#116494', shine: '#a2e8fc', label: '#0d4273' },
+                { glass: '#083a5e', shine: '#61c8ed', label: '#12548a' }
             ];
             const BEER_IMAGE_HEIGHT_RATIO = 7;
             const BEER_IMAGES = [
@@ -675,8 +648,12 @@
             ];
             BEER_IMAGES.forEach(({ src, image }) => {
                 image.onerror = () => console.error('Unable to load beer image:', src);
-                image.src = encodeURI(src); // filenames contain spaces
+                image.src = encodeURI(src);
             });
+
+            /* ---------- Beach Background (640 x 1280) ---------- */
+            const bgImage = new Image();
+            bgImage.src = './images/beach.jpg';
 
             function updateBeerCollection() {
                 let total = 0;
@@ -703,16 +680,10 @@
 
             const rand = (min, max) => min + Math.random() * (max - min);
 
-            /* ---------- Stable mobile height ----------
-               On phones the address bar grows/shrinks while scrolling, which changes
-               100vh and used to resize the canvas mid-scroll (the "not clean" look).
-               We lock the window height to a fixed pixel value and only update it when
-               the screen width changes (rotation). */
+            /* ---------- Stable Height Handler ---------- */
             const mobileMQ = window.matchMedia('(max-width: 767px)');
-            let lockedWidth = window.innerWidth;
 
             function lockAppHeight() {
-                lockedWidth = window.innerWidth;
                 document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px');
             }
             lockAppHeight();
@@ -720,13 +691,9 @@
             let hitFlash = 0;
             let flashRGB = '255, 70, 40';
 
-            // Catching the frosty beer mug slows the basket for a moment.
             const FREEZE_SECONDS = 2;
             let freezeTimer = 0;
 
-            /* The game is drawn on a fixed 640-wide canvas. Height follows the screen:
-               exactly 640 x 1280 on a 1:2 screen, taller or shorter on other phones.
-               `scale` = on-screen px per game unit, `u` = size unit for HUD/details. */
             const DESIGN_W = 640;
             let scale = 1, u = 640 / 360;
             let W = 0, H = 0, dpr = 1;
@@ -763,7 +730,7 @@
             /* ---------- Spawning ---------- */
             function spawnItem() {
                 const roll = Math.random();
-                // bombs 15%, ice 15%, Angkor beer 70%
+                // bombs 15%, ice 15%, Anchor beer 70%
                 const type = roll < 0.15 ? 'bomb' : roll < 0.30 ? 'ice' : 'beer';
                 const speedBoost = Math.min(score / 160, 1);
                 items.push({
@@ -779,138 +746,18 @@
                 });
             }
 
-            /* ---------- Drawing ---------- */
+            /* ---------- Full-Screen Background Drawing ---------- */
             function drawBackground() {
-                const sky = ctx.createLinearGradient(0, 0, 0, H);
-                sky.addColorStop(0, '#430812');
-                sky.addColorStop(0.48, '#9e1526');
-                sky.addColorStop(0.76, '#d83a38');
-                sky.addColorStop(1, '#ef7950');
-                ctx.fillStyle = sky;
-                ctx.fillRect(0, 0, W, H);
-
-                const baseY = H * 0.86;
-                const moonX = W * 0.82;
-                const moonY = H * 0.15;
-                const moonGlow = ctx.createRadialGradient(moonX, moonY, 2, moonX, moonY, W * 0.13);
-                moonGlow.addColorStop(0, 'rgba(255, 226, 173, 0.82)');
-                moonGlow.addColorStop(1, 'rgba(255, 226, 173, 0)');
-                ctx.fillStyle = moonGlow;
-                ctx.fillRect(moonX - W * 0.13, moonY - W * 0.13, W * 0.26, W * 0.26);
-                ctx.fillStyle = '#ffe4b2';
-                ctx.beginPath();
-                ctx.arc(moonX, moonY, W * 0.025, 0, Math.PI * 2);
-                ctx.fill();
-
-                drawPhnomPenhSkyline(baseY);
-
-                const river = ctx.createLinearGradient(0, baseY - H * 0.06, 0, H);
-                river.addColorStop(0, '#761827');
-                river.addColorStop(0.35, '#4b101d');
-                river.addColorStop(1, '#260911');
-                ctx.fillStyle = river;
-                ctx.fillRect(0, baseY - H * 0.06, W, H - baseY + H * 0.06);
-
-                const floor = ctx.createLinearGradient(0, baseY, 0, H);
-                floor.addColorStop(0, '#52121c');
-                floor.addColorStop(1, '#26090f');
-                ctx.fillStyle = floor;
-                ctx.fillRect(0, baseY, W, H - baseY);
-
-                ctx.save();
-                ctx.globalAlpha = 0.3;
-                ctx.strokeStyle = '#f5bc76';
-                ctx.lineWidth = 2 * u;
-                for (let i = 0; i < 8; i++) {
-                    const y = baseY + H * (0.025 + i * 0.014);
-                    const halfWidth = W * (0.08 + i * 0.023);
-                    ctx.beginPath();
-                    ctx.moveTo(W / 2 - halfWidth, y);
-                    ctx.lineTo(W / 2 + halfWidth, y);
-                    ctx.stroke();
+                if (bgImage.complete && bgImage.naturalWidth > 0) {
+                    ctx.drawImage(bgImage, 0, 0, W, H);
+                } else {
+                    const sky = ctx.createLinearGradient(0, 0, 0, H);
+                    sky.addColorStop(0, '#1976d2');
+                    sky.addColorStop(0.5, '#64b5f6');
+                    sky.addColorStop(1, '#ffb74d');
+                    ctx.fillStyle = sky;
+                    ctx.fillRect(0, 0, W, H);
                 }
-                ctx.restore();
-            }
-
-            function drawPhnomPenhSkyline(baseY) {
-                const buildingColor = '#4b101d';
-                const windowColor = 'rgba(255, 203, 126, 0.72)';
-                const buildings = [
-                    { x: 0.03, w: 0.11, h: 0.2 }, { x: 0.16, w: 0.08, h: 0.13 },
-                    { x: 0.76, w: 0.09, h: 0.17 }, { x: 0.87, w: 0.1, h: 0.23 }
-                ];
-                buildings.forEach(({ x, w, h }) => {
-                    const bx = W * x, bw = W * w, bh = H * h;
-                    ctx.fillStyle = buildingColor;
-                    ctx.fillRect(bx, baseY - bh, bw, bh);
-                    ctx.fillStyle = windowColor;
-                    for (let wy = baseY - bh + 10 * u; wy < baseY - 8 * u; wy += 17 * u) {
-                        for (let wx = bx + 7 * u; wx < bx + bw - 4 * u; wx += 12 * u) {
-                            const row = Math.floor((wy - (baseY - bh)) / (17 * u));
-                            const column = Math.floor((wx - bx) / (12 * u));
-                            if ((row * 3 + column) % 4 !== 0) ctx.fillRect(wx, wy, 3 * u, 5 * u);
-                        }
-                    }
-                });
-
-                const centerX = W / 2;
-                const hallBase = baseY - H * 0.015;
-                const hallWidth = W * 0.43;
-                const hallTop = baseY - H * 0.19;
-                ctx.fillStyle = '#70202a';
-                ctx.fillRect(centerX - hallWidth / 2, hallTop, hallWidth, hallBase - hallTop);
-
-                ctx.fillStyle = 'rgba(255, 205, 124, 0.82)';
-                for (let i = 0; i < 7; i++) {
-                    const pillarX = centerX - hallWidth * 0.42 + i * hallWidth * 0.14;
-                    ctx.fillRect(pillarX, hallTop + H * 0.055, 2.5 * u, hallBase - hallTop - H * 0.055);
-                    ctx.fillRect(pillarX - 2 * u, hallTop + H * 0.055, 6.5 * u, 3 * u);
-                }
-                ctx.fillStyle = 'rgba(255, 210, 135, 0.9)';
-                ctx.fillRect(centerX - hallWidth * 0.12, hallTop + H * 0.065, hallWidth * 0.24, H * 0.07);
-
-                const roof = (width, y, rise) => {
-                    ctx.beginPath();
-                    ctx.moveTo(centerX - width / 2, y);
-                    ctx.quadraticCurveTo(centerX - width * 0.24, y - rise * 0.08, centerX, y - rise);
-                    ctx.quadraticCurveTo(centerX + width * 0.24, y - rise * 0.08, centerX + width / 2, y);
-                    ctx.lineTo(centerX + width * 0.43, y + H * 0.012);
-                    ctx.quadraticCurveTo(centerX, y - rise * 0.58, centerX - width * 0.43, y + H * 0.012);
-                    ctx.closePath();
-                    const roofGradient = ctx.createLinearGradient(0, y - rise, 0, y + H * 0.012);
-                    roofGradient.addColorStop(0, '#f6d184');
-                    roofGradient.addColorStop(1, '#a86939');
-                    ctx.fillStyle = roofGradient;
-                    ctx.fill();
-                    ctx.strokeStyle = 'rgba(255, 225, 163, 0.95)';
-                    ctx.lineWidth = 2 * u;
-                    ctx.stroke();
-                };
-
-                roof(W * 0.55, hallTop + H * 0.07, H * 0.085);
-                roof(W * 0.4, hallTop + H * 0.005, H * 0.09);
-                roof(W * 0.24, hallTop - H * 0.06, H * 0.1);
-
-                const spire = (x, y, height, width) => {
-                    ctx.fillStyle = '#f4c66e';
-                    ctx.beginPath();
-                    ctx.moveTo(x - width / 2, y);
-                    ctx.lineTo(x - width * 0.3, y - height * 0.25);
-                    ctx.lineTo(x - width * 0.19, y - height * 0.25);
-                    ctx.lineTo(x - width * 0.13, y - height * 0.53);
-                    ctx.lineTo(x - width * 0.08, y - height * 0.53);
-                    ctx.lineTo(x, y - height);
-                    ctx.lineTo(x + width * 0.08, y - height * 0.53);
-                    ctx.lineTo(x + width * 0.13, y - height * 0.53);
-                    ctx.lineTo(x + width * 0.19, y - height * 0.25);
-                    ctx.lineTo(x + width * 0.3, y - height * 0.25);
-                    ctx.lineTo(x + width / 2, y);
-                    ctx.closePath();
-                    ctx.fill();
-                };
-                spire(centerX, hallTop - H * 0.135, H * 0.19, W * 0.055);
-                spire(centerX - hallWidth * 0.36, hallTop + H * 0.005, H * 0.11, W * 0.035);
-                spire(centerX + hallWidth * 0.36, hallTop + H * 0.005, H * 0.11, W * 0.035);
             }
 
             function heartPath(x, y, s) {
@@ -926,25 +773,45 @@
             function drawHUD() {
                 const s = 18 * u;
                 for (let i = 0; i < MAX_LIVES; i++) {
-                    const hx = 22 * u + i * (s + 8 * u);
-                    heartPath(hx, 22 * u, s);
+                    let hx = 22 * u + i * (s + 8 * u);
+                    let hy = 22 * u;
+                    let curSize = s;
+
+                    // Small pulse on the heart that was just lost
+                    if (heartLostTimer > 0 && i === lives) {
+                        curSize = s * (1 + Math.sin(heartLostTimer * 25) * 0.25);
+                        hx += (Math.random() - 0.5) * 3 * u;
+                    }
+
+                    heartPath(hx, hy, curSize);
                     if (i < lives) {
                         ctx.fillStyle = '#ff3b4e';
                         ctx.fill();
+                        ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)';
+                        ctx.lineWidth = 1.5 * u;
+                        ctx.stroke();
                     } else {
-                        ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+                        // Lost heart: dim dark interior with clear outline
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+                        ctx.fill();
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
                         ctx.lineWidth = 1.5 * u;
                         ctx.stroke();
                     }
                 }
 
+                ctx.save();
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                ctx.shadowBlur = 4 * u;
+                ctx.shadowOffsetY = 1 * u;
                 ctx.textAlign = 'right';
-                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.fillStyle = 'rgba(255,255,255,0.9)';
                 ctx.font = '600 ' + (10 * u) + 'px Montserrat, Arial, sans-serif';
                 ctx.fillText('SCORE', W - 16 * u, 24 * u);
                 ctx.fillStyle = '#ffffff';
                 ctx.font = '800 ' + (26 * u) + 'px Montserrat, Arial, sans-serif';
                 ctx.fillText(String(score), W - 16 * u, 50 * u);
+                ctx.restore();
             }
 
             function drawBeer(it) {
@@ -970,11 +837,11 @@
                 ctx.rotate(it.rot);
 
                 const glass = ctx.createLinearGradient(-bw / 2, 0, bw / 2, 0);
-                glass.addColorStop(0, '#482013');
+                glass.addColorStop(0, '#062840');
                 glass.addColorStop(0.28, it.color.glass);
                 glass.addColorStop(0.58, it.color.shine);
                 glass.addColorStop(0.78, it.color.glass);
-                glass.addColorStop(1, '#35180f');
+                glass.addColorStop(1, '#041d30');
                 ctx.fillStyle = glass;
                 ctx.beginPath();
                 ctx.moveTo(-neckW / 2, -bh / 2);
@@ -991,12 +858,12 @@
                 ctx.closePath();
                 ctx.fill();
 
-                ctx.fillStyle = 'rgba(255, 224, 160, 0.68)';
+                ctx.fillStyle = 'rgba(215, 245, 255, 0.72)';
                 ctx.fillRect(-neckW * 0.42, -bh * 0.43, neckW * 0.16, bh * 0.45);
 
-                ctx.fillStyle = '#d7bd75';
+                ctx.fillStyle = '#65c4eb';
                 ctx.fillRect(-neckW * 0.62, -bh * 0.51, neckW * 1.24, bh * 0.065);
-                ctx.fillStyle = '#f3d991';
+                ctx.fillStyle = '#bdf2ff';
                 ctx.fillRect(-neckW * 0.62, -bh * 0.51, neckW * 1.24, bh * 0.018);
 
                 const labelY = -bh * 0.015;
@@ -1005,7 +872,7 @@
                 ctx.beginPath();
                 ctx.roundRect(-bw * 0.46, labelY, bw * 0.92, labelH, bw * 0.13);
                 ctx.fill();
-                ctx.strokeStyle = 'rgba(255, 224, 155, 0.95)';
+                ctx.strokeStyle = '#ffd875';
                 ctx.lineWidth = Math.max(1, bw * 0.035);
                 ctx.stroke();
 
@@ -1021,11 +888,11 @@
                 ctx.closePath();
                 ctx.fill();
 
-                ctx.fillStyle = '#fff6db';
+                ctx.fillStyle = '#ffffff';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.font = 'bold ' + Math.max(5, bw * 0.21) + 'px Arial, sans-serif';
-                ctx.fillText('ANGKOR', 0, labelY + labelH * 0.68, bw * 0.82);
+                ctx.fillText('ANCHOR', 0, labelY + labelH * 0.68, bw * 0.82);
 
                 ctx.restore();
             }
@@ -1138,7 +1005,6 @@
                 ctx.fill();
                 ctx.restore();
 
-                // A dented beer can with a lit fuse marks this as the hazard.
                 const can = ctx.createLinearGradient(canX, 0, canX + canW, 0);
                 can.addColorStop(0, '#391720');
                 can.addColorStop(0.28, '#702434');
@@ -1204,6 +1070,7 @@
                 ctx.restore();
             }
 
+            /* ---------- Bucket / Beer Glass with Sea Vibe ---------- */
             function drawBucket() {
                 const { x, y, w, h } = bucket;
                 const cupW = w * 0.72;
@@ -1211,6 +1078,7 @@
                 const right = x + cupW / 2;
                 const top = y + h * 0.16;
                 const bottom = y + h * 0.92;
+
                 const bodyPath = () => {
                     ctx.beginPath();
                     ctx.moveTo(left + cupW * 0.035, top);
@@ -1223,25 +1091,26 @@
                     ctx.closePath();
                 };
 
+                // 1. Tropical ocean shadow under the mug
                 ctx.save();
-                ctx.shadowColor = 'rgba(255, 194, 93, 0.48)';
-                ctx.shadowBlur = 14 * u;
-                ctx.fillStyle = 'rgba(255, 190, 75, 0.2)';
+                ctx.shadowColor = 'rgba(0, 160, 220, 0.5)';
+                ctx.shadowBlur = 16 * u;
+                ctx.fillStyle = 'rgba(0, 110, 160, 0.25)';
                 ctx.beginPath();
                 ctx.ellipse(x, bottom + h * 0.015, cupW * 0.54, 5 * u, 0, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
 
-                // Draw the handle first so it sits naturally behind the glass.
+                // 2. Coastal aqua handle with deep sea navy inner rim
                 ctx.save();
                 ctx.lineCap = 'round';
-                ctx.strokeStyle = '#f2cc7b';
+                ctx.strokeStyle = '#8ae3ff';
                 ctx.lineWidth = Math.max(5 * u, w * 0.055);
                 ctx.beginPath();
                 ctx.moveTo(right - cupW * 0.03, top + h * 0.17);
                 ctx.bezierCurveTo(x + w * 0.59, top + h * 0.12, x + w * 0.59, bottom - h * 0.12, right - cupW * 0.04, bottom - h * 0.12);
                 ctx.stroke();
-                ctx.strokeStyle = '#7b351d';
+                ctx.strokeStyle = '#0e4f7a';
                 ctx.lineWidth = Math.max(2 * u, w * 0.022);
                 ctx.beginPath();
                 ctx.moveTo(right - cupW * 0.025, top + h * 0.22);
@@ -1249,13 +1118,14 @@
                 ctx.stroke();
                 ctx.restore();
 
+                // 3. Crisp sunlit golden beer inside the glass
                 bodyPath();
                 ctx.save();
                 ctx.clip();
                 const beer = ctx.createLinearGradient(0, top + h * 0.16, 0, bottom);
-                beer.addColorStop(0, '#f8c451');
-                beer.addColorStop(0.16, '#db8a27');
-                beer.addColorStop(1, '#8e3b18');
+                beer.addColorStop(0, '#ffe375');
+                beer.addColorStop(0.3, '#f5b02b');
+                beer.addColorStop(1, '#c96a12');
                 ctx.fillStyle = beer;
                 const beerTop = top + h * 0.19;
                 ctx.beginPath();
@@ -1267,69 +1137,85 @@
                 ctx.closePath();
                 ctx.fill();
 
+                // 4. Cool sea-glass crystal reflections
                 const glass = ctx.createLinearGradient(left, 0, right, 0);
-                glass.addColorStop(0, 'rgba(255, 237, 177, 0.62)');
-                glass.addColorStop(0.18, 'rgba(255, 255, 255, 0.08)');
-                glass.addColorStop(0.52, 'rgba(255, 255, 255, 0.02)');
-                glass.addColorStop(0.84, 'rgba(255, 255, 255, 0.12)');
-                glass.addColorStop(1, 'rgba(255, 218, 125, 0.52)');
+                glass.addColorStop(0, 'rgba(190, 242, 255, 0.7)');
+                glass.addColorStop(0.18, 'rgba(255, 255, 255, 0.25)');
+                glass.addColorStop(0.52, 'rgba(255, 255, 255, 0.04)');
+                glass.addColorStop(0.84, 'rgba(160, 230, 255, 0.2)');
+                glass.addColorStop(1, 'rgba(130, 220, 255, 0.65)');
                 ctx.fillStyle = glass;
                 ctx.fillRect(left, top, cupW, bottom - top);
 
-                ctx.fillStyle = 'rgba(255,255,255,0.48)';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
                 ctx.beginPath();
                 ctx.ellipse(left + cupW * 0.16, top + h * 0.48, cupW * 0.025, h * 0.2, 0.04, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
 
+                // 5. Frosted cyan glass outline
                 bodyPath();
-                ctx.strokeStyle = '#ffe4a0';
+                ctx.strokeStyle = '#c8f2ff';
                 ctx.lineWidth = 2.5 * u;
-                ctx.shadowColor = 'rgba(255, 214, 124, 0.5)';
-                ctx.shadowBlur = 5 * u;
+                ctx.shadowColor = 'rgba(70, 210, 255, 0.7)';
+                ctx.shadowBlur = 6 * u;
                 ctx.stroke();
                 ctx.shadowBlur = 0;
 
-                ctx.fillStyle = '#fff8e8';
+                // 6. Crisp wave-crest sea foam
+                ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
                 ctx.ellipse(x, top + h * 0.055, cupW * 0.51, h * 0.115, 0, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#f2d794';
+                ctx.fillStyle = '#daf2fd';
                 ctx.beginPath();
                 ctx.ellipse(x, top + h * 0.105, cupW * 0.48, h * 0.055, 0, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#fffaf0';
+                ctx.fillStyle = '#f6fdff';
                 [[-0.34, 0.02, 0.12], [-0.17, -0.02, 0.1], [0.08, 0.015, 0.13], [0.3, -0.015, 0.1]].forEach(([offset, lift, size]) => {
                     ctx.beginPath();
                     ctx.arc(x + cupW * offset, top + h * (0.02 + lift), h * size * 0.2, 0, Math.PI * 2);
                     ctx.fill();
                 });
 
+                // 7. Sea-vibe Anchor Beer Badge (Deep Nautical Navy & Sunlit Beach Gold)
                 const badgeY = y + h * 0.56;
                 const badgeW = cupW * 0.84;
                 const badgeH = h * 0.36;
-                ctx.fillStyle = '#b62d2b';
+
+                const badgeGrad = ctx.createLinearGradient(x - badgeW / 2, badgeY - badgeH / 2, x + badgeW / 2, badgeY + badgeH / 2);
+                badgeGrad.addColorStop(0, '#0c467a');
+                badgeGrad.addColorStop(0.5, '#073056');
+                badgeGrad.addColorStop(1, '#031c36');
+                ctx.fillStyle = badgeGrad;
                 ctx.beginPath();
                 ctx.roundRect(x - badgeW / 2, badgeY - badgeH / 2, badgeW, badgeH, 7 * u);
                 ctx.fill();
-                ctx.strokeStyle = '#f8d985';
+
+                // Outer border: Sunlit nautical gold
+                ctx.strokeStyle = '#ffd269';
                 ctx.lineWidth = 2 * u;
                 ctx.stroke();
 
-                ctx.strokeStyle = 'rgba(255, 231, 161, 0.72)';
+                // Inner border: Radiant sea-cyan accent
+                ctx.strokeStyle = 'rgba(150, 235, 255, 0.75)';
                 ctx.lineWidth = 1.2 * u;
                 ctx.beginPath();
                 ctx.roundRect(x - badgeW / 2 + 4 * u, badgeY - badgeH / 2 + 4 * u, badgeW - 8 * u, badgeH - 8 * u, 5 * u);
                 ctx.stroke();
 
-                ctx.fillStyle = '#fff8e8';
+                // ANCHOR text in wave-white with deep ocean drop shadow
+                ctx.fillStyle = '#ffffff';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.shadowColor = 'rgba(49, 12, 12, 0.72)';
-                ctx.shadowBlur = 2 * u;
+                ctx.shadowColor = 'rgba(0, 15, 35, 0.9)';
+                ctx.shadowBlur = 3 * u;
                 ctx.shadowOffsetY = 1 * u;
                 ctx.font = '900 ' + (14 * u) + 'px Arial, sans-serif';
-                ctx.fillText('ANGKOR', x, badgeY - badgeH * 0.12, badgeW * 0.82);
+                ctx.fillText('ANCHOR', x, badgeY - badgeH * 0.12, badgeW * 0.82);
+
+                // BEER text in sunny sand gold
+                ctx.fillStyle = '#ffe27d';
                 ctx.font = '800 ' + (8 * u) + 'px Arial, sans-serif';
                 ctx.letterSpacing = (0.8 * u) + 'px';
                 ctx.fillText('BEER', x, badgeY + badgeH * 0.28, badgeW * 0.72);
@@ -1338,12 +1224,13 @@
                 ctx.shadowBlur = 0;
                 ctx.shadowOffsetY = 0;
 
-                ctx.fillStyle = 'rgba(255,255,255,0.45)';
+                // 8. Frosted glass highlight & upper rim
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
                 ctx.beginPath();
                 ctx.ellipse(left + cupW * 0.14, y + h * 0.52, cupW * 0.025, h * 0.17, 0.04, 0, Math.PI * 2);
                 ctx.fill();
 
-                ctx.strokeStyle = '#fff0c4';
+                ctx.strokeStyle = '#d4f6ff';
                 ctx.lineWidth = 2 * u;
                 ctx.beginPath();
                 ctx.ellipse(x, top + h * 0.055, cupW * 0.51, h * 0.115, 0, 0, Math.PI * 2);
@@ -1351,7 +1238,6 @@
             }
 
             function drawIdleDecor(t) {
-                // Small beer bottles drift in the background while idle.
                 for (let i = 0; i < 4; i++) {
                     const x = W * (0.2 + i * 0.2);
                     const y = ((t * 0.04 + i * 160) % (H + 100)) - 50;
@@ -1367,6 +1253,7 @@
                 state = 'playing';
                 score = 0;
                 lives = MAX_LIVES;
+                heartLostTimer = 0;
                 BEER_IMAGES.forEach((beer) => { beer.caught = 0; });
                 updateBeerCollection();
                 items = [];
@@ -1389,6 +1276,8 @@
             function update(dt) {
                 const follow = freezeTimer > 0 ? 2.5 : 18;
                 if (freezeTimer > 0) freezeTimer = Math.max(0, freezeTimer - dt);
+                if (heartLostTimer > 0) heartLostTimer = Math.max(0, heartLostTimer - dt);
+
                 bucket.x += (bucket.targetX - bucket.x) * Math.min(1, dt * follow);
 
                 spawnTimer -= dt;
@@ -1420,9 +1309,11 @@
                             flashRGB = '120, 200, 255';
                             hitFlash = 0.45;
                         } else if (it.type === 'bomb') {
-                            lives = 0;
+                            // Deduct exactly 1 heart per bomb touch
+                            lives = Math.max(0, lives - 1);
+                            heartLostTimer = 0.4;
                             flashRGB = '255, 70, 40';
-                            hitFlash = 0.7;
+                            hitFlash = 0.6;
                         }
                         items.splice(i, 1);
                         if (lives <= 0) { endGame(); return; }
@@ -1433,7 +1324,7 @@
                 }
             }
 
-            /* ---------- Render loop (pauses while the window is off-screen) ---------- */
+            /* ---------- Render loop ---------- */
             let visible = true;
             let running = false;
 
@@ -1469,7 +1360,7 @@
             function kick() {
                 if (running || !visible) return;
                 running = true;
-                lastTime = 0; // avoid a big time jump after being off-screen
+                lastTime = 0;
                 requestAnimationFrame(frame);
             }
 
@@ -1478,10 +1369,6 @@
                 kick();
             }, { rootMargin: '120px 0px' }).observe(slot);
 
-            /* ---------- Window sync ----------
-               Clip the fixed layer itself to the slot's on-screen rectangle.
-               This does not depend on the browser clipping fixed children
-               through a parent, which is what failed on some mobile browsers. */
             const fixedEl = document.querySelector('.underlay-fixed-content');
 
             function syncWindow() {
@@ -1508,7 +1395,7 @@
             /* ---------- Input ---------- */
             function pointerX(e) {
                 const r = canvas.getBoundingClientRect();
-                const gx = (e.clientX - r.left) / scale; // screen px -> game units
+                const gx = (e.clientX - r.left) / scale;
                 return Math.max(bucket.w / 2, Math.min(W - bucket.w / 2, gx));
             }
 
@@ -1535,22 +1422,14 @@
                 if (e.key === 'ArrowRight') bucket.targetX = Math.min(W - bucket.w / 2, bucket.targetX + step);
             });
 
-            /* ---------- Resize ----------
-               On mobile, ignore height-only changes (address bar moving during scroll).
-               Rebuild only when the width changes (rotation / real resize). */
+            /* ---------- Resize listener ---------- */
             let resizeTimer;
             window.addEventListener('resize', () => {
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(() => {
-                    if (mobileMQ.matches) {
-                        if (window.innerWidth === lockedWidth) return;
-                        lockAppHeight();
-                        // let the new --app-h apply before measuring
-                        requestAnimationFrame(resize);
-                        return;
-                    }
+                    lockAppHeight();
                     resize();
-                }, 150);
+                }, 100);
             });
 
             window.addEventListener('orientationchange', () => {
